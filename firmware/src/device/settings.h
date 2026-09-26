@@ -72,8 +72,9 @@ struct Settings {
   std::string pack;
 
   int intervalMin = 60;  // between refreshes
-  int quietFrom = 0;     // no refreshes from this hour...
-  int quietTo = 6;       // ...to this one; equal means never quiet
+  // Minutes after midnight, local time.
+  int quietFrom = 0;     // no refreshes from this time...
+  int quietTo = 6 * 60;  // ...to this one; equal means never quiet
   // POSIX, for the quiet hours and the status page. Sydney/Canberra/Melbourne
   // with daylight saving; plain "AEST-10" is Brisbane.
   std::string tz = "AEST-10AEDT,M10.1.0,M4.1.0/3";
@@ -108,7 +109,7 @@ struct State {
   bool fetchOk = false;
   int lastHttp = 0;
   bool showingStatus = false;  // key 2 toggles this
-  bool portalOn = false;       // key 1 toggles this
+  bool portalOn = false;       // key 1 sets this; the web UI or the idle timeout clears it
   std::string glass;           // what is on the panel: birds, status, setup, pattern
   uint32_t refreshes = 0;      // glass refreshes counted, while counting is on
   uint32_t refreshesSince = 0; // epoch seconds the count started, 0 for not yet

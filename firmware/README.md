@@ -128,9 +128,10 @@ sleeps, because deep sleep is a reboot.
 
 **The three keys** (GPIO 2, 3 and 5, active low, all RTC-capable so they wake it):
 
-- **Key 1** toggles the settings portal. WiFi stays up and the web UI answers
-  at `http://birdframe.local/` (or the address on the status page) until the
-  key is pressed again, *Done* is clicked, or half an hour passes untouched.
+- **Key 1** turns the settings portal on. WiFi stays up and the web UI answers
+  at `http://birdframe.local/` (or the address on the status page) until
+  *Done* is clicked or half an hour passes untouched. Pressing it again while
+  it is on only restarts the half hour.
 - **Key 2** toggles the status page on the glass: address, source, endpoint,
   whether the last fetch answered and with what, the settings in force, the
   clock, free memory, firmware version. Press again for the birds.

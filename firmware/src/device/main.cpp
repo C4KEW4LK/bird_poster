@@ -4,9 +4,9 @@
 // wake is the ordinary cycle - join WiFi, ask the source, pack a page, push it
 // - and the three keys are the exceptions:
 //
-//   key 1  toggles the settings portal: WiFi stays up and the web UI answers
-//          until the key is pressed again or nobody has touched it for a
-//          while. Without a network configured this is the frame's own access
+//   key 1  turns the settings portal on: WiFi stays up and the web UI answers
+//          until "Done" is clicked there or nobody has touched it for a
+//          while. Pressed again, it only restarts that while. Without a network configured this is the frame's own access
 //          point with the setup page on the glass.
 //   key 2  toggles the status page: address, source, whether the endpoint
 //          answered, the settings in force. Stays until pressed again.
@@ -207,9 +207,8 @@ void servePortal(bool captive, bool untilSetUp = false) {
     }
     switch (keyPressed()) {
       case Key::One:
-        app.state.portalOn = false;
-        app.portalSleepAt = 0;
-        return;
+        touch();  // on only: off is the web UI's "Done" or the idle timeout
+        break;
       case Key::Two:
         app.state.showingStatus = !app.state.showingStatus;
         if (app.state.showingStatus) app.showStatus();
@@ -275,7 +274,7 @@ void setup() {
   Key key = woke;
   if (key == Key::None) key = keyPressed();
 
-  if (key == Key::One) app.state.portalOn = !app.state.portalOn;
+  if (key == Key::One) app.state.portalOn = true;
   if (key == Key::Two) app.state.showingStatus = !app.state.showingStatus;
   if (key == Key::Three) ++app.state.layout;
   saveState(app.state);
@@ -300,8 +299,11 @@ void setup() {
   }
   app.state.wifiFailures = 0;
 
-  if (app.state.portalOn) {
+  if (app.state.portalOn && app.settings.sourceConfigured()) {
     syncClock();
+    // Straight from the setup network, the glass still gives that network's
+    // address, which has just gone. Show the one the frame has now.
+    if (app.state.glass == "setup") app.showStatus();
     Serial.println("portal: on");
     servePortal(false);
     goToSleep();
@@ -318,6 +320,9 @@ void setup() {
     app.state.showingStatus = false;
     ++app.state.layout;
     drawNewPage();
+    // Just joined from the setup network: stay reachable a while after the
+    // first page, since whoever set it up is likely still at the settings.
+    if (app.state.portalOn) servePortal(false);
     goToSleep();
   }
 

@@ -62,8 +62,14 @@ void loadSettings(Settings &s) {
   s.cream = std::min<int>(4, p.getUChar("cream", uint8_t(s.cream)));
   s.cycleHours = p.getInt("cycleh", s.cycleHours);  // new key: "cycle" was days
   s.intervalMin = p.getInt("interval", s.intervalMin);
-  s.quietFrom = p.getInt("quietfrom", s.quietFrom);
-  s.quietTo = p.getInt("quietto", s.quietTo);
+  // New keys in minutes; the old ones held whole hours.
+  const auto quiet = [&p](const char *key, const char *oldKey, int fallback) {
+    if (p.isKey(key)) return std::clamp(p.getInt(key, fallback), 0, 24 * 60 - 1);
+    if (p.isKey(oldKey)) return std::clamp(p.getInt(oldKey, 0), 0, 23) * 60;
+    return fallback;
+  };
+  s.quietFrom = quiet("quietfromm", "quietfrom", s.quietFrom);
+  s.quietTo = quiet("quiettom", "quietto", s.quietTo);
   s.tz = getStr(p, "tz", s.tz);
   s.pack = getStr(p, "pack", s.pack);
   p.end();
@@ -109,8 +115,8 @@ void saveSettings(const Settings &s) {
   p.putUChar("cream", uint8_t(s.cream));
   p.putInt("cycleh", s.cycleHours);
   p.putInt("interval", s.intervalMin);
-  p.putInt("quietfrom", s.quietFrom);
-  p.putInt("quietto", s.quietTo);
+  p.putInt("quietfromm", s.quietFrom);
+  p.putInt("quiettom", s.quietTo);
   p.putString("tz", s.tz.c_str());
   p.putString("pack", s.pack.c_str());
   p.end();

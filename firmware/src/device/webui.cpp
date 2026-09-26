@@ -1,6 +1,8 @@
 #include "webui.h"
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
 
 #include <Arduino.h>
 #include <DNSServer.h>
@@ -72,9 +74,9 @@ button:disabled{opacity:.6;cursor:wait}
 <h2>WiFi</h2>
 <label>Networks nearby</label><div class="row"><select id="nearby" onchange="if(this.value)document.getElementsByName('ssid')[0].value=this.value"><option value="">%SCANNOTE%</option>%NETWORKS%</select><button type="submit" formaction="/action" formmethod="post" name="do" value="scan" formnovalidate style="flex:0;white-space:nowrap">Scan again</button></div>
 <label>Network name (SSID)</label><input name="ssid" value="%SSID%" maxlength="32" required list="ssids" autocomplete="off"><datalist id="ssids">%SSIDLIST%</datalist>
-<label>Password</label><input name="pass" type="password" maxlength="63" placeholder="%PASSHINT%" autocomplete="off">
-<div class="row"><div><label>Frame's own hostname</label><input name="host" value="%HOST%" maxlength="24" pattern="[a-z0-9-]+"></div>
-<div><label>Setup network password</label><input name="appass" type="password" maxlength="63" placeholder="unchanged" autocomplete="off"></div></div>
+<label>Password</label><input name="pass" type="password" minlength="8" maxlength="63" title="8 to 63 characters, or blank" placeholder="%PASSHINT%" autocomplete="off">
+<div class="row"><div><label>Frame's own hostname</label><input name="host" value="%HOST%" maxlength="24" pattern="[a-z0-9]([a-z0-9-]*[a-z0-9])?" title="lower-case letters, digits and hyphens, not starting or ending with a hyphen" autocapitalize="off"></div>
+<div><label>Setup network password</label><input name="appass" type="password" minlength="8" maxlength="63" placeholder="unchanged" autocomplete="off" title="at least 8 characters"></div></div>
 <small>The frame answers at http://%HOST%.local/ once joined. Passwords are not shown here; leave a field blank to keep what is saved.</small>
 <div class="actions" style="margin-top:.6rem"><button class="primary" type="submit">Save WiFi and join</button></div>
 </form>
@@ -85,14 +87,14 @@ button:disabled{opacity:.6;cursor:wait}
 <label>Source</label><select name="source" id="source" onchange="srcChanged()"><option value="inat" %SRC_INAT%>iNaturalist - what people record nearby</option><option value="ebird" %SRC_EBIRD%>eBird - what birders report nearby (needs a free key)</option><option value="ala" %SRC_ALA%>Atlas of Living Australia - every record near here</option><option value="birdnet" %SRC_BN%>BirdNET-Go - what a microphone hears here</option><option value="list" %SRC_LIST%>A JSON list of names at a URL of your own</option></select>
 <label>Show</label><select name="mode" id="mode"><option value="most" %MODE_MOST%>Most seen</option><option value="rarest" id="rarest" %MODE_RARE%>Rarest in the world</option></select>
 <small class="ebird">On eBird, "rarest" is its <i>notable</i> list: sightings eBird's own regional filters flag as unusual for the place and the season.</small>
-<div class="birdnet"><label>BirdNET-Go address</label><input name="detector" value="%DETECTOR%" placeholder="http://birdnet-go.local:8080"></div>
-<div class="list"><label>List URL</label><input name="listurl" value="%LISTURL%" placeholder="http://homeassistant.local:8123/local/birds.json">
+<div class="birdnet"><label>BirdNET-Go address</label><input name="detector" value="%DETECTOR%" maxlength="256" placeholder="http://birdnet-go.local:8080"></div>
+<div class="list"><label>List URL</label><input name="listurl" value="%LISTURL%" maxlength="256" placeholder="http://homeassistant.local:8123/local/birds.json">
 <small>Anything that answers with JSON: a bare list of scientific names, <code>["Turdus merula", &hellip;]</code>, or a list of objects with <code>scientific</code>, and optionally <code>common</code> and <code>count</code>. BirdNET-Go's own field names work too. The order given is the ranking when there are no counts.</small></div>
-<div class="ebird"><label>eBird API key</label><input name="ebirdkey" value="%EBIRDKEY%" placeholder="from ebird.org/api/keygen" autocomplete="off">
+<div class="ebird"><label>eBird API key</label><input name="ebirdkey" value="%EBIRDKEY%" maxlength="64" placeholder="from ebird.org/api/keygen" autocomplete="off">
 <small>Free and instant from <a href="https://ebird.org/api/keygen" target="_blank">ebird.org/api/keygen</a> with an eBird account. The frame only reads with it. eBird looks back 30 days at most and 50 km at most.</small>
 <label>Names in</label><select name="ebirdloc"><option value="en_AU" %EBL_AU%>Australian English - Grey Teal, Australian Wood Duck</option><option value="en" %EBL_EN%>Clements English - Gray Teal, Maned Duck</option><option value="en_NZ" %EBL_NZ%>New Zealand English</option><option value="en_UK" %EBL_UK%>British English</option><option value="en_IN" %EBL_IN%>Indian English</option><option value="en_ZA" %EBL_ZA%>South African English</option></select></div>
 <div class="place">
-<div class="js online" %OFFLINE%><label>Find a place</label><div class="row"><input id="place" placeholder="Canberra" autocomplete="off"><button type="button" onclick="findPlace()" style="flex:0;white-space:nowrap">Look up</button></div><div class="places" id="places"></div></div>
+<div class="js online" %OFFLINE%><label>Find a place</label><div class="row"><input id="place" placeholder="Sydney" autocomplete="off"><button type="button" onclick="findPlace()" style="flex:0;white-space:nowrap">Look up</button></div><div class="places" id="places"></div></div>
 <div class="row"><div><label>Latitude</label><input name="lat" id="lat" type="number" step="any" min="-90" max="90" value="%LAT%"></div><div><label>Longitude</label><input name="lng" id="lng" type="number" step="any" min="-180" max="180" value="%LNG%"></div></div>
 <div class="row"><div><label>Radius, km</label><input name="radius" type="number" min="1" max="500" value="%RADIUS%"></div>
 <div class="inat"><label>iNaturalist API</label><select name="inatv" title="v2 answers with only the fields the frame reads - about an eighth of the bytes - but iNaturalist still calls it in development and may change it without notice. v1 is the frozen, documented API; it sends the whole record for every species, so each fetch is longer on the radio."><option value="2" %INATV2%>v2 - lean, may change</option><option value="1" %INATV1%>v1 - stable, slower</option></select></div></div>
@@ -126,15 +128,16 @@ button:disabled{opacity:.6;cursor:wait}
 <div><label>Detail</label><select name="sharpen"><option value="0" %SHP0%>0 - Softest</option><option value="1" %SHP1%>1</option><option value="2" %SHP2%>2</option><option value="3" %SHP3%>3</option><option value="4" %SHP4%>4 - Sharpest</option></select></div>
 <div><label>Edges</label><select name="edges"><option value="0" %EDG0%>0 - None</option><option value="1" %EDG1%>1</option><option value="2" %EDG2%>2</option><option value="3" %EDG3%>3</option><option value="4" %EDG4%>4 - Strongest</option></select></div></div>
 <label><input type="checkbox" name="webplates" value="1" %WEBON% style="width:auto;margin-right:.4rem">Full-size plates from the web</label><input type="hidden" name="webplates" value="0">
-<input name="weburl" value="%WEBURL%" placeholder="https://c4kew4lk.github.io/bird_poster/plates/{region}" autocomplete="off">
+<input name="weburl" value="%WEBURL%" maxlength="256" placeholder="https://c4kew4lk.github.io/bird_poster/plates/{region}" autocomplete="off">
 <small>For a bird drawn much larger than its plate in flash - a page of one or two birds - the frame fetches the same plate at full size from here (<code>&lt;address&gt;/Genus_species.bin</code>), and uses the one in flash if the site does not answer. A normal page never needs it. Put <code>{region}</code> in the address for a site with a folder a region. %WEBLAST%</small>
 <label>Paper</label><select name="cream"><option value="0" %CRM0%>White</option><option value="1" %CRM1%>1 - Faint cream</option><option value="2" %CRM2%>2</option><option value="3" %CRM3%>3</option><option value="4" %CRM4%>4 - Warmest cream</option></select>
 <small>The glass has six dull inks and the dither blurs fine lines. Colour pushes saturation, Detail sharpens what contrast there is, and Edges draws a line along every boundary it finds - faint ones included, which is what keeps a white bird off the page. Pick all three by eye. Paper prints the page on cream instead of white: the background and the plates' own pale paper take the same warm tone, so the birds sit into the page rather than on it. The glass has no cream ink, so it comes out as a fine stipple of yellow and white.</small>
 
 <h2>Schedule</h2>
-<div class="row"><div><label>Refresh every, minutes</label><input name="interval" type="number" min="10" max="1440" value="%INTERVAL%"></div>
-<div><label>Quiet from, hour</label><input name="quietfrom" type="number" min="0" max="23" value="%QFROM%"></div>
-<div><label>until</label><input name="quietto" type="number" min="0" max="23" value="%QTO%"></div></div>
+<div class="row"><div><label>Refresh every, minutes</label><input name="interval" id="interval" type="number" min="10" max="1440" value="%INTERVAL%" required></div>
+<div><label>Quiet from</label><input name="quietfrom" id="quietfrom" type="time" value="%QFROM%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="22:00"></div>
+<div><label>until</label><input name="quietto" id="quietto" type="time" value="%QTO%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="06:00"></div></div>
+<small id="quietnote">No new pages between these times, in the frame's timezone; the keys still work. The same time twice means never quiet.</small>
 <div class="js" hidden><label>Timezone</label><select id="tzsel" onchange="tzPick()">
 <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Sydney, Canberra, Melbourne, Hobart</option>
 <option value="AEST-10">Brisbane</option>
@@ -154,8 +157,8 @@ button:disabled{opacity:.6;cursor:wait}
 <option value="UTC0">UTC</option>
 <option value="">Other - enter it manually</option>
 </select><div class="actions"><button type="button" id="tzmanual" onclick="tzToggle()">Manual entry</button></div></div>
-<div id="tzbox"><label>Timezone (POSIX)</label><input name="tz" id="tz" value="%TZ%" placeholder="AEST-10AEDT,M10.1.0,M4.1.0/3">
-<small>e.g. AEST-10AEDT,M10.1.0,M4.1.0/3 for Canberra, NZST-12NZDT,M9.5.0,M4.1.0/3, CET-1CEST,M3.5.0,M10.5.0/3, EST5EDT,M3.2.0,M11.1.0</small></div>
+<div id="tzbox"><label>Timezone (POSIX)</label><input name="tz" id="tz" value="%TZ%" maxlength="64" placeholder="AEST-10AEDT,M10.1.0,M4.1.0/3">
+<small>e.g. AEST-10AEDT,M10.1.0,M4.1.0/3 for Sydney, NZST-12NZDT,M9.5.0,M4.1.0/3, CET-1CEST,M3.5.0,M10.5.0/3, EST5EDT,M3.2.0,M11.1.0</small></div>
 <div class="actions" style="margin-top:1rem"><button class="primary" type="submit">Save settings</button></div>
 </form>
 
@@ -196,6 +199,7 @@ b.onclick=function(){var ll=p.location.split(',');document.getElementById('lat')
 out.appendChild(b)})}).catch(function(){out.textContent='lookup failed - is this device online?'})}
 document.getElementById('place').addEventListener('keydown',function(e){if(e.key=='Enter'){e.preventDefault();findPlace()}});
 document.getElementById('settings').addEventListener('submit',function(e){var b=e.submitter;if(!b)return;
+if(b.id!='testbtn'){check();if(!this.reportValidity()){e.preventDefault();return}}
 if(b.id=='testbtn'){document.getElementById('testing').hidden=false;setTimeout(function(){b.disabled=true},0)}
 else if(b.type=='submit'){b.innerHTML='<span class="spin"></span>'+b.textContent;setTimeout(function(){b.disabled=true},0)}});
 window.addEventListener('pageshow',function(){document.getElementById('testing').hidden=true;document.querySelectorAll('button:disabled').forEach(function(b){b.disabled=false;b.textContent=b.textContent})});
@@ -206,6 +210,33 @@ tzShow(sel.value==='');
 function tzPick(){if(sel.value){tz.value=sel.value;tzShow(false)}else tzShow(true)}
 function tzToggle(){tzShow(tzbox.hidden)}
 tz.addEventListener('input',function(){sel.value=tz.value;if(sel.value!==tz.value)sel.value=''});
+function mins(v){var m=/^(\d{1,2}):(\d{2})/.exec(v||'');if(!m||+m[1]>23||+m[2]>59)return -1;return m[1]*60+ +m[2]}
+function hm(n){return Math.floor(n/60)+' h'+(n%60?' '+n%60+' min':'')}
+// The checks the server makes too, said before the round trip. Only fields
+// that are showing are questioned: a hidden invalid field would block the
+// submit with nowhere to say why.
+function check(){var f=document.getElementById('settings'),v=document.getElementById('source').value;
+var g=function(n){return f.elements[n]},vis=function(e){return e.offsetParent!==null},say=function(e,m){e.setCustomValidity(vis(e)?m:'')};
+var lat=g('lat'),lng=g('lng'),place=v=='inat'||v=='ebird'||v=='ala';
+say(lat,place&&lat.value.trim()===''?'Enter the latitude, or use the place lookup.':'');
+say(lng,place&&lng.value.trim()===''?'Enter the longitude, or use the place lookup.':'');
+if(place&&lat.value!==''&&lng.value!==''&&+lat.value==0&&+lng.value==0)say(lat,'0, 0 is the Gulf of Guinea - use the place lookup or type the frame\'s location.');
+else if(v=='ala'&&lat.validity.valid&&lng.validity.valid&&lat.value!==''&&lng.value!==''&&(+lat.value<-56||+lat.value>-8||+lng.value<104||+lng.value>170))say(lat,'The Atlas of Living Australia only covers Australia and its territories.');
+var key=g('ebirdkey'),k=key.value.trim();say(key,v!='ebird'?'':!k?'eBird needs an API key - free from ebird.org/api/keygen.':!/^[A-Za-z0-9]+$/.test(k)?'The key is only letters and digits - check it was copied whole.':'');
+var url=/^https?:\/\/\S+$/i;
+say(g('detector'),v=='birdnet'&&!url.test(g('detector').value.trim())?'Start the address with http:// or https://':'');
+say(g('listurl'),v=='list'&&!url.test(g('listurl').value.trim())?'Start the URL with http:// or https://':'');
+var w=g('weburl');say(w,g('webplates')[0].checked&&!url.test(w.value.trim())?'Start the address with http:// or https://':'');
+var qf=g('quietfrom'),qt=g('quietto'),a=mins(qf.value),b=mins(qt.value),iv=+g('interval').value,note=document.getElementById('quietnote');
+say(qf,a<0?'Enter a time such as 22:00':'');say(qt,b<0?'Enter a time such as 06:00':'');
+if(a>=0&&b>=0){var q=(b-a+1440)%1440;
+if(a==b)note.textContent='Never quiet: a new page every '+(iv||'?')+' minutes, day and night.';
+else if(1440-q<Math.max(iv,60)){say(qt,'That leaves under '+hm(Math.max(iv,60))+' awake a day - the frame would hardly draw. Shorten the quiet time.');note.textContent=''}
+else note.textContent='Quiet for '+hm(q)+' a day, from '+qf.value+' to '+qt.value+(b<a?' the next morning':'')+'; a new page every '+(iv||'?')+' minutes the rest of the time.';}
+var tz=g('tz'),t=tz.value.trim();say(tz,t&&!(t.length<=64&&/^([A-Za-z]{3,}|<[^>]+>)[+-]?\d[A-Za-z0-9+\-,.:\/<>]*$/.test(t))?'Not a POSIX timezone - it needs an offset, e.g. AEST-10AEDT,M10.1.0,M4.1.0/3, not Australia/Sydney. Pick one from the list above.':'');}
+document.getElementById('settings').addEventListener('input',check);
+document.getElementById('settings').addEventListener('change',check);
+check();
 var stamp=%STAMP%,sawBusy=false;
 function watch(){fetch('/api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j.phase){sawBusy=true;document.getElementById('phase').textContent=j.phase;document.getElementById('busy').hidden=false}
@@ -245,6 +276,9 @@ String esc(const std::string &s) {
       case '<': out += "&lt;"; break;
       case '>': out += "&gt;"; break;
       case '"': out += "&quot;"; break;
+      // render() fills its %TOKEN%s one after another: a saved value that
+      // held one would be filled in by a later pass.
+      case '%': out += "&#37;"; break;
       default: out += c;
     }
   }
@@ -261,10 +295,77 @@ String fmt(double v) {
 
 std::string arg(const char *name) { return std::string(server.arg(name).c_str()); }
 
+// Longest URL, key or timezone kept: NVS takes far more, but nothing real
+// comes near it.
+constexpr size_t kMaxText = 256;
+
+// A field typed or pasted: surrounding spaces and any control characters
+// (a pasted newline, say) dropped. Not for the SSID or passwords, which may
+// begin or end with a space on purpose.
+std::string argTrim(const char *name) {
+  std::string out;
+  for (char c : arg(name))
+    if (uint8_t(c) >= 0x20 && c != 0x7f) out += c;
+  const size_t a = out.find_first_not_of(' ');
+  if (a == std::string::npos) return "";
+  return out.substr(a, out.find_last_not_of(' ') - a + 1);
+}
+
+// A whole number, clamped into range. Blank or not a number keeps what is
+// saved: toInt() would read either as 0 and the clamp would make that the
+// minimum.
 int argInt(const char *name, int lo, int hi, int fallback) {
   if (!server.hasArg(name)) return fallback;
-  const long v = server.arg(name).toInt();
+  const std::string text = argTrim(name);
+  if (text.empty()) return fallback;
+  char *end = nullptr;
+  const long v = strtol(text.c_str(), &end, 10);
+  if (*end != '\0') return fallback;
   return int(v < lo ? lo : (v > hi ? hi : v));
+}
+
+// "HH:MM" as a time input sends it, to minutes after midnight. Anything
+// else keeps what is saved.
+int argTime(const char *name, int fallback) {
+  const std::string t = arg(name);
+  int h = 0, m = 0;
+  char tail = 0;
+  if (sscanf(t.c_str(), "%d:%d%c", &h, &m, &tail) != 2) return fallback;
+  if (h < 0 || h > 23 || m < 0 || m > 59) return fallback;
+  return h * 60 + m;
+}
+
+String hhmm(int minutes) {
+  char buf[8];
+  snprintf(buf, sizeof buf, "%02d:%02d", minutes / 60, minutes % 60);
+  return buf;
+}
+
+// For a string inside JSON: esc() is for HTML, and the page sets these with
+// textContent, where an entity would show as typed.
+String jsonEsc(const std::string &s) {
+  String out;
+  out.reserve(s.size());
+  for (char c : s) {
+    if (c == '"' || c == '\\') {
+      out += '\\';
+      out += c;
+    } else if (uint8_t(c) < 0x20) {
+      char buf[8];
+      snprintf(buf, sizeof buf, "\\u%04x", c);
+      out += buf;
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
+
+bool validHostname(const std::string &h) {
+  if (h.empty() || h.size() > 24 || h.front() == '-' || h.back() == '-') return false;
+  for (char c : h)
+    if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-')) return false;
+  return true;
 }
 
 // While a page is being made the settings must not move under it, and a
@@ -287,12 +388,13 @@ String stamp(App &app) {
 // A coordinate as typed. Blank, letters or out of range all fail: atof would
 // quietly read any of them as 0, which is a real place with no birds.
 bool parseCoordinate(const char *name, double limit, double &out) {
-  const std::string text = std::string(server.arg(name).c_str());
+  const std::string text = argTrim(name);
   if (text.empty()) return false;
   char *end = nullptr;
   const double v = strtod(text.c_str(), &end);
   if (end == text.c_str() || *end != '\0') return false;
-  if (v < -limit || v > limit) return false;
+  // strtod reads "nan", and a NaN passes every comparison below.
+  if (!std::isfinite(v) || v < -limit || v > limit) return false;
   out = v;
   return true;
 }
@@ -308,17 +410,57 @@ Source sourceFromArg(const std::string &value, Source fallback) {
   return fallback;
 }
 
+// http(s)://, something after it, no spaces, and not absurdly long.
 bool isHttpUrl(const std::string &url) {
-  return url.rfind("http://", 0) == 0 || url.rfind("https://", 0) == 0;
+  const size_t scheme = url.rfind("http://", 0) == 0 ? 7 : url.rfind("https://", 0) == 0 ? 8 : 0;
+  return scheme && url.size() > scheme && url.size() <= kMaxText &&
+         url.find(' ') == std::string::npos;
+}
+
+// eBird's keys are a dozen letters and digits. Anything else is a paste gone
+// wrong, and it goes into a request header, where a line break would not do.
+bool validEbirdKey(const std::string &k) {
+  if (k.empty() || k.size() > 64) return false;
+  for (char c : k)
+    if (!isalnum(uint8_t(c))) return false;
+  return true;
+}
+
+bool validEbirdLocale(const std::string &l) {
+  for (const char *ok : {"en_AU", "en", "en_NZ", "en_UK", "en_IN", "en_ZA"})
+    if (l == ok) return true;
+  return false;
+}
+
+// A POSIX TZ string's shape, loosely: a name of three letters or more (or
+// <+10> in angle brackets), an offset, then only the characters the format
+// uses. "Australia/Sydney" fails on the offset: newlib would read it as UTC,
+// which would move the quiet hours without a word.
+bool validTz(const std::string &tz) {
+  if (tz.size() < 4 || tz.size() > 64) return false;
+  size_t i = 0;
+  if (tz[0] == '<') {
+    i = tz.find('>');
+    if (i == std::string::npos || i < 2) return false;
+    ++i;
+  } else {
+    while (i < tz.size() && isalpha(uint8_t(tz[i]))) ++i;
+    if (i < 3) return false;
+  }
+  if (i < tz.size() && (tz[i] == '+' || tz[i] == '-')) ++i;
+  if (i >= tz.size() || !isdigit(uint8_t(tz[i]))) return false;
+  for (char c : tz)
+    if (!isalnum(uint8_t(c)) && !strchr("+-,.:/<>", c)) return false;
+  return true;
 }
 
 SourceConfig sourceFromForm(App &app, std::string &problem) {
   SourceConfig cfg = app.sourceConfig();
   if (server.hasArg("source")) cfg.source = sourceFromArg(arg("source"), cfg.source);
-  if (server.hasArg("detector")) cfg.detectorUrl = arg("detector");
-  if (server.hasArg("ebirdkey")) cfg.ebirdKey = arg("ebirdkey");
-  if (server.hasArg("ebirdloc")) cfg.ebirdLocale = arg("ebirdloc");
-  if (server.hasArg("listurl")) cfg.listUrl = arg("listurl");
+  if (server.hasArg("detector")) cfg.detectorUrl = argTrim("detector");
+  if (server.hasArg("ebirdkey")) cfg.ebirdKey = argTrim("ebirdkey");
+  if (server.hasArg("ebirdloc") && validEbirdLocale(arg("ebirdloc"))) cfg.ebirdLocale = arg("ebirdloc");
+  if (server.hasArg("listurl")) cfg.listUrl = argTrim("listurl");
   cfg.radiusKm = argInt("radius", 1, 500, cfg.radiusKm);
   cfg.inatVersion = argInt("inatv", 1, 2, app.settings.inatVersion);
   cfg.since = app.windowStart(argInt("lookback", 1, 10000, app.settings.lookback),
@@ -334,15 +476,16 @@ SourceConfig sourceFromForm(App &app, std::string &problem) {
     else if (!lngOk) problem = "Longitude must be a number from -180 to 180.";
     else if (cfg.lat == 0 && cfg.lng == 0) problem = "Latitude and longitude are both 0 - that is the Gulf of Guinea. Use the place lookup or type the frame's location.";
     else if (cfg.source == Source::eBird && cfg.ebirdKey.empty()) problem = "eBird needs an API key - free from ebird.org/api/keygen.";
+    else if (cfg.source == Source::eBird && !validEbirdKey(cfg.ebirdKey)) problem = "The eBird API key should be only letters and digits - check it was copied whole.";
     // Australia and its territories, generously: Christmas Island in the west,
     // Norfolk Island in the east, Macquarie Island in the south. ALA has
     // nothing outside it, and an empty page is a poor way to learn that.
     else if (cfg.source == Source::Ala && (cfg.lat < -56 || cfg.lat > -8 || cfg.lng < 104 || cfg.lng > 170))
       problem = "That place is outside Australia and its territories, which is all the Atlas of Living Australia covers - use iNaturalist or eBird there.";
   } else if (cfg.source == Source::BirdNet && !isHttpUrl(cfg.detectorUrl)) {
-    problem = "The BirdNET-Go address must start with http:// or https://.";
+    problem = "The BirdNET-Go address must start with http:// or https://, with no spaces.";
   } else if (cfg.source == Source::JsonList && !isHttpUrl(cfg.listUrl)) {
-    problem = "The list URL must start with http:// or https://.";
+    problem = "The list URL must start with http:// or https://, with no spaces.";
   }
   return cfg;
 }
@@ -516,8 +659,8 @@ String render(App &app, const std::string &error = "") {
   for (int v = 0; v < 5; ++v) page.replace("%EDG" + String(v) + "%", sel(s.edges == v));
   for (int v = 0; v < 5; ++v) page.replace("%CRM" + String(v) + "%", sel(s.cream == v));
   page.replace("%INTERVAL%", String(s.intervalMin));
-  page.replace("%QFROM%", String(s.quietFrom));
-  page.replace("%QTO%", String(s.quietTo));
+  page.replace("%QFROM%", hhmm(s.quietFrom));
+  page.replace("%QTO%", hhmm(s.quietTo));
   page.replace("%TZ%", esc(s.tz));
   return page;
 }
@@ -609,15 +752,15 @@ void WebUi::begin(bool captive) {
     touched = true;
     // `stamp` changes whenever the frame's state moves on: the settings page
     // polls it after "fetch and draw" and reloads when it does.
-    String json = "{\"stamp\":\"" + stamp(app) + "\",\"phase\":\"" + esc(app.phase) +
+    String json = "{\"stamp\":\"" + jsonEsc(stamp(app).c_str()) + "\",\"phase\":\"" + jsonEsc(app.phase) +
                   "\",\"ok\":" + (app.state.fetchOk ? "true" : "false") +
-                  ",\"result\":\"" + esc(app.fetchError.empty() ? app.state.lastResult : app.fetchError) +
-                  "\",\"glass\":\"" + esc(app.lastKind) + "\",\"lines\":[";
+                  ",\"result\":\"" + jsonEsc(app.fetchError.empty() ? app.state.lastResult : app.fetchError) +
+                  "\",\"glass\":\"" + jsonEsc(app.lastKind) + "\",\"lines\":[";
     bool first = true;
     for (const std::string &l : app.statusLines()) {
       if (!first) json += ",";
       first = false;
-      json += "\"" + esc(l) + "\"";
+      json += "\"" + jsonEsc(l) + "\"";
     }
     json += "]}";
     server.send(200, "application/json", json);
@@ -627,33 +770,48 @@ void WebUi::begin(bool captive) {
     touched = true;
     if (refuseIfBusy(app)) return;
     Settings &s = app.settings;
-    const std::string newSsid = arg("ssid");
+    std::string note;
+    // The SSID and passwords are taken exactly as typed: spaces in them are
+    // legal and may be meant.
+    std::string newSsid = arg("ssid");
+    if (newSsid.empty() || newSsid.size() > 32) {
+      note += " The network name must be 1 to 32 characters.";
+      newSsid = s.wifiSsid;
+    }
     // Blank password fields mean "keep": they are never echoed into the page,
-    // so a save with nothing typed must not wipe them.
+    // so a save with nothing typed must not wipe them. WPA2 wants 8 to 63;
+    // anything else would only fail to join and drop back to setup.
     const std::string typedPass = arg("pass");
-    const std::string newPass = typedPass.empty() ? s.wifiPass : typedPass;
+    std::string newPass = s.wifiPass;
+    if (typedPass.size() >= 8 && typedPass.size() <= 63) newPass = typedPass;
+    else if (!typedPass.empty()) note += " The WiFi password was not changed: it must be 8 to 63 characters.";
     const bool wifiChanged = newSsid != s.wifiSsid || newPass != s.wifiPass;
     s.wifiSsid = newSsid;
     s.wifiPass = newPass;
     const std::string host = arg("host");
-    if (!host.empty()) s.hostname = host;
+    if (validHostname(host)) s.hostname = host;
+    else if (!host.empty()) note += " The hostname was not changed: lower-case letters, digits and hyphens only.";
     const std::string ap = arg("appass");
-    if (ap.size() >= 8) s.apPass = ap;
+    if (ap.size() >= 8 && ap.size() <= 63) s.apPass = ap;
+    else if (!ap.empty()) note += " The setup network password was not changed: it must be 8 to 63 characters.";
     saveSettings(s);
     if (wifiChanged) {
       app.state.wifiFailures = 0;
+      // WiFi stays up after the restart, with the new address on the glass,
+      // so the frame can be found on the network just joined.
+      app.state.portalOn = true;
       saveState(app.state);
       server.send(200, "text/html",
                   "<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'>"
                   "<body style='font:16px system-ui;padding:1rem'><h2>Saved</h2>"
                   "<p>The frame will restart and join <b>" + esc(s.wifiSsid) +
-                      "</b>. If it cannot, it comes back on its own network with the setup page. "
+                      "</b> and show its new address on the glass. If it cannot, it comes back on its own network with the setup page. "
                       "Once joined it answers at <a href='http://" + esc(s.hostname) +
                       ".local/'>http://" + esc(s.hostname) + ".local/</a>, where the bird "
                       "settings can reach iNaturalist.</p></body>");
       pending_ = Request::Reboot;
     } else {
-      warning_ = "WiFi settings saved.";
+      warning_ = note.empty() ? "WiFi settings saved." : "Saved, except:" + note;
       redirectHome();
     }
   });
@@ -664,7 +822,7 @@ void WebUi::begin(bool captive) {
     Settings &s = app.settings;
     // A bad location must not block the rest: everything else saves, the
     // location keeps what it had, and the next page says so.
-    std::string problem;
+    std::string problem, notes;
     const SourceConfig cfg = sourceFromForm(app, problem);
     s.source = cfg.source;
     s.mode = modeFromForm(cfg.source, s.mode);
@@ -680,7 +838,7 @@ void WebUi::begin(bool captive) {
       s.lat = cfg.lat;
       s.lng = cfg.lng;
     } else {
-      warning_ = "Saved, except the source's details: " + problem;
+      notes += " The source's details: " + problem;
     }
     s.birds = argInt("birds", 1, 40, s.birds);
     s.rotation = argInt("rotation", 0, 3, s.rotation);
@@ -697,7 +855,11 @@ void WebUi::begin(bool captive) {
     if (counting && !s.countRefreshes) app.resetRefreshCount();
     s.countRefreshes = counting;
     s.webPlates = argInt("webplates", 0, 1, int(s.webPlates)) == 1;
-    if (server.hasArg("weburl")) s.webPlatesUrl = arg("weburl");
+    if (server.hasArg("weburl")) {
+      const std::string url = argTrim("weburl");
+      if (isHttpUrl(url)) s.webPlatesUrl = url;
+      else if (!url.empty()) notes += " The web plates address must start with http:// or https://, with no spaces.";
+    }
     s.dateStyle = DateStyle(argInt("datestyle", 0, 4, int(s.dateStyle)));
     s.dateOrder = DateOrder(argInt("dateorder", 0, 1, int(s.dateOrder)));
     s.dateEdge = DateEdge(argInt("dateedge", 0, 1, int(s.dateEdge)));
@@ -708,20 +870,23 @@ void WebUi::begin(bool captive) {
     s.cream = argInt("cream", 0, 4, s.cream);
     s.cycleHours = argInt("cycle", 0, 8760, s.cycleHours);
     s.intervalMin = argInt("interval", 10, 1440, s.intervalMin);
-    s.quietFrom = argInt("quietfrom", 0, 23, s.quietFrom);
-    s.quietTo = argInt("quietto", 0, 23, s.quietTo);
-    if (server.hasArg("pack") && arg("pack") != s.pack) {
+    s.quietFrom = argTime("quietfrom", s.quietFrom);
+    s.quietTo = argTime("quietto", s.quietTo);
+    if (server.hasArg("pack") && arg("pack") != s.pack &&
+        std::find(app.packs.begin(), app.packs.end(), arg("pack")) != app.packs.end()) {
       s.pack = arg("pack");
       app.openPack();  // the next page draws from it; the current one stays on the glass
     }
-    const std::string tz = arg("tz");
-    if (!tz.empty() && tz != s.tz) {
+    const std::string tz = argTrim("tz");
+    if (!tz.empty() && !validTz(tz)) {
+      notes += " The timezone does not look like a POSIX one, e.g. AEST-10AEDT,M10.1.0,M4.1.0/3.";
+    } else if (!tz.empty() && tz != s.tz) {
       s.tz = tz;
       setenv("TZ", tz.c_str(), 1);  // so the status card's times are right without a reboot
       tzset();
     }
     saveSettings(s);
-    if (warning_.empty()) warning_ = "Settings saved.";
+    warning_ = notes.empty() ? "Settings saved." : "Saved, except:" + notes;
     redirectHome();
   });
   server.on("/test", HTTP_POST, [this]() {

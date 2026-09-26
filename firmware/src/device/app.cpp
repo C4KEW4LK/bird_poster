@@ -672,24 +672,23 @@ std::string App::clockTime(std::time_t t) const {
 
 uint64_t App::sleepSeconds(std::time_t now) const {
   uint64_t seconds = uint64_t(std::max(10, settings.intervalMin)) * 60;
-  if (!inQuietHours()) return seconds;
+  if (!inQuietHours(now)) return seconds;
   // Sleep straight through to the end of the quiet window.
   std::tm tm{};
   localtime_r(&now, &tm);
-  int hours = settings.quietTo - tm.tm_hour;
-  if (hours <= 0) hours += 24;
-  return std::max<uint64_t>(60, uint64_t(hours) * 3600 - uint64_t(tm.tm_min) * 60);
+  int minutes = settings.quietTo - (tm.tm_hour * 60 + tm.tm_min);
+  if (minutes <= 0) minutes += 24 * 60;
+  return std::max<uint64_t>(60, uint64_t(minutes) * 60 - uint64_t(tm.tm_sec));
 }
 
-bool App::inQuietHours() const {
+bool App::inQuietHours(std::time_t t) const {
   if (settings.quietFrom == settings.quietTo) return false;
-  const std::time_t now = std::time(nullptr);
-  if (now < 100000) return false;  // no clock yet: never skip on a guess
+  if (t < 100000) return false;  // no clock yet: never skip on a guess
   std::tm tm{};
-  localtime_r(&now, &tm);
-  const int h = tm.tm_hour;
-  if (settings.quietFrom < settings.quietTo) return h >= settings.quietFrom && h < settings.quietTo;
-  return h >= settings.quietFrom || h < settings.quietTo;  // wraps midnight
+  localtime_r(&t, &tm);
+  const int m = tm.tm_hour * 60 + tm.tm_min;
+  if (settings.quietFrom < settings.quietTo) return m >= settings.quietFrom && m < settings.quietTo;
+  return m >= settings.quietFrom || m < settings.quietTo;  // wraps midnight
 }
 
 std::string App::apSsid() const {
@@ -771,9 +770,13 @@ std::vector<std::string> App::statusLines() {
                                                             : state.lastBirds));
   lines.push_back("Rendered: " + localTime(state.lastRender) + ", layout " +
                   std::to_string(state.layout));
-  lines.push_back("Refresh: every " + std::to_string(settings.intervalMin) + " min, quiet " +
-                  std::to_string(settings.quietFrom) + ":00-" + std::to_string(settings.quietTo) +
-                  ":00, " + std::to_string(settings.birds) + " birds, " +
+  char quiet[16];
+  snprintf(quiet, sizeof quiet, "%02d:%02d-%02d:%02d", settings.quietFrom / 60, settings.quietFrom % 60,
+           settings.quietTo / 60, settings.quietTo % 60);
+  lines.push_back("Refresh: every " + std::to_string(settings.intervalMin) + " min, " +
+                  (settings.quietFrom == settings.quietTo ? std::string("never quiet")
+                                                          : "quiet " + std::string(quiet)) +
+                  ", " + std::to_string(settings.birds) + " birds, " +
                   (settings.portrait() ? "portrait" : "landscape"));
   {
     // What happens next, so the glass explains its own silence.

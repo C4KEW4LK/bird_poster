@@ -511,7 +511,7 @@ Each step is verifiable on its own; do not skip to 4.
    run. HTTPS to iNaturalist is `setInsecure()`: the frame has no clock at
    first boot and no root store; a CA bundle is a later refinement. Settings
    live in NVS (`Preferences`, namespace `frame`), the frame's own memory in
-   `state`. Keys: 1 toggles the portal, 2 the status page, 3 a new page.
+   `state`. Keys: 1 turns the portal on, 2 the status page, 3 a new page.
    Without a network, or after three failed joins, the frame is its own AP
    with a captive portal and a WiFi QR code on the glass.
 

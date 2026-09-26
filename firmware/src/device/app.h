@@ -159,7 +159,8 @@ struct App {
   // Start the refresh count again from nothing.
   void resetRefreshCount();
   std::string clockTime(std::time_t t) const;  // HH:MM, or "never"
-  bool inQuietHours() const;
+  bool inQuietHours() const { return inQuietHours(std::time(nullptr)); }
+  bool inQuietHours(std::time_t t) const;
   // How long the next deep sleep lasts from `now`: the refresh interval, or
   // through to the end of the quiet window.
   uint64_t sleepSeconds(std::time_t now) const;
