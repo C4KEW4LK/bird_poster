@@ -22,7 +22,7 @@
 
 #include "plates.h"
 
-namespace birdframe {
+namespace birdposter {
 
 // The panel's six inks, in the driver's own order.
 enum Ink : uint8_t { kBlack = 0, kWhite = 1, kYellow = 2, kRed = 3, kBlue = 4, kGreen = 5 };
@@ -188,4 +188,4 @@ int qrSize(const std::string &text, int module);
 // Android and iOS both read it; `pass` empty means an open network.
 std::string wifiQrPayload(const std::string &ssid, const std::string &pass);
 
-}  // namespace birdframe
+}  // namespace birdposter

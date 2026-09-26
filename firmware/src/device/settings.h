@@ -12,15 +12,15 @@
 #include "pages.h"
 #include "source.h"
 
-namespace birdframe {
+namespace birdposter {
 
 struct Settings {
   // The network the frame joins. Empty SSID means "not set up yet", which is
   // what puts the frame into its own access point with the setup page.
   std::string wifiSsid;
   std::string wifiPass;
-  std::string apPass = "birdframe";  // the setup network's own password
-  std::string hostname = "birdframe";  // also the mDNS name: http://birdframe.local/
+  std::string apPass = "birdposter";  // the setup network's own password
+  std::string hostname = "birdposter";  // also the mDNS name: http://birdposter.local/
 
   Source source = Source::iNaturalist;
   Mode mode = Mode::MostDetected;
@@ -124,4 +124,4 @@ void saveSettings(const Settings &s);
 void loadState(State &s);
 void saveState(const State &s);
 
-}  // namespace birdframe
+}  // namespace birdposter

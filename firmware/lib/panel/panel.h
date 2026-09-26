@@ -20,7 +20,7 @@
 
 class SPIClass;  // Arduino's; the header itself stays out of here
 
-namespace birdframe {
+namespace birdposter {
 
 // Physical GPIO numbers. The same glass and the same two controllers sit
 // behind two different boards:
@@ -124,4 +124,4 @@ class Panel {
   bool ok_ = false;
 };
 
-}  // namespace birdframe
+}  // namespace birdposter

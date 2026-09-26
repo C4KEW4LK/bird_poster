@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace birdframe {
+namespace birdposter {
 namespace {
 
 constexpr int kBits = 64;
@@ -1492,4 +1492,4 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
   }
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

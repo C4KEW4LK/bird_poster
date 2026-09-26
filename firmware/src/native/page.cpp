@@ -30,7 +30,7 @@
 #include "plates.h"
 #include "render.h"
 
-using namespace birdframe;
+using namespace birdposter;
 
 namespace {
 
@@ -237,10 +237,10 @@ int pageMain(int argc, char **argv) {
 
   Frame frame;
   if (setup) {
-    renderSetupPage(settings.portrait, font, "birdframe-3A7F", "birdframe", "http://192.168.4.1/",
+    renderSetupPage(settings.portrait, font, "birdposter-3A7F", "birdposter", "http://192.168.4.1/",
                     frame);
   } else if (status) {
-    renderStatusPage(settings.portrait, font, "Bird frame status",
+    renderStatusPage(settings.portrait, font, "Bird poster status",
                      {"WiFi: joined HomeNet as 192.168.1.42 (-61 dBm)", "Settings: http://192.168.1.42/",
                       "Source: iNaturalist, most seen, 25 km around -27.4700, 153.0200, 30 days",
                       "Endpoint: https://api.inaturalist.org/v1/observations/species_counts",

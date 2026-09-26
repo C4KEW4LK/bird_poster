@@ -129,7 +129,7 @@ sleeps, because deep sleep is a reboot.
 **The three keys** (GPIO 2, 3 and 5, active low, all RTC-capable so they wake it):
 
 - **Key 1** turns the settings portal on. WiFi stays up and the web UI answers
-  at `http://birdframe.local/` (or the address on the status page) until
+  at `http://birdposter.local/` (or the address on the status page) until
   *Done* is clicked or half an hour passes untouched. Pressing it again while
   it is on only restarts the half hour.
 - **Key 2** toggles the status page on the glass: address, source, endpoint,
@@ -138,7 +138,7 @@ sleeps, because deep sleep is a reboot.
 - **Key 3** draws a new page now, advancing the layout.
 
 **No network yet**, or the configured one fails three wakes running, and the
-frame becomes its own access point (`birdframe-XXXX`, password `birdframe`)
+frame becomes its own access point (`birdposter-XXXX`, password `birdposter`)
 and draws the setup page: a WiFi QR code a phone's camera turns into a join
 prompt, the name and password in text beside it, and the address. The portal
 is captive - a DNS catch-all plus the Android/Apple/Windows connectivity

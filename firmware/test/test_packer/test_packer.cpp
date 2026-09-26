@@ -15,7 +15,7 @@
 
 #include "packer.h"
 
-using namespace birdframe;
+using namespace birdposter;
 
 namespace {
 

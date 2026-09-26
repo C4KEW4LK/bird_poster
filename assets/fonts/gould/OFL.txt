@@ -1,5 +1,5 @@
 Gould Condensed (GouldCondensed-Regular.ttf) is an inline (engraved) cut of
-Playfair Display, made for the bird frame project. It is a Modified Version
+Playfair Display, made for the bird poster project. It is a Modified Version
 under the terms below and is licensed under the same SIL Open Font License,
 Version 1.1. "Playfair Display" is a Reserved Font Name and is not used for
 this derivative.

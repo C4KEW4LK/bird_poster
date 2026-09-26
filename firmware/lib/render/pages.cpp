@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <utility>
 
-namespace birdframe {
+namespace birdposter {
 
 namespace {
 
@@ -376,7 +376,7 @@ void renderSetupPage(bool portrait, const Font &font, const std::string &ssid,
   int ascent = 0, descent = 0;
   font.measure("x", big, &ascent, &descent);
   int y = margin + ascent;
-  font.draw(out, "Bird frame", margin, y, big, kBlack);
+  font.draw(out, "Bird poster", margin, y, big, kBlack);
   y += descent + body / 2;
   rule(out, margin, y, width - 2 * margin);
   y += body;
@@ -469,4 +469,4 @@ void renderStatusPage(bool portrait, const Font &font, const std::string &title,
   }
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

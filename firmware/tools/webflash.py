@@ -282,7 +282,7 @@ def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool) -> N
 
     def manifest(name: str, chosen: list[dict]) -> dict:
         return {
-            "name": f"Bird frame - {name}",
+            "name": f"Bird poster - {name}",
             "version": version,
             # Always prompt. ESP Web Tools erases the whole chip by default on
             # a device without Improv Serial: `false` here does not mean "do

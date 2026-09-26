@@ -23,7 +23,7 @@
 #include "app.h"
 #include "webui.h"
 
-using namespace birdframe;
+using namespace birdposter;
 
 // The progress hook nests the web server's poll inside a fetch or a render,
 // and the request handlers build a page on top of that. Must be at file scope:
@@ -258,7 +258,7 @@ void setup() {
   const Key woke = keyFromWake();
   delay(woke == Key::None && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED ? 1500
                                                                                         : 100);
-  Serial.printf("\nbird frame %s, woke by %s\n", kFirmwareVersion,
+  Serial.printf("\nbird poster %s, woke by %s\n", kFirmwareVersion,
                 woke == Key::None ? (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER
                                          ? "timer"
                                          : "power")

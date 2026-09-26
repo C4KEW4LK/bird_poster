@@ -1,10 +1,10 @@
-# bird frame (ESP32-S3)
+# Bird Poster (ESP32)
 
-A battery e-ink bird frame: it asks the network which birds have been seen
+A battery e-ink bird poster: it asks the network which birds have been seen
 nearby, draws them as public-domain illustrations packed onto one page, and goes
 back to sleep.
 
-Inspired by [Fugleramme](https://github.com/arnegiacomo/fugleramme).
+Inspired by the awesome Bird Frame project [Fugleramme](https://github.com/arnegiacomo/fugleramme).
 
 <p align="center">
   <img src="images/output_example.bmp" alt="A page from the frame: five Australian birds from Gould's plates - Rufous Whistler, Latham's Snipe, Nankeen Kestrel, Little Eagle and Great Egret - each with its common and scientific name, and the date in the corner" width="480">

@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <random>
 
-namespace birdframe {
+namespace birdposter {
 namespace {
 
 std::string trimSlash(const std::string& url) {
@@ -474,4 +474,4 @@ std::vector<Sighting> cycle(const std::vector<Sighting>& ranked,
   return fresh;
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

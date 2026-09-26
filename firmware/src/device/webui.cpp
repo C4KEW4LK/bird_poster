@@ -11,7 +11,7 @@
 
 #include <cstring>
 
-namespace birdframe {
+namespace birdposter {
 
 namespace {
 
@@ -27,7 +27,7 @@ volatile bool touched = false;
 // works.
 const char kPage[] PROGMEM = R"HTML(<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bird frame</title>
+<title>Bird poster</title>
 <style>
 :root{color-scheme:light}
 body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:1rem;max-width:42rem;margin-inline:auto;background:#f4f1ea;color:#222}
@@ -56,7 +56,7 @@ small{color:#666}
 button:disabled{opacity:.6;cursor:wait}
 .credits{margin:1.2rem 0 .4rem;font-size:.85rem;color:#666}.credits summary{cursor:pointer}.credits p{margin:.4rem 0}
 </style></head><body>
-<h1>Bird frame</h1>
+<h1>Bird poster</h1>
 <div class="status">
 <div><b>Network</b><span>%NET%</span></div>
 <div><b>Last fetch</b><span class="%FETCHCLASS%">%FETCH%</span></div>
@@ -258,7 +258,7 @@ if(!document.getElementById('busy').hidden)setTimeout(watch,1000);
 // values survive a tap on Back.
 const char kTestPage[] PROGMEM = R"HTML(<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bird frame - source test</title>
+<title>Bird poster - source test</title>
 <style>
 body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:1rem;max-width:42rem;margin-inline:auto;background:#f4f1ea;color:#222}
 h1{font:italic 1.8rem Georgia,serif;margin:.2rem 0 .6rem}
@@ -1038,4 +1038,4 @@ WebUi::Request WebUi::take() {
   return r;
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

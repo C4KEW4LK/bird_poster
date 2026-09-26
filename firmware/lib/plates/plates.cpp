@@ -4,7 +4,7 @@
 
 #include "tinf.h"
 
-namespace birdframe {
+namespace birdposter {
 
 namespace {
 
@@ -277,4 +277,4 @@ bool Plates::decode(const PlateEntry &e, const Reader &reader, uint32_t base, Sp
   return true;
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

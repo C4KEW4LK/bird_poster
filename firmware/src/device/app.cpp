@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace birdframe {
+namespace birdposter {
 
 #ifndef FIRMWARE_VERSION
 #define FIRMWARE_VERSION "dev"
@@ -564,7 +564,7 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
 }
 
 bool App::showStatus() {
-  renderStatusPage(settings.portrait(), font, "Bird frame", statusLines(), last);
+  renderStatusPage(settings.portrait(), font, "Bird poster", statusLines(), last);
   lastKind = "status";
   return present();
 }
@@ -588,7 +588,7 @@ bool App::showPattern() {
   dither(paper, strip);
   for (int y = 0; y < strip.h; ++y)
     std::copy(strip.row(y), strip.row(y) + w, last.row(h * 2 / 3 + y));
-  if (fontOk) font.draw(last, "Bird frame - test pattern - top left is black", w / 20, h - h / 12,
+  if (fontOk) font.draw(last, "Bird poster - test pattern - top left is black", w / 20, h - h / 12,
                         h / 24, kBlack);
   lastKind = "pattern";
   return present();
@@ -705,7 +705,7 @@ std::string App::apSsid() const {
   uint8_t mac[6];
   esp_read_mac(mac, ESP_MAC_WIFI_STA);  // readable before the radio is up
   char buf[32];
-  snprintf(buf, sizeof buf, "birdframe-%02X%02X", mac[4], mac[5]);
+  snprintf(buf, sizeof buf, "birdposter-%02X%02X", mac[4], mac[5]);
   return buf;
 }
 
@@ -833,4 +833,4 @@ std::vector<std::string> App::statusLines() {
   return lines;
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

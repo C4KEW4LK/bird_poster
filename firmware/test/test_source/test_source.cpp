@@ -18,7 +18,7 @@
 
 #include "source.h"
 
-using namespace birdframe;
+using namespace birdposter;
 
 namespace {
 

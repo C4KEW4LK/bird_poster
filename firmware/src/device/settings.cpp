@@ -4,7 +4,7 @@
 
 #include <Preferences.h>
 
-namespace birdframe {
+namespace birdposter {
 
 namespace {
 
@@ -160,4 +160,4 @@ void saveState(const State &s) {
   p.end();
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

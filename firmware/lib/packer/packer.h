@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace birdframe {
+namespace birdposter {
 
 // Ported verbatim from collage.py. These are not tunables - several were chosen
 // to fix specific visual bugs, and the packer is not scale-invariant, so the
@@ -358,4 +358,4 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
           std::vector<Placement> &placed, float maxFactor = 1.5f, int nudge = 0,
           int rounds = 1, float roundStep = 0.0f);
 
-}  // namespace birdframe
+}  // namespace birdposter

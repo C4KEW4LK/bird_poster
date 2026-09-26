@@ -17,7 +17,7 @@
 #include "plates.h"
 #include "render.h"
 
-namespace birdframe {
+namespace birdposter {
 
 // page.LABEL_SIZES: a name as a fraction of the page's short side.
 enum class LabelSize { Small, Medium, Large, XLarge };
@@ -149,4 +149,4 @@ void renderSetupPage(bool portrait, const Font &font, const std::string &ssid,
 void renderStatusPage(bool portrait, const Font &font, const std::string &title,
                       const std::vector<std::string> &lines, Frame &out);
 
-}  // namespace birdframe
+}  // namespace birdposter

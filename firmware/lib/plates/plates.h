@@ -26,7 +26,7 @@
 
 #include "packer.h"
 
-namespace birdframe {
+namespace birdposter {
 
 // Read `len` bytes at `offset` from the pack file. Returns false short.
 using Reader = std::function<bool(uint32_t offset, void *dst, size_t len)>;
@@ -141,4 +141,4 @@ class Plates {
   uint32_t payload_ = 0;  // file offset the record offsets are relative to
 };
 
-}  // namespace birdframe
+}  // namespace birdposter

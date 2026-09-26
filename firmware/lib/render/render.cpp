@@ -17,7 +17,7 @@
 #include "stb_truetype.h"
 #pragma GCC diagnostic pop
 
-namespace birdframe {
+namespace birdposter {
 
 // dither.PALETTE_6: int(saturated * 0.5 + desaturated * 0.5), truncated the way
 // Python's int() truncates. Order is the driver's: black, white, yellow, red,
@@ -595,4 +595,4 @@ std::string wifiQrPayload(const std::string &ssid, const std::string &pass) {
   return "WIFI:T:WPA;S:" + esc(ssid) + ";P:" + esc(pass) + ";;";
 }
 
-}  // namespace birdframe
+}  // namespace birdposter

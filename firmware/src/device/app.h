@@ -16,7 +16,7 @@
 #include "settings.h"
 #include "source.h"
 
-namespace birdframe {
+namespace birdposter {
 
 constexpr const char *kPlatesPath = "/plates.bin";  // a board with one pack
 constexpr const char *kPackPrefix = "/plates-";      // "/plates-au.bin": a board with several
@@ -169,4 +169,4 @@ struct App {
   std::string apSsid() const;
 };
 
-}  // namespace birdframe
+}  // namespace birdposter

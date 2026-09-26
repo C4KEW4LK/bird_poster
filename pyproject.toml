@@ -1,7 +1,7 @@
 [project]
-name = "birdframe"
+name = "birdposter"
 version = "1.0.0"
-description = "Build and deploy tooling for the ESP32-S3 e-ink bird frame: the browser flasher, font subsetting and the full-size web plates."
+description = "Build and deploy tooling for the ESP32-S3 e-ink bird poster: the browser flasher, font subsetting and the full-size web plates."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

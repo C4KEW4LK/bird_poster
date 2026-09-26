@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-namespace birdframe {
+namespace birdposter {
 
 enum class Source {
   BirdNet,      // a BirdNET-Go instance on the LAN
@@ -57,7 +57,7 @@ enum class Mode {
 // repo rather than a person keeps a contact in the header without putting an
 // address in the firmware image.
 constexpr const char* kUserAgent =
-    "birdframe/0.1 (+https://github.com/C4KEW4LK/bird_poster)";
+    "birdposter/0.1 (+https://github.com/C4KEW4LK/bird_poster)";
 
 // Aves. iNaturalist's own taxon id, not something we assign.
 constexpr int kTaxonAves = 3;
@@ -191,4 +191,4 @@ std::vector<Sighting> cycle(const std::vector<Sighting>& ranked,
                             const std::function<std::time_t(const std::string&)>& lastShown,
                             std::time_t now, int windowHours, std::size_t limit, uint32_t seed);
 
-}  // namespace birdframe
+}  // namespace birdposter

@@ -13,7 +13,7 @@
 
 #include "app.h"
 
-namespace birdframe {
+namespace birdposter {
 
 class WebUi {
  public:
@@ -40,4 +40,4 @@ class WebUi {
   std::string warning_;     // shown once on the next page: what a save could not take
 };
 
-}  // namespace birdframe
+}  // namespace birdposter

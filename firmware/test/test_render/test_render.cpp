@@ -18,7 +18,7 @@
 #include "plates.h"
 #include "render.h"
 
-using namespace birdframe;
+using namespace birdposter;
 
 namespace {
 
@@ -127,8 +127,8 @@ void test_a_grown_sprite_blends_between_its_pixels() {
 
 
 void test_wifi_qr_payload_escapes_what_the_format_reserves() {
-  TEST_ASSERT_EQUAL_STRING("WIFI:T:WPA;S:birdframe-3A7F;P:birdframe;;",
-                           wifiQrPayload("birdframe-3A7F", "birdframe").c_str());
+  TEST_ASSERT_EQUAL_STRING("WIFI:T:WPA;S:birdposter-3A7F;P:birdposter;;",
+                           wifiQrPayload("birdposter-3A7F", "birdposter").c_str());
   TEST_ASSERT_EQUAL_STRING("WIFI:T:WPA;S:a\\;b\\:c;P:x\\,y\\\\z\\\";;",
                            wifiQrPayload("a;b:c", "x,y\\z\"").c_str());
   TEST_ASSERT_EQUAL_STRING("WIFI:T:nopass;S:open;;", wifiQrPayload("open", "").c_str());

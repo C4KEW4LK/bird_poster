@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-namespace birdframe {
+namespace birdposter {
 
 namespace {
 
@@ -214,4 +214,4 @@ void Panel::sleep() {
   ok_ = false;
 }
 
-}  // namespace birdframe
+}  // namespace birdposter
