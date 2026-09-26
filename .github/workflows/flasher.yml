@@ -1,0 +1,91 @@
+# The browser flasher, published as the repository's GitHub Pages site on
+# every push to main: https://c4kew4lk.github.io/bird_poster/
+#
+# The same firmware/tools/webflash.py that serves the page on a workstation
+# assembles it here - app images from `pio run`, a plates image per region from
+# the committed packs, the fonts subset, the ESP Web Tools manifests, and the
+# full-size web plates the frame fetches - so the published page and the local
+# one are one build. Pages serves over HTTPS, which is the condition Web Serial
+# puts on flashing from a browser.
+#
+# The plate packs are committed (firmware/packs/) and the runner takes them as
+# they are. They are baked on the workstation that holds the artwork, which is
+# not in the repository; after a rebake, commit the new packs.
+name: flasher
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+# On a tag the same build is also attached to the GitHub release: the app
+# images and every plate pack, for anyone flashing with esptool rather than
+# the page, and so a release carries the binaries it was made from.
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # tags, for the version the page shows
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+
+      - name: Cache the PlatformIO toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: platformio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+
+      - name: Build the app and assemble the page
+        env:
+          BUILD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: uv run --with platformio python firmware/tools/webflash.py --no-serve
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: firmware/webflash/dist
+
+      - name: Attach the binaries to the release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          d=firmware/webflash/dist; out=release-assets; mkdir -p $out
+          for b in ee02 e1004; do
+            cp $d/$b/firmware.bin    $out/firmware-$b.bin
+            cp $d/$b/bootloader.bin  $out/bootloader-$b.bin
+            cp $d/$b/partitions.bin  $out/partitions-$b.bin
+            for p in $d/$b/plates-*.bin; do cp "$p" "$out/$(basename ${p%.bin})-$b.bin"; done
+          done
+          for p in $d/card/plates-*.bin; do cp "$p" "$out/$(basename ${p%.bin})-card-1200px.bin"; done
+          cp $d/builds.json $out/builds.json
+          cp firmware/packs/ATTRIBUTION.md $out/ATTRIBUTION-plates.md
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" $out/* --clobber
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true  # turns Pages on for the repository the first time
+      - id: deployment
+        uses: actions/deploy-pages@v4

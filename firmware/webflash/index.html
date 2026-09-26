@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bird frame flasher</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink: #1c1b18; --muted: #6b6860; --line: #d9d5cc; --paper: #f5f2ea; --card: #fffdf8; --accent: #2f5d3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #ecebe6; --muted: #a09d94; --line: #3a3934; --paper: #1b1b19; --card: #232320; --accent: #8fc79a; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  header { margin-bottom: 2rem; }
+  h1 { font-size: 1.75rem; font-weight: 650; letter-spacing: -.01em; margin: 0 0 .25rem; }
+  .meta { color: var(--muted); margin: 0; }
+  h2 { font-size: .8rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 2rem 0 .6rem; }
+  .seg { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .seg label {
+    flex: 1 1 12rem; padding: .7rem .9rem; border: 1px solid var(--line); border-radius: .6rem;
+    background: var(--card); cursor: pointer; display: flex; flex-direction: column; gap: .1rem;
+  }
+  .seg label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .seg input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .seg b { font-weight: 600; }
+  .seg small { color: var(--muted); }
+  .cards { display: grid; gap: .75rem; }
+  .card {
+    border: 1px solid var(--line); border-radius: .8rem; background: var(--card);
+    padding: 1rem 1.1rem; display: grid; grid-template-columns: 1fr auto; gap: .25rem 1rem; align-items: center;
+  }
+  .card h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+  .card p { margin: 0; color: var(--muted); grid-column: 1; }
+  .card .size { color: var(--muted); font-size: .85rem; grid-column: 1; }
+  .card esp-web-install-button { grid-column: 2; grid-row: 1 / span 3; }
+  .card[hidden] { display: none; }
+  .hint { color: var(--muted); font-size: .9rem; margin: .5rem 0 0; }
+  .hint[hidden] { display: none; }
+  #sd[hidden] { display: none; }
+  .downloads { list-style: none; padding: 0; margin: .6rem 0 0; display: grid; gap: .5rem; }
+  .downloads li { border: 1px solid var(--line); border-radius: .6rem; background: var(--card); padding: .6rem .9rem; display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .downloads code { font-size: .9rem; }
+  .downloads .size { color: var(--muted); font-size: .85rem; }
+  esp-web-install-button::part(button) {
+    background: var(--accent); color: #fff; border: 0; border-radius: .5rem; padding: .55rem 1rem; font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .warn { color: #b0413e; font-size: .85rem; }
+  ol { padding-left: 1.2rem; color: var(--muted); }
+  ol li { margin: .3rem 0; }
+  ol b { color: var(--ink); font-weight: 600; }
+  .credits { margin: 3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .85rem; color: var(--muted); }
+  .credits summary { cursor: pointer; color: var(--ink); }
+  .credits p { margin: .5rem 0; }
+  a { color: var(--accent); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+  [hidden] { display: none !important; }
+</style>
+<script type="module" src="https://cdn.jsdelivr.net/npm/esp-web-tools@10.4.0/dist/web/install-button.js"></script>
+</head>
+<body>
+<main>
+<header>
+  <h1>Bird frame flasher</h1>
+  <p class="meta" id="meta">loading the build list&hellip;</p>
+</header>
+
+<h2>Your frame</h2>
+<div class="seg" id="boards"></div>
+
+<div id="regions-block" hidden>
+<h2>Artwork</h2>
+<div class="seg" id="regions"></div>
+<p class="hint" id="regions-hint" hidden>The birds' size is the sprite the pack holds before it is scaled onto the page; larger keeps more of the plate's detail through the dither. Every region at once means the region is switched in the frame's settings; one region alone gives that region the whole partition and is switched by flashing another.</p>
+</div>
+
+<h2>Install</h2>
+<div class="cards">
+  <div class="card" id="card-full">
+    <h3>Everything</h3>
+    <p>The app and the plates. For a first install, or a board coming from other firmware; tick <b>Erase device</b> then.</p>
+    <span class="size" data-size="full"></span>
+    <esp-web-install-button id="btn-full">
+      <span slot="unsupported" class="warn">This browser has no Web Serial. Use Chrome or Edge on a desktop.</span>
+      <span slot="not-allowed" class="warn">Web Serial needs <code>localhost</code> or HTTPS.</span>
+    </esp-web-install-button>
+  </div>
+  <div class="card" id="card-app">
+    <h3>App only</h3>
+    <p>A firmware update. Leaves the plates and every setting on the board &mdash; keep <b>Erase device</b> unticked.</p>
+    <span class="size" data-size="app"></span>
+    <esp-web-install-button id="btn-app">
+      <span slot="unsupported" class="warn">This browser has no Web Serial.</span>
+      <span slot="not-allowed" class="warn">Web Serial needs <code>localhost</code> or HTTPS.</span>
+    </esp-web-install-button>
+  </div>
+  <div class="card" id="card-plates">
+    <h3>Plates only</h3>
+    <p>New artwork under the app already on the board, or the other region's. For a frame that says <i>no filesystem</i>, <i>missing /plates.bin</i> or <i>not a v6 FGPL pack</i>. Keep <b>Erase device</b> unticked.</p>
+    <span class="size" data-size="plates"></span>
+    <esp-web-install-button id="btn-plates">
+      <span slot="unsupported" class="warn">This browser has no Web Serial.</span>
+      <span slot="not-allowed" class="warn">Web Serial needs <code>localhost</code> or HTTPS.</span>
+    </esp-web-install-button>
+  </div>
+</div>
+
+<section id="sd" hidden>
+<h2>SD card</h2>
+<p>This board also reads a pack from its microSD card, where the plates keep their full size &mdash; 1200&nbsp;px on the longest side, against the sizes the flash images above can hold &mdash; so every feather survives to the dither. Download a region, copy the file to the root of a FAT32 card as it is named here, and put the card in the slot: the frame uses it over the flash copy on its next page, whichever flash image is on the board. The flash plates stay as the fallback for a frame without a card.</p>
+<ul class="downloads" id="sd-files"></ul>
+</section>
+
+<h2>How</h2>
+<ol>
+  <li>Plug the frame in over USB-C.</li>
+  <li>Press <b>Install</b>, pick the board's port in the browser's dialog, answer the erase question.</li>
+  <li>No port listed? Hold <b>BOOT</b>, tap <b>RESET</b>, release <b>BOOT</b>, and try again.</li>
+  <li>When it restarts the glass shows a setup page with a QR code: scan it to join the frame's own network and the settings page opens. On a board with every region's plates, the artwork is chosen there.</li>
+  <li>On the reTerminal, <b>every region</b> holds all three regions and the region is a setting; <b>one region alone</b> gives that region the whole 31&nbsp;MB, about one and a half times the sprite size, and the region is chosen here instead. The SD card below beats both.</li>
+</ol>
+
+<details class="credits">
+<summary>Credits and licences</summary>
+<p><b>Artwork.</b> Australian plates: John Gould, <i>The Birds of Australia</i> (1840&ndash;48), lithographed by Elizabeth Gould and H.&nbsp;C. Richter; scans digitally enhanced by <a href="https://www.rawpixel.com/">rawpixel</a>, CC&nbsp;BY-SA&nbsp;4.0, cut for this project under the same licence, with supplementary plates from other public-domain works via <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>, each credited in the style's manifest. European plates: John Gould, <i>The Birds of Europe</i> (1832&ndash;37), and the von Wright brothers, <i>Svenska F&aring;glar</i>; rawpixel-enhanced scans CC&nbsp;BY-SA&nbsp;4.0 and Finnish National Gallery scans CC0; cut-outs by Arne Giacomo Munthe-Kaas for Fugleramme, CC&nbsp;BY-SA&nbsp;4.0. North American plates: John James Audubon, <i>The Birds of America</i> (1827&ndash;38), engraved by Robert Havell; rawpixel-enhanced scans CC&nbsp;BY-SA&nbsp;4.0, cut for this project under the same licence. Full attributions are in each style's <code>ATTRIBUTION.md</code> in the repository.</p>
+<p><b>Fonts</b> in the plate image: Gentium Book Plus (SIL International) and a display face derived from Playfair Display (Claus Eggers S&oslash;rensen), SIL Open Font License 1.1.</p>
+<p><b>Code.</b> The firmware is MIT, on <a href="https://github.com/C4KEW4LK/bird_poster">GitHub</a>; it carries ArduinoJson (Beno&icirc;t Blanchon, MIT), tinf (J&oslash;rgen Ibsen, zlib licence), stb_truetype (Sean Barrett, public domain), the QR Code generator (Project Nayuki, MIT) and the Arduino core for the ESP32. This page flashes with <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a> (ESPHome, Apache 2.0).</p>
+</details>
+</main>
+
+<script type="module">
+  // ESP Web Tools asks about erasing, then asks again whether to install at
+  // all. The second screen is redundant once the first has been answered: go
+  // straight from the erase choice to the flash. The dialog element is
+  // defined lazily when a button is first pressed, so the patch waits for it.
+  // Pinned to 10.4.0 above, where these two methods exist.
+  customElements.whenDefined("ewt-install-dialog").then((Dialog) => {
+    const start = Dialog.prototype._startInstall;
+    Dialog.prototype._startInstall = function (erase) {
+      start.call(this, erase);
+      this._confirmInstall();
+    };
+  });
+
+  const mb = (n) => `${(n / 1048576).toFixed(1)} MB`;
+  const $ = (id) => document.getElementById(id);
+  let builds;
+  try { builds = await (await fetch("builds.json", { cache: "no-store" })).json(); }
+  catch (e) { $("meta").textContent = "no builds.json - run firmware/tools/webflash.py"; throw e; }
+  $("meta").textContent = `Build ${builds.version} · ESP32-S3`;
+
+  const boardKeys = Object.keys(builds.boards);
+  // ?board=e1004&image=au opens straight on a choice - for a link in a
+  // README - and the page remembers the last choice otherwise.
+  const params = new URLSearchParams(location.search);
+  let board = params.get("board") || localStorage.getItem("board");
+  if (!boardKeys.includes(board)) board = boardKeys[0];
+  let image = params.get("image") || localStorage.getItem("image");
+
+  function segment(container, name, options, current, onPick) {
+    container.replaceChildren();
+    for (const [key, title, note] of options) {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "radio"; input.name = name; input.value = key; input.checked = key === current;
+      input.addEventListener("change", () => onPick(key));
+      const b = document.createElement("b"); b.textContent = title;
+      const s = document.createElement("small"); s.textContent = note;
+      label.append(input, b, s);
+      container.append(label);
+    }
+  }
+
+  function show() {
+    const spec = builds.boards[board];
+    const images = spec.images;
+    const keys = Object.keys(images);
+    if (!keys.includes(image)) image = keys[0];
+    // A board with one image per region gets the artwork choice; a board
+    // that carries every region in one image has nothing to choose here.
+    const choose = keys.length > 1;
+    $("regions-block").hidden = !choose;
+    $("regions-hint").hidden = !(choose && "all" in images);
+    if (choose) {
+      segment($("regions"), "region", keys.map(k => [k, images[k].label, mb(images[k].size) + " of plates" + (images[k].source ? ` · birds at ${images[k].source} px` : "")]), image, (k) => { image = k; localStorage.setItem("image", k); show(); });
+    }
+    const img = image ? images[image] : null;
+    $("btn-full").setAttribute("manifest", img ? img.full : spec.app.manifest);
+    $("btn-app").setAttribute("manifest", spec.app.manifest);
+    $("card-plates").hidden = !img;
+    if (img) $("btn-plates").setAttribute("manifest", img.plates);
+    document.querySelector('[data-size="full"]').textContent = img ? mb(spec.app.size + img.size) + (choose ? "" : ` · ${img.label}`) : mb(spec.app.size);
+    document.querySelector('[data-size="app"]').textContent = mb(spec.app.size);
+    if (img) document.querySelector('[data-size="plates"]').textContent = mb(img.size) + (choose ? "" : ` · ${img.label}`);
+    // The card's packs, on a board with a slot: plain downloads, named as
+    // the firmware looks for them.
+    const sd = spec.card || null;
+    $("sd").hidden = !sd;
+    if (sd) {
+      $("sd-files").innerHTML = Object.keys(sd).map(k => {
+        const f = sd[k];
+        const name = f.path.split("/").pop();
+        return `<li><span><b>${f.label}</b> &mdash; <code>${name}</code></span><span class="size">${mb(f.size)}${f.source ? ` · birds at ${f.source} px` : ""}</span><a href="${f.path}" download="${name}">Download</a></li>`;
+      }).join("");
+    }
+    localStorage.setItem("board", board);
+  }
+
+  segment($("boards"), "board", boardKeys.map(k => [k, builds.boards[k].label, "all" in builds.boards[k].images ? "every region's plates, or one region larger" : "one region's plates at a time"]), board, (k) => { board = k; show(); });
+  show();
+</script>
+</body>
+</html>

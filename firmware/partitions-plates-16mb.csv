@@ -1,0 +1,34 @@
+# Flash map for the eink build, which carries its plates instead of a card.
+#
+# Single app, no OTA, on purpose: the plate pack is the reason for the 16 MB
+# part, and a second app slot would spend 2 MB of it to save a cable. The
+# colour build keeps OTA (it reads plates off SD and does not need the room).
+#
+# `plates` is a LittleFS filesystem, so the pack ships with `pio run -e xiao
+# -t uploadfs` like any other asset and can be replaced without an esptool
+# offset. Raw + esp_partition_mmap was the first cut here and bought nothing:
+# the sprites are zlib streams, so they inflate into PSRAM either way, and
+# mapping only saved staging a ~32 KB compressed blob. Peak working set is
+# ~1.9 MB of the 8 MB PSRAM (six inflated sprites, the occupancy grid and the
+# framebuffer), so there is no memory case for reading in place.
+#
+# LittleFS rather than SPIFFS for the same tooling: SPIFFS scans the whole
+# partition on mount, which is a cost this partition's size pays on every wake,
+# and it is deprecated upstream. Swapping back is one word here and one in
+# platformio.ini if you want it.
+#
+# Keep the pack a single file. LittleFS looks a directory up by scanning it, so
+# 400-plus per-species files would be the slow shape; the FGPL index is read
+# once and seeked into.
+#
+# Sizes: the partition takes a pack of up to 13.80 MiB beside the two subset
+# fonts (~96 KB), measured with mklittlefs; the bake is fitted a little under
+# that so the frame can rewrite /shown.txt (webflash.py's ee02 budget). What
+# that buys depends on the region: au has the most species, so the smallest
+# sprites.
+#
+# name,     type, subtype,  offset,    size,      flags
+nvs,        data, nvs,      0x9000,    0x5000,
+phy_init,   data, phy,      0xE000,    0x1000,
+factory,    app,  factory,  0x10000,   0x200000,
+plates,     data, spiffs,   0x210000,  0xDF0000,

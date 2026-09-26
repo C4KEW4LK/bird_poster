@@ -1,0 +1,4263 @@
+{
+ "birds/acanthis-flammea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_379.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate379",
+  "common": "Lesser Red-Poll",
+  "stated": "Lesser Red-Poll"
+ },
+ "birds/accipiter-striatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_378.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate378",
+  "common": "Sharp-shinned Hawk",
+  "stated": "Sharp-shinned Hawk"
+ },
+ "birds/actitis-macularius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_312.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate312",
+  "common": "Spotted Sandpiper",
+  "stated": "Spotted Sandpiper"
+ },
+ "birds/aegolius-acadicus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_199.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate199",
+  "common": "Little Owl",
+  "stated": "Little Owl"
+ },
+ "birds/aegolius-funereus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_384.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate384",
+  "common": "Tengmalm's Owl",
+  "stated": "Tengmalm's Owl"
+ },
+ "birds/aeronautes-saxatalis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MicropusMelanoleucusKeulemans.jpg",
+  "licence": "Public domain",
+  "artist": "J G Keulemans",
+  "common": "White-throated Swift"
+ },
+ "birds/agelaius-phoeniceus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_67.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate67",
+  "common": "Red winged Starling, or Marsh Blackbird",
+  "stated": "Red winged Starling, or Marsh Blackbird"
+ },
+ "birds/agelaius-phoeniceus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_426.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate426",
+  "common": "Prairie Starling",
+  "stated": "Prairie Starling"
+ },
+ "birds/aimophila-ruficeps.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:ZonotrichiaBoucardiSmit.jpg",
+  "licence": "Public domain",
+  "artist": "Joseph Smit",
+  "common": "Rufous-crowned Sparrow"
+ },
+ "birds/aix-galericulata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Cassell%27s_book_of_birds_(Plate_XXXVII)_(8574782998).jpg",
+  "licence": "Public domain",
+  "artist": "Alfred Brehm / Thomas Rymer Jones",
+  "common": "Mandarin Duck"
+ },
+ "birds/aix-sponsa.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_206.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate206",
+  "common": "Summer, or Wood Duck",
+  "stated": "Summer, or Wood Duck"
+ },
+ "birds/alca-torda.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_214.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate214",
+  "common": "Razor Bill",
+  "stated": "Razor Bill"
+ },
+ "birds/alectoris-chukar.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Naturgeschichte_des_Federwildprets_(Page_V)_BHL47144803.jpg",
+  "licence": "Public domain",
+  "artist": "Jardine, William",
+  "common": "Chukar"
+ },
+ "birds/alle-alle.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_343.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate343",
+  "common": "Little Auk",
+  "stated": "Little Auk"
+ },
+ "birds/alopochen-aegyptiaca.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_natural_history_of_the_ducks_(Plate_15)_(8230113724).jpg",
+  "licence": "Public domain",
+  "artist": "Benson, Frank Weston; Brooks, Allan; Fuertes, Louis Agassiz; Gr\u00f6nvold, Henrik; Phillips, John C.",
+  "common": "Egyptian Goose"
+ },
+ "birds/amazilia-yucatanensis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi5Goul_0108.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Buff-bellied Hummingbird"
+ },
+ "birds/amazona-finschi.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:ChrysotisFinschiSmit.jpg",
+  "licence": "Public domain",
+  "artist": "Joseph Smit",
+  "common": "Lilac-crowned Amazon"
+ },
+ "birds/amazona-oratrix.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1906)_(14752033622).jpg",
+  "licence": "Public domain",
+  "artist": "Internet Archive Book Images",
+  "common": "Yellow-headed Amazon"
+ },
+ "birds/ammodramus-savannarum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_130.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate130",
+  "common": "Yellow-winged Sparrow",
+  "stated": "Yellow-winged Sparrow"
+ },
+ "birds/ammospiza-caudacuta.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_149.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate149",
+  "common": "Sharp-tailed Finch",
+  "stated": "Sharp-tailed Finch"
+ },
+ "birds/ammospiza-maritima-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_93.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate93",
+  "common": "Seaside Finch",
+  "stated": "Seaside Finch"
+ },
+ "birds/ammospiza-maritima.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_359.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate359",
+  "common": "MacGillivray's Finch",
+  "stated": "MacGillivray's Finch"
+ },
+ "birds/amphispiza-bilineata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_23)_(6306535412).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Black-throated Sparrow"
+ },
+ "birds/anarhynchus-montanus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_354.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate354",
+  "common": "Rocky Mountain Plover",
+  "stated": "Rocky Mountain Plover"
+ },
+ "birds/anarhynchus-wilsonia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_209.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate209",
+  "common": "Wilson's Plover",
+  "stated": "Wilson's Plover"
+ },
+ "birds/anas-acuta.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_227.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate227",
+  "common": "Pin-Tailed Duck",
+  "stated": "Pin-Tailed Duck"
+ },
+ "birds/anas-crecca.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_228.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate228",
+  "common": "Green winged Teal",
+  "stated": "Green winged Teal"
+ },
+ "birds/anas-platyrhynchos.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_221.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate221",
+  "common": "Mallard Duck",
+  "stated": "Mallard Duck"
+ },
+ "birds/anas-rubripes.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_304.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate304",
+  "common": "Dusky Duck",
+  "stated": "Dusky Duck"
+ },
+ "birds/anhinga-anhinga.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_319.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate319",
+  "common": "Black-bellied Darter",
+  "stated": "Black-bellied Darter"
+ },
+ "birds/anous-stolidus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_276.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate276",
+  "common": "Noddy Tern",
+  "stated": "Noddy Tern"
+ },
+ "birds/anser-albifrons.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_288.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate288",
+  "common": "White-fronted Goose",
+  "stated": "White-fronted Goose"
+ },
+ "birds/anser-anser.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:British_birds_BHL43051592.jpg",
+  "licence": "Public domain",
+  "artist": "Thorburn, Archibald",
+  "common": "Greylag Goose"
+ },
+ "birds/anser-caerulescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_385.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate385",
+  "common": "Snow Goose",
+  "stated": "Snow Goose"
+ },
+ "birds/anser-cygnoides.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_geese_of_Europe_and_Asia_(Plate_21)_(7006269878).jpg",
+  "licence": "Public domain",
+  "artist": "Alferaki, Serge\u01d0 Nikolaevich",
+  "common": "Swan Goose"
+ },
+ "birds/anthus-rubescens-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_80.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate80",
+  "common": "Prairie Titlark",
+  "stated": "Prairie Titlark"
+ },
+ "birds/anthus-rubescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_10.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate10",
+  "common": "Brown Lark",
+  "stated": "Brown Lark"
+ },
+ "birds/antigone-canadensis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Book_Illustration,_The_Birds_of_North_America-_the_descriptions_of_species_based_chiefly_on_the_collections_in_the_Museum_of_the_Smithsonian_Institution,_vol._2,_Grus_Fraterculus_(Little_Crane),_plate_(CH_68775967).jpg",
+  "licence": "Public domain",
+  "artist": "Unknown artist Unknown artist",
+  "common": "Sandhill Crane"
+ },
+ "birds/antrostomus-carolinensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_52.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate52",
+  "common": "Chuck-will's Widow",
+  "stated": "Chuck-will's Widow"
+ },
+ "birds/antrostomus-vociferus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_82.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate82",
+  "common": "Whip-poor-will",
+  "stated": "Whip-poor-will"
+ },
+ "birds/aphelocoma-californica.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Bulletin_-_Biological_Survey_(1908)_(19806716154).jpg",
+  "licence": "No restrictions",
+  "artist": "United States. Bureau of Biological Survey",
+  "common": "California Scrub-Jay"
+ },
+ "birds/aphelocoma-coerulescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_87.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate87",
+  "common": "Florida Jay",
+  "stated": "Florida Jay"
+ },
+ "birds/aquila-chrysaetos.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_181.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate181",
+  "common": "Golden Eagle",
+  "stated": "Golden Eagle"
+ },
+ "birds/aramus-guarauna.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_381.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate381",
+  "common": "Scolopaceus Courlan",
+  "stated": "Scolopaceus Courlan"
+ },
+ "birds/archilochus-alexandri.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi3Goul_0072.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Black-chinned Hummingbird"
+ },
+ "birds/archilochus-colubris.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_47.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate47",
+  "common": "Ruby-throated Humming Bird",
+  "stated": "Ruby-throated Humming Bird"
+ },
+ "birds/ardea-alba.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_390.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate390",
+  "common": "White Heron",
+  "stated": "White Heron"
+ },
+ "birds/ardea-herodias-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_282.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate282",
+  "common": "Great White Heron",
+  "stated": "Great White Heron"
+ },
+ "birds/ardea-herodias.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_211.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate211",
+  "common": "Great blue Heron",
+  "stated": "Great blue Heron"
+ },
+ "birds/ardenna-gravis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_285.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate285",
+  "common": "Wandering Shearwater",
+  "stated": "Wandering Shearwater"
+ },
+ "birds/ardenna-grisea.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:GouldBirdsEuropeVCinereous_Shearwater.jpg",
+  "licence": "Public domain",
+  "artist": "J and E Gould E Lear",
+  "common": "Sooty Shearwater"
+ },
+ "birds/ardenna-pacifica.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:SLNSW_823148_f97_WedgeTailed_Shearwater_Puffinis_Pacificus.jpg",
+  "licence": "Public domain",
+  "artist": "(Sydney Bird Painter)",
+  "common": "Wedge-tailed Shearwater"
+ },
+ "birds/arenaria-interpres.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_306.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate306",
+  "common": "Turn-stone",
+  "stated": "Turn-stone"
+ },
+ "birds/arenaria-melanocephala.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_natural_history_of_Washington_territory,_with_much_relating_to_Minnesota,_Nebraska,_Kansas,_Oregon,_and_California,_between_the_thirty-sixth_and_forty-ninth_parallels_of_latitude,_being_those_(14760947162).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Black Turnstone"
+ },
+ "birds/asio-flammeus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:GouldBirdsEuropeIShort-Eared_Owl.jpg",
+  "licence": "Public domain",
+  "artist": "J and E Gould E Lear",
+  "common": "Short-eared Owl"
+ },
+ "birds/asio-otus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_387.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate387",
+  "common": "Long-eared Owl",
+  "stated": "Long-eared Owl"
+ },
+ "birds/astur-atricapillus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:De_Kay_and_Hill_1844_Plate_002.jpg",
+  "licence": "Public domain",
+  "artist": "James Ellsworth De Kay and J. W. Hill.",
+  "common": "American Goshawk"
+ },
+ "birds/astur-cooperii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_36.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate36",
+  "common": "Stanley Hawk",
+  "stated": "Stanley Hawk"
+ },
+ "birds/aythya-affinis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_229.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate229",
+  "common": "Scaup Duck",
+  "stated": "Scaup Duck"
+ },
+ "birds/aythya-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_326.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate326",
+  "common": "Red-headed Duck",
+  "stated": "Red-headed Duck"
+ },
+ "birds/aythya-collaris.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_234.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate234",
+  "common": "Ring-necked Duck",
+  "stated": "Ring-necked Duck"
+ },
+ "birds/aythya-valisineria.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_303.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate303",
+  "common": "Canvas backed Duck",
+  "stated": "Canvas backed Duck"
+ },
+ "birds/baeolophus-atricristatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_3)_(6306006117).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Black-crested Titmouse"
+ },
+ "birds/baeolophus-bicolor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_39.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate39",
+  "common": "Crested Titmouse",
+  "stated": "Crested Titmouse"
+ },
+ "birds/bartramia-longicauda.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_305.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate305",
+  "common": "Bartram Sandpiper",
+  "stated": "Bartram Sandpiper"
+ },
+ "birds/bombycilla-cedrorum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_43.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate43",
+  "common": "Cedar Bird",
+  "stated": "Cedar Bird"
+ },
+ "birds/bombycilla-garrulus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_367.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate367",
+  "common": "Bohemian Chatterer",
+  "stated": "Bohemian Chatterer"
+ },
+ "birds/bonasa-umbellus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_41.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate41",
+  "common": "Ruffed Grouse",
+  "stated": "Ruffed Grouse"
+ },
+ "birds/botaurus-exilis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_210.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate210",
+  "common": "Least Bittern",
+  "stated": "Least Bittern"
+ },
+ "birds/botaurus-lentiginosus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_341.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate341",
+  "common": "American Bittern",
+  "stated": "American Bittern"
+ },
+ "birds/brachyramphus-marmoratus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_435.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate435",
+  "common": "Slender-billed Guillemot",
+  "stated": "Slender-billed Guillemot"
+ },
+ "birds/branta-bernicla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_395.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate395",
+  "common": "Brant Goose",
+  "stated": "Brant Goose"
+ },
+ "birds/branta-canadensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_201.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate201",
+  "common": "Canada Goose",
+  "stated": "Canada Goose"
+ },
+ "birds/branta-hutchinsii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_278.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate278",
+  "common": "Hutchins's Barnacle Goose",
+  "stated": "Hutchins's Barnacle Goose"
+ },
+ "birds/branta-leucopsis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_298.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate298",
+  "common": "Barnacle Goose",
+  "stated": "Barnacle Goose"
+ },
+ "birds/branta-sandvicensis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Bonite-oiseaux-pl10.jpg",
+  "licence": "Public domain",
+  "artist": "Jeffdelonge ( talk )",
+  "common": "Hawaiian Goose"
+ },
+ "birds/bubo-scandiacus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_121.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate121",
+  "common": "Snowy Owl",
+  "stated": "Snowy Owl"
+ },
+ "birds/bubo-virginianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_61.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate61",
+  "common": "Great Horned Owl",
+  "stated": "Great Horned Owl"
+ },
+ "birds/bucephala-albeola.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_329.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate329",
+  "common": "Buffel-headed Duck",
+  "stated": "Buffel-headed Duck"
+ },
+ "birds/bucephala-clangula-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_408.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate408",
+  "common": "Golden-eye Duck",
+  "stated": "Golden-eye Duck"
+ },
+ "birds/bucephala-clangula.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_346.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate346",
+  "common": "Golden-eye Duck",
+  "stated": "Golden-eye Duck"
+ },
+ "birds/bucephala-islandica.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:403_Golden-eye_Duck.jpg",
+  "licence": "Public domain",
+  "artist": "John James Audubon",
+  "common": "Barrow's Goldeneye"
+ },
+ "birds/buteo-albonotatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Zone-tailed_Hawk_by_Wolf_(51115558746).jpg",
+  "licence": "Public domain",
+  "artist": "cotinis",
+  "common": "Zone-tailed Hawk"
+ },
+ "birds/buteo-jamaicensis-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_86.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate86",
+  "common": "Black Warrior",
+  "stated": "Black Warrior"
+ },
+ "birds/buteo-jamaicensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_51.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate51",
+  "common": "Red-tailed Hawk",
+  "stated": "Red-tailed Hawk"
+ },
+ "birds/buteo-lagopus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_428.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate428",
+  "common": "Rough-legged Falcon",
+  "stated": "Rough-legged Falcon"
+ },
+ "birds/buteo-lagopus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_166.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate166",
+  "common": "Rough-legged Falcon",
+  "stated": "Rough-legged Falcon"
+ },
+ "birds/buteo-lineatus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_71.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate71",
+  "common": "Winter Hawk",
+  "stated": "Winter Hawk"
+ },
+ "birds/buteo-lineatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_56.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate56",
+  "common": "Red-shouldered Hawk",
+  "stated": "Red-shouldered Hawk"
+ },
+ "birds/buteo-plagiatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Exotic_ornithology_(Ex._Orn._Plate_XC)_(6941034553).jpg",
+  "licence": "Public domain",
+  "artist": "Hanhart, Michael; Hanhart, N; Salvin, Osbert; Sclater, Philip Lutley; Smith, J.",
+  "common": "Gray Hawk"
+ },
+ "birds/buteo-platypterus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_91.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate91",
+  "common": "Broad-winged Hawk",
+  "stated": "Broad-winged Hawk"
+ },
+ "birds/buteo-regalis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1903)_(14748358354).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Ferruginous Hawk"
+ },
+ "birds/buteo-swainsoni.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_376.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate376",
+  "common": "Common Buzzard",
+  "stated": "Common Buzzard"
+ },
+ "birds/butorides-virescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_337.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate337",
+  "common": "Green Heron",
+  "stated": "Green Heron"
+ },
+ "birds/calcarius-lapponicus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_369.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate369",
+  "common": "Lapland Long-spur",
+  "stated": "Lapland Long-spur"
+ },
+ "birds/calcarius-ornatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Calcarius_ornatus.png",
+  "licence": "Public domain",
+  "artist": "Spencer Fullerton Baird",
+  "common": "Chestnut-collared Longspur"
+ },
+ "birds/calidris-alba.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_230.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate230",
+  "common": "Sanderling",
+  "stated": "Sanderling"
+ },
+ "birds/calidris-alpina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_292.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate292",
+  "common": "Red backed Sandpiper",
+  "stated": "Red backed Sandpiper"
+ },
+ "birds/calidris-canutus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_318.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate318",
+  "common": "Red-breasted Sandpiper",
+  "stated": "Red-breasted Sandpiper"
+ },
+ "birds/calidris-ferruginea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_264.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate264",
+  "common": "Pigmy curlew",
+  "stated": "Pigmy curlew"
+ },
+ "birds/calidris-fuscicollis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_279.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate279",
+  "common": "Schinz's Sandpiper",
+  "stated": "Schinz's Sandpiper"
+ },
+ "birds/calidris-himantopus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_348.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate348",
+  "common": "Long-legged Sandpiper",
+  "stated": "Long-legged Sandpiper"
+ },
+ "birds/calidris-maritima.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_286.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate286",
+  "common": "Purple Sandpiper",
+  "stated": "Purple Sandpiper"
+ },
+ "birds/calidris-melanotos.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_296.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate296",
+  "common": "Pectoral Sandpiper",
+  "stated": "Pectoral Sandpiper"
+ },
+ "birds/calidris-minutilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_323.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate323",
+  "common": "Little Sandpiper",
+  "stated": "Little Sandpiper"
+ },
+ "birds/calidris-pugnax.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Coloured_figures_of_the_birds_of_the_British_Islands_-_issued_by_Lord_Lilford_(19678255503).jpg",
+  "licence": "CC BY 2.0",
+  "artist": "Keulemans, J. G.; Lilford, Thomas Littleton Powys; Newton, Alfred; Salvin, Osbert; Thorburn, Archibald",
+  "common": "Ruff"
+ },
+ "birds/calidris-pusilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_410.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate410",
+  "common": "Semipalmated Sandpiper",
+  "stated": "Semipalmated Sandpiper"
+ },
+ "birds/calidris-subruficollis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_266.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate266",
+  "common": "Buff breasted Sandpiper",
+  "stated": "Buff breasted Sandpiper"
+ },
+ "birds/calidris-virgata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_433.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate433",
+  "common": "Townsend's Sandpiper",
+  "stated": "Townsend's Sandpiper"
+ },
+ "birds/callipepla-californica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_419.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate419",
+  "common": "California Partridge",
+  "stated": "California Partridge"
+ },
+ "birds/calocitta-colliei.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_96.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate96",
+  "common": "Columbia Jay",
+  "stated": "Columbia Jay"
+ },
+ "birds/calothorax-lucifer.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_selection_of_the_birds_of_Brazil_and_Mexico_(Plate_77)_(5977796130).jpg",
+  "licence": "Public domain",
+  "artist": "Swainson, William",
+  "common": "Lucifer Hummingbird"
+ },
+ "birds/calypte-anna.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_430.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate430",
+  "common": "Columbian Humming Bird",
+  "stated": "Columbian Humming Bird"
+ },
+ "birds/calypte-costae.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi3Goul_0080.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Costa's Hummingbird"
+ },
+ "birds/campephilus-principalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_66.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate66",
+  "common": "Ivory-billed Woodpecker",
+  "stated": "Ivory-billed Woodpecker"
+ },
+ "birds/camptorhynchus-labradorius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_336.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate336",
+  "common": "Pied Duck",
+  "stated": "Pied Duck"
+ },
+ "birds/canachites-canadensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_176.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate176",
+  "common": "Spotted Grouse",
+  "stated": "Spotted Grouse"
+ },
+ "birds/caracara-plancus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_161.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate161",
+  "common": "Brasilian Caracara Eagle",
+  "stated": "Brasilian Caracara Eagle"
+ },
+ "birds/cardellina-canadensis-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_5.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate5",
+  "common": "Bonaparte's Flycatcher",
+  "stated": "Bonaparte's Flycatcher"
+ },
+ "birds/cardellina-canadensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_103.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate103",
+  "common": "Canada Warbler",
+  "stated": "Canada Warbler"
+ },
+ "birds/cardellina-pusilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_124.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate124",
+  "common": "Green Black-Capt Flycatcher",
+  "stated": "Green Black-Capt Flycatcher"
+ },
+ "birds/cardellina-rubrifrons.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Red-faced_Warbler_NGM-v31-p305-D.jpg",
+  "licence": "Public domain",
+  "artist": "Louis Agassiz Fuertes.",
+  "common": "Red-faced Warbler"
+ },
+ "birds/cardinalis-cardinalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_159.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate159",
+  "common": "Cardinal Grosbeak",
+  "stated": "Cardinal Grosbeak"
+ },
+ "birds/cardinalis-sinuatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_33)_(6306538500).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Pyrrhuloxia"
+ },
+ "birds/cathartes-aura.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_151.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate151",
+  "common": "Turkey Buzzard",
+  "stated": "Turkey Buzzard"
+ },
+ "birds/catharus-fuscescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_164.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate164",
+  "common": "Tawny Thrush",
+  "stated": "Tawny Thrush"
+ },
+ "birds/catharus-guttatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_58.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate58",
+  "common": "Hermit Thrush",
+  "stated": "Hermit Thrush"
+ },
+ "birds/catharus-ustulatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_history_of_the_birds_of_Europe_(Pl._634)_(7135304473).jpg",
+  "licence": "Public domain",
+  "artist": "Dresser, H. E.; Dresser, H. E.; Keulemans, J. G.; Neale, Edward; Sharpe, Richard Bowdler; Thorburn, Archibald; Wolf, Jos",
+  "common": "Swainson's Thrush"
+ },
+ "birds/catherpes-mexicanus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_description_of_sixteen_new_species_of_North_American_birds_(Plate_8)_(6829604879).jpg",
+  "licence": "Public domain",
+  "artist": "Giraud, J. P.",
+  "common": "Canyon Wren"
+ },
+ "birds/centrocercus-urophasianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_375.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate375",
+  "common": "Cock of the Plains",
+  "stated": "Cock of the Plains"
+ },
+ "birds/centronyx-henslowii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_70.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate70",
+  "common": "Henslow's Bunting",
+  "stated": "Henslow's Bunting"
+ },
+ "birds/cepphus-grylle.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_219.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate219",
+  "common": "Black Guillemot",
+  "stated": "Black Guillemot"
+ },
+ "birds/chaetura-pelagica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_158.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate158",
+  "common": "American Swift",
+  "stated": "American Swift"
+ },
+ "birds/chamaea-fasciata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_7)_(6306007047).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Wrentit"
+ },
+ "birds/charadrius-melodus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_220.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate220",
+  "common": "Piping Plover",
+  "stated": "Piping Plover"
+ },
+ "birds/charadrius-semipalmatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_334.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate334",
+  "common": "Ring Plover",
+  "stated": "Ring Plover"
+ },
+ "birds/charadrius-vociferus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_225.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate225",
+  "common": "Kildeer Plover",
+  "stated": "Kildeer Plover"
+ },
+ "birds/chlidonias-niger.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_281.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate281",
+  "common": "Black Tern",
+  "stated": "Black Tern"
+ },
+ "birds/chloroceryle-americana.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_monograph_of_the_Alcedinidae_(19210674964).jpg",
+  "licence": "Public domain",
+  "artist": "Sharpe, Richard Bowdler",
+  "common": "Green Kingfisher"
+ },
+ "birds/chlorodrepanis-virens.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Aves_Hawaiienses_(Pl._16)_(8465169716).jpg",
+  "licence": "Public domain",
+  "artist": "Evans, A. H.; Frohawk, Frederick William; Gadow, Hans; Wilson, Scott B.",
+  "common": "Hawai\u02bbi \u02bbAmakihi"
+ },
+ "birds/chordeiles-acutipennis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Chordeiles_acutipennis_texensisAQBIP06CA.jpg",
+  "licence": "Public domain",
+  "artist": "United States Department of the Interior",
+  "common": "Lesser Nighthawk"
+ },
+ "birds/chordeiles-minor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_147.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate147",
+  "common": "Night Hawk",
+  "stated": "Night Hawk"
+ },
+ "birds/chroicocephalus-philadelphia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_328.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate328",
+  "common": "Bonapartian Gull",
+  "stated": "Bonapartian Gull"
+ },
+ "birds/cinclus-mexicanus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_441.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate441",
+  "common": "Columbian Water Ouzel and Arctic Water Ouzel",
+  "stated": "Columbian Water Ouzel and Arctic Water Ouzel"
+ },
+ "birds/cinclus-mexicanus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_374.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate374",
+  "common": "American Water Ouzel",
+  "stated": "American Water Ouzel"
+ },
+ "birds/circus-hudsonius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_360.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate360",
+  "common": "Marsh Hawk",
+  "stated": "Marsh Hawk"
+ },
+ "birds/cistothorus-palustris.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_98.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate98",
+  "common": "Marsh Wren",
+  "stated": "Marsh Wren"
+ },
+ "birds/cistothorus-stellaris.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_175.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate175",
+  "common": "Nuttall's lesser-marsh Wren",
+  "stated": "Nuttall's lesser-marsh Wren"
+ },
+ "birds/clangula-hyemalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_315.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate315",
+  "common": "Long-tailed Duck",
+  "stated": "Long-tailed Duck"
+ },
+ "birds/coccyzus-americanus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_2.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate2",
+  "common": "Yellow-billed Cuckoo",
+  "stated": "Yellow-billed Cuckoo"
+ },
+ "birds/coccyzus-erythropthalmus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_32.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate32",
+  "common": "Black-billed Cuckoo",
+  "stated": "Black-billed Cuckoo"
+ },
+ "birds/coccyzus-minor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_169.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate169",
+  "common": "Mangrove Cuckoo",
+  "stated": "Mangrove Cuckoo"
+ },
+ "birds/colaptes-auratus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_37.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate37",
+  "common": "Golden-winged Woodpecker",
+  "stated": "Golden-winged Woodpecker"
+ },
+ "birds/colinus-virginianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_76.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate76",
+  "common": "Virginian Partridge",
+  "stated": "Virginian Partridge"
+ },
+ "birds/columba-livia.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:BirdsAsiaJohnGoVIGoul_0232.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Rock Pigeon"
+ },
+ "birds/columbina-passerina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_182.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate182",
+  "common": "Ground Dove",
+  "stated": "Ground Dove"
+ },
+ "birds/contopus-cooperi.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_174.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate174",
+  "common": "Olive sided Flycatcher",
+  "stated": "Olive sided Flycatcher"
+ },
+ "birds/contopus-virens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_115.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate115",
+  "common": "Wood Pewee",
+  "stated": "Wood Pewee"
+ },
+ "birds/conuropsis-carolinensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_26.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate26",
+  "common": "Carolina Parrot",
+  "stated": "Carolina Parrot"
+ },
+ "birds/copsychus-malabaricus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:CopsychusSuavisGould.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould and W. Hart",
+  "common": "White-rumped Shama"
+ },
+ "birds/coragyps-atratus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_106.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate106",
+  "common": "Black Vulture, or Carrion Crow",
+  "stated": "Black Vulture, or Carrion Crow"
+ },
+ "birds/corthylio-calendula.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_195.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate195",
+  "common": "Ruby crowned Wren",
+  "stated": "Ruby crowned Wren"
+ },
+ "birds/corvus-brachyrhynchos.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_156.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate156",
+  "common": "American Crow",
+  "stated": "American Crow"
+ },
+ "birds/corvus-corax.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_101.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate101",
+  "common": "Raven",
+  "stated": "Raven"
+ },
+ "birds/corvus-ossifragus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_146.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate146",
+  "common": "Fish Crow",
+  "stated": "Fish Crow"
+ },
+ "birds/coturnicops-noveboracensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_333.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate333",
+  "common": "Yellow-breasted Rail",
+  "stated": "Yellow-breasted Rail"
+ },
+ "birds/cyanocitta-cristata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_102.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate102",
+  "common": "Blue Jay",
+  "stated": "Blue Jay"
+ },
+ "birds/cyanocitta-stelleri.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Steller%27s_Jay_(illustration).jpg",
+  "licence": "Public domain",
+  "artist": "John James Audubon",
+  "common": "Steller's Jay"
+ },
+ "birds/cyanocorax-yncas.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:1Carraqui.tif",
+  "licence": "CC BY-SA 4.0",
+  "artist": "Obejara",
+  "common": "Green Jay"
+ },
+ "birds/cygnus-buccinator-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_411.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate411",
+  "common": "Trumpeter Swan",
+  "stated": "Trumpeter Swan"
+ },
+ "birds/cygnus-buccinator.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_380.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate380",
+  "common": "Trumpeter Swan",
+  "stated": "Trumpeter Swan"
+ },
+ "birds/cygnus-columbianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_416.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate416",
+  "common": "Common American Swan",
+  "stated": "Common American Swan"
+ },
+ "birds/cygnus-olor.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_Europe_(1837)_(14563988068).jpg",
+  "licence": "No restrictions",
+  "artist": "Gould, John, 1804-1881",
+  "common": "Mute Swan"
+ },
+ "birds/cynanthus-latirostris.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi5Goul_0228.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Broad-billed Hummingbird"
+ },
+ "birds/dendragapus-obscurus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_365.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate365",
+  "common": "Long-tailed or Dusky Grous",
+  "stated": "Long-tailed or Dusky Grous"
+ },
+ "birds/dendrocygna-autumnalis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Dendrocygna_autumnalis_-_1700-1880_-_Print_-_Iconographia_Zoologica_-_Special_Collections_University_of_Amsterdam_-_UBA01_IZ17600261.tif",
+  "licence": "Public domain",
+  "artist": "Fran\u00e7ois-Nicolas Martinet",
+  "common": "Black-bellied Whistling-Duck"
+ },
+ "birds/dendrocygna-bicolor.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Dendrocygna_bicolor_1921.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Fulvous Whistling-Duck"
+ },
+ "birds/dolichonyx-oryzivorus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_54.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate54",
+  "common": "Rice Bird",
+  "stated": "Rice Bird"
+ },
+ "birds/drepanis-coccinea.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Aves_Hawaiienses_(Pl._5)_(8465166422).jpg",
+  "licence": "Public domain",
+  "artist": "Evans, A. H.; Frohawk, Frederick William; Gadow, Hans; Wilson, Scott B.",
+  "common": "\u02bbI\u02bbiwi"
+ },
+ "birds/dryobates-borealis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_393.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate393",
+  "common": "Red-Cockaded Woodpecker",
+  "stated": "Red-Cockaded Woodpecker"
+ },
+ "birds/dryobates-nuttallii.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1903)_(14564250007).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Nuttall's Woodpecker"
+ },
+ "birds/dryobates-pubescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_112.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate112",
+  "common": "Downy Woodpecker",
+  "stated": "Downy Woodpecker"
+ },
+ "birds/dryocopus-pileatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_111.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate111",
+  "common": "Pileated Woodpecker",
+  "stated": "Pileated Woodpecker"
+ },
+ "birds/dumetella-carolinensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_128.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate128",
+  "common": "Cat Bird",
+  "stated": "Cat Bird"
+ },
+ "birds/ectopistes-migratorius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_62.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate62",
+  "common": "Passenger Pigeon",
+  "stated": "Passenger Pigeon"
+ },
+ "birds/egretta-caerulea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_309.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate309",
+  "common": "Blue Crane or Heron",
+  "stated": "Blue Crane or Heron"
+ },
+ "birds/egretta-rufescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_257.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate257",
+  "common": "Purple Heron",
+  "stated": "Purple Heron"
+ },
+ "birds/egretta-thula.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_242.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate242",
+  "common": "Snowy Heron, or White Egret",
+  "stated": "Snowy Heron, or White Egret"
+ },
+ "birds/egretta-tricolor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_217.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate217",
+  "common": "Louisiana Heron",
+  "stated": "Louisiana Heron"
+ },
+ "birds/elanoides-forficatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_72.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate72",
+  "common": "Swallow-tailed Hawk",
+  "stated": "Swallow-tailed Hawk"
+ },
+ "birds/elanus-leucurus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_356.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate356",
+  "common": "Black-Winged Hawk",
+  "stated": "Black-Winged Hawk"
+ },
+ "birds/empidonax-traillii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_45.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate45",
+  "common": "Traill's Flycatcher",
+  "stated": "Traill's Flycatcher"
+ },
+ "birds/empidonax-virescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_144.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate144",
+  "common": "Small Green Crested Flycatcher",
+  "stated": "Small Green Crested Flycatcher"
+ },
+ "birds/eremophila-alpestris.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_200.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate200",
+  "common": "Shore Lark",
+  "stated": "Shore Lark"
+ },
+ "birds/estrilda-astrild.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Estrilda_astrild_1869.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Common Waxbill"
+ },
+ "birds/eudocimus-albus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_222.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate222",
+  "common": "White Ibis",
+  "stated": "White Ibis"
+ },
+ "birds/eudocimus-ruber.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_402.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate402",
+  "common": "Scarlet Ibis",
+  "stated": "Scarlet Ibis"
+ },
+ "birds/eugenes-fulgens.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi2Goul_0082.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Rivoli's Hummingbird"
+ },
+ "birds/euphagus-carolinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_157.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate157",
+  "common": "Rusty Grakle",
+  "stated": "Rusty Grakle"
+ },
+ "birds/falco-columbarius-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_92.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate92",
+  "common": "Pigeon Hawk",
+  "stated": "Pigeon Hawk"
+ },
+ "birds/falco-columbarius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_75.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate75",
+  "common": "Le Petit Caporal",
+  "stated": "Le Petit Caporal"
+ },
+ "birds/falco-femoralis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Nouveau_recueil_de_planches_colori%C3%A9es_d%27oiseaux_(6286226176).jpg",
+  "licence": "Public domain",
+  "artist": "Buffon, Georges Louis Leclerc; Huet, Nicholas.; Laugier de Chartrouse, Guillaume Michel Jer\u00f4me Meiffren; Pr\u00eatre, J. G.; ",
+  "common": "Aplomado Falcon"
+ },
+ "birds/falco-mexicanus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_16)_(6306009493).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Prairie Falcon"
+ },
+ "birds/falco-peregrinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_16.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate16",
+  "common": "Great Footed Hawk",
+  "stated": "Great Footed Hawk"
+ },
+ "birds/falco-rusticolus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_370.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate370",
+  "common": "Iceland or Jer Falcon",
+  "stated": "Iceland or Jer Falcon"
+ },
+ "birds/falco-rusticolus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_196.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate196",
+  "common": "Labrador Falcon",
+  "stated": "Labrador Falcon"
+ },
+ "birds/falco-sparverius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_142.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate142",
+  "common": "American Sparrow Hawk",
+  "stated": "American Sparrow Hawk"
+ },
+ "birds/fratercula-arctica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_213.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate213",
+  "common": "Puffin",
+  "stated": "Puffin"
+ },
+ "birds/fratercula-cirrhata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_249.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate249",
+  "common": "Tufted Auk",
+  "stated": "Tufted Auk"
+ },
+ "birds/fratercula-corniculata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_295.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate295",
+  "common": "Large billed Puffin",
+  "stated": "Large billed Puffin"
+ },
+ "birds/fregata-magnificens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_272.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate272",
+  "common": "Frigate Pelican",
+  "stated": "Frigate Pelican"
+ },
+ "birds/fulica-alai.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Aves_Hawaiienses_(Pl._56)_(8465185200).jpg",
+  "licence": "Public domain",
+  "artist": "Evans, A. H.; Frohawk, Frederick William; Gadow, Hans; Wilson, Scott B.",
+  "common": "Hawaiian Coot"
+ },
+ "birds/fulica-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_239.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate239",
+  "common": "American Coot",
+  "stated": "American Coot"
+ },
+ "birds/fulmarus-glacialis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_265.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate265",
+  "common": "Fulmar Petrel",
+  "stated": "Fulmar Petrel"
+ },
+ "birds/gallinago-delicata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_243.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate243",
+  "common": "American Snipe",
+  "stated": "American Snipe"
+ },
+ "birds/gallinula-galeata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_244.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate244",
+  "common": "Common Gallinule",
+  "stated": "Common Gallinule"
+ },
+ "birds/gallus-gallus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Gallus_gallus_bankiva_1876.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Red Junglefowl"
+ },
+ "birds/gavia-immer.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_308.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate308",
+  "common": "Great Northern Diver or Loon",
+  "stated": "Great Northern Diver or Loon"
+ },
+ "birds/gavia-pacifica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_350.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate350",
+  "common": "Black-Throated Diver",
+  "stated": "Black-Throated Diver"
+ },
+ "birds/gavia-stellata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_202.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate202",
+  "common": "Red-Throated Diver",
+  "stated": "Red-Throated Diver"
+ },
+ "birds/gelochelidon-nilotica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_415.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate415",
+  "common": "Marsh Tern",
+  "stated": "Marsh Tern"
+ },
+ "birds/geococcyx-californianus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1903)_(14752991834).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Greater Roadrunner"
+ },
+ "birds/geothlypis-formosa.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_38.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate38",
+  "common": "Kentucky Warbler",
+  "stated": "Kentucky Warbler"
+ },
+ "birds/geothlypis-philadelphia.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Annual_report_(1912)_(18425301452).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Mourning Warbler"
+ },
+ "birds/geothlypis-trichas-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_24.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate24",
+  "common": "Roscoe's Yellow-throat",
+  "stated": "Roscoe's Yellow-throat"
+ },
+ "birds/geothlypis-trichas.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_23.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate23",
+  "common": "Yellow-breasted Warbler",
+  "stated": "Yellow-breasted Warbler"
+ },
+ "birds/geotrygon-chrysia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_167.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate167",
+  "common": "Key-west Dove",
+  "stated": "Key-west Dove"
+ },
+ "birds/geranoaetus-albicaudatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Geranoaetus_albicaudatus_1876.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "White-tailed Hawk"
+ },
+ "birds/glaucidium-gnoma.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:GlaucidiumGnomaKeulemans.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Northern Pygmy-Owl"
+ },
+ "birds/grus-americana-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_262.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate262",
+  "common": "Hooping Crane",
+  "stated": "Hooping Crane"
+ },
+ "birds/grus-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_226.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate226",
+  "common": "Hooping Crane",
+  "stated": "Hooping Crane"
+ },
+ "birds/gygis-candida.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Gygis_alba_-_1786-1789_-_Print_-_Iconographia_Zoologica_-_Special_Collections_University_of_Amsterdam_-_UBA01_IZ17900396.tif",
+  "licence": "Public domain",
+  "artist": "",
+  "common": "Blue-billed White-Tern"
+ },
+ "birds/gymnogyps-californianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_431.jpg",
+  "licence": "Public domain",
+  "sheet": "plate431",
+  "common": "Californian Vulture",
+  "stated": "Californian Vulture"
+ },
+ "birds/gymnorhinus-cyanocephalus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_28)_(6306013283).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Pinyon Jay"
+ },
+ "birds/haematopus-bachmani.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_432.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate432",
+  "common": "White-legged Oyster-catcher, or Slender-billed Oyster-catcher",
+  "stated": "White-legged Oyster-catcher, or Slender-billed Oyster-catcher"
+ },
+ "birds/haematopus-palliatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_223.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate223",
+  "common": "Pied oyster-catcher",
+  "stated": "Pied oyster-catcher"
+ },
+ "birds/haemorhous-cassinii.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds._Collected_excerpts_from_v._10_of_Reports_of_explorations_and_surveys,_to_ascertain_the_most_practicable_and_economical_route_for_a_railroad_from_the_Mississippi_River_to_the_Pacific_Ocean_(20609462559).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Cassin's Finch"
+ },
+ "birds/haemorhous-mexicanus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Crimson_fronted_Purple_Finch_-_Drawn_from_nature_by_J.J._Audubon,_F.R.S.F.L._LCCN2014646350.jpg",
+  "licence": "Public domain",
+  "artist": "Audubon, John James, 1785-1851, artist; Mead, Larkin G. (Larkin Goldsmith), 1835-1910, collector",
+  "common": "House Finch"
+ },
+ "birds/haemorhous-purpureus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_4.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate4",
+  "common": "Purple Finch",
+  "stated": "Purple Finch"
+ },
+ "birds/haliaeetus-leucocephalus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_31.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate31",
+  "common": "Plate",
+  "stated": "Plate"
+ },
+ "birds/haliaeetus-leucocephalus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_126.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate126",
+  "common": "White-headed Eagle",
+  "stated": "White-headed Eagle"
+ },
+ "birds/helmitheros-vermivorum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_34.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate34",
+  "common": "Worm eating Warbler",
+  "stated": "Worm eating Warbler"
+ },
+ "birds/hesperiphona-vespertina.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Annual_report_(1912)_(17806766574).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Evening Grosbeak"
+ },
+ "birds/himantopus-mexicanus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_332.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate332",
+  "common": "Long-legged Avocet",
+  "stated": "Long-legged Avocet"
+ },
+ "birds/himatione-sanguinea.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Himatione_fraithii.jpg",
+  "licence": "Public domain",
+  "artist": "Artist/K\u00fcnstler: John Gerrard Keulemans (1842-1912)",
+  "common": "\u02bbApapane"
+ },
+ "birds/hirundo-rustica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_173.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate173",
+  "common": "Barn Swallow",
+  "stated": "Barn Swallow"
+ },
+ "birds/histrionicus-histrionicus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_299.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate299",
+  "common": "Harlequin Duck",
+  "stated": "Harlequin Duck"
+ },
+ "birds/hydrobates-leucorhous.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_261.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate261",
+  "common": "Fork-tailed Petrel",
+  "stated": "Fork-tailed Petrel"
+ },
+ "birds/hydroprogne-caspia.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1906)_(14727503626).jpg",
+  "licence": "Public domain",
+  "artist": "Internet Archive Book Images",
+  "common": "Caspian Tern"
+ },
+ "birds/hylocichla-mustelina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_73.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate73",
+  "common": "Wood Thrush",
+  "stated": "Wood Thrush"
+ },
+ "birds/icteria-virens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_137.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate137",
+  "common": "Yellow-breasted Chat",
+  "stated": "Yellow-breasted Chat"
+ },
+ "birds/icterus-cucullatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_California_(Plate_8)_(7699531800).jpg",
+  "licence": "CC BY 2.0",
+  "artist": "Brooks, Allan; Dawson, William Leon; Dickey, Donald R.; Finley, William L.; Pierce, Wright M.",
+  "common": "Hooded Oriole"
+ },
+ "birds/icterus-galbula.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_12.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate12",
+  "common": "Baltimore Oriole",
+  "stated": "Baltimore Oriole"
+ },
+ "birds/icterus-graduacauda.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_21)_(6306011127).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Audubon's Oriole"
+ },
+ "birds/icterus-gularis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1904)_(14751734175).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Altamira Oriole"
+ },
+ "birds/icterus-parisorum.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_California_(Plate_1)_(7699523740).jpg",
+  "licence": "CC BY 2.0",
+  "artist": "Brooks, Allan; Dawson, William Leon; Dickey, Donald R.; Finley, William L.; Pierce, Wright M.",
+  "common": "Scott's Oriole"
+ },
+ "birds/icterus-pectoralis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Iconographie_ornithologique_(Pl._10)_(6120564462).jpg",
+  "licence": "Public domain",
+  "artist": "Becquet (Firm); Becquet fr\u00e8res; Buffon, Georges Louis Leclerc; Des Murs, Marc Athanase Parfait \u0152illet; Imprimerie Dondey",
+  "common": "Spot-breasted Oriole"
+ },
+ "birds/icterus-spurius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_42.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate42",
+  "common": "Orchard Oriole",
+  "stated": "Orchard Oriole"
+ },
+ "birds/ictinia-mississippiensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_117.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate117",
+  "common": "Mississippi Kite",
+  "stated": "Mississippi Kite"
+ },
+ "birds/junco-hyemalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_13.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate13",
+  "common": "Snow Bird",
+  "stated": "Snow Bird"
+ },
+ "birds/junco-phaeonotus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Biologia_Centrali-Americana_(Tab_26)_(7996786146).jpg",
+  "licence": "Public domain",
+  "artist": "Bale & Danielsson; Bannwarth, Th.; Cambridge Scientific Instrument Company; Godman, Frederick Du Cane; Hanhart; Horman-F",
+  "common": "Yellow-eyed Junco"
+ },
+ "birds/lagopus-lagopus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_191.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate191",
+  "common": "Willow Grouse, or Large Ptarmigan",
+  "stated": "Willow Grouse, or Large Ptarmigan"
+ },
+ "birds/lagopus-muta.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_372.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate372",
+  "common": "Rock Grous",
+  "stated": "Rock Grous"
+ },
+ "birds/lampornis-clemenciae.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_monograph_of_the_Trochilid%C3%A6,_or_family_of_humming-birds_(Plate_60)_(7175937338).jpg",
+  "licence": "Public domain",
+  "artist": "Gould, John; Hullmandel & Walton; Richter, Henry Constantine; Walter & Cohn",
+  "common": "Blue-throated Mountain-gem"
+ },
+ "birds/lanius-borealis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_192.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate192",
+  "common": "Great cinereous Shrike, or Butcher Bird",
+  "stated": "Great cinereous Shrike, or Butcher Bird"
+ },
+ "birds/lanius-ludovicianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_57.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate57",
+  "common": "Loggerhead Shrike",
+  "stated": "Loggerhead Shrike"
+ },
+ "birds/larus-brachyrhynchus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_zoology_of_the_voyage_of_H.M.S._Sulphur_(8328962877).jpg",
+  "licence": "Public domain",
+  "artist": "Belcher, Edward; Day & Haghe; Gould, John; Gray, John Edward; Great Britain.; Hawkins, B. Waterhouse; Hawkins, B. Waterh",
+  "common": "Short-billed Gull"
+ },
+ "birds/larus-californicus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Knowing_birds_through_stories_(6298874914).jpg",
+  "licence": "Public domain",
+  "artist": "Bralliar, Floyd Burton; Kalmbach, E. R.",
+  "common": "California Gull"
+ },
+ "birds/larus-delawarensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_212.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate212",
+  "common": "Common American Gull",
+  "stated": "Common American Gull"
+ },
+ "birds/larus-fuscus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Coloured_figures_of_the_birds_of_the_British_Islands_-_issued_by_Lord_Lilford_(Plate_XXIV)_(20132201459).jpg",
+  "licence": "Public domain",
+  "artist": "Keulemans, J. G.; Lilford, Thomas Littleton Powys; Newton, Alfred; Salvin, Osbert; Thorburn, Archibald",
+  "common": "Lesser Black-backed Gull"
+ },
+ "birds/larus-glaucoides.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_284.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate284",
+  "common": "White-winged silvery Gull",
+  "stated": "White-winged silvery Gull"
+ },
+ "birds/larus-heermanni.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_5)_(6306530264).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Heermann's Gull"
+ },
+ "birds/larus-hyperboreus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_400.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate400",
+  "common": "Burgomaster Gull",
+  "stated": "Burgomaster Gull"
+ },
+ "birds/larus-marinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_241.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate241",
+  "common": "Black Backed Gull",
+  "stated": "Black Backed Gull"
+ },
+ "birds/larus-smithsonianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_293.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate293",
+  "common": "Herring Gull",
+  "stated": "Herring Gull"
+ },
+ "birds/laterallus-jamaicensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_353.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate353",
+  "common": "Least Water-hen",
+  "stated": "Least Water-hen"
+ },
+ "birds/leiothlypis-celata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_178.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate178",
+  "common": "Orange-crowned Warbler",
+  "stated": "Orange-crowned Warbler"
+ },
+ "birds/leiothlypis-peregrina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_154.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate154",
+  "common": "Tennessee Warbler",
+  "stated": "Tennessee Warbler"
+ },
+ "birds/leiothlypis-ruficapilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_89.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate89",
+  "common": "Nashville Warbler",
+  "stated": "Nashville Warbler"
+ },
+ "birds/leiothrix-lutea.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:BirdsAsiaJohnGoIVGoul_0068.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Red-billed Leiothrix"
+ },
+ "birds/leuconotopicus-albolarvatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Journal_of_the_Academy_of_Natural_Sciences_of_Philadelphia_BHL35731298.jpg",
+  "licence": "Public domain",
+  "artist": "Academy of Natural Sciences of Philadelphia.",
+  "common": "White-headed Woodpecker"
+ },
+ "birds/leucophaeus-atricilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_317.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate317",
+  "common": "Black-headed Gull",
+  "stated": "Black-headed Gull"
+ },
+ "birds/leucosticte-tephrocotis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_zoology_of_the_voyage_of_H.M.S._Sulphur_(8330017990).jpg",
+  "licence": "Public domain",
+  "artist": "Belcher, Edward; Day & Haghe; Gould, John; Gray, John Edward; Great Britain.; Hawkins, B. Waterhouse; Hawkins, B. Waterh",
+  "common": "Gray-crowned Rosy-Finch"
+ },
+ "birds/limnodromus-griseus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_339.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate339",
+  "common": "Red-breasted Snipe",
+  "stated": "Red-breasted Snipe"
+ },
+ "birds/limnodromus-scolopaceus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Annals_of_the_Lyceum_of_Natural_History_of_New-York_(1852)_(18387181756).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Long-billed Dowitcher"
+ },
+ "birds/limnothlypis-swainsonii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_198.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate198",
+  "common": "Brown headed Worm eating Warbler",
+  "stated": "Brown headed Worm eating Warbler"
+ },
+ "birds/limosa-fedoa.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_238.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate238",
+  "common": "Great Marbled Godwit",
+  "stated": "Great Marbled Godwit"
+ },
+ "birds/limosa-haemastica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_259.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate259",
+  "common": "Hudsonian Godwit",
+  "stated": "Hudsonian Godwit"
+ },
+ "birds/lonchura-atricapilla.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Keulemans_Onze_vogels_3_48.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Chestnut Munia"
+ },
+ "birds/lonchura-punctulata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Keulemans_Onze_vogels_2_53.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Scaly-breasted Munia"
+ },
+ "birds/lophodytes-cucullatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_232.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate232",
+  "common": "Hooded Merganser",
+  "stated": "Hooded Merganser"
+ },
+ "birds/lophura-leucomelanos.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:BirdsAsiaJohnGoVIIGoul_0064.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Kalij Pheasant"
+ },
+ "birds/loxia-curvirostra.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_197.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate197",
+  "common": "American Crossbill",
+  "stated": "American Crossbill"
+ },
+ "birds/loxia-leucoptera.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_368.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate368",
+  "common": "White-winged Crossbill",
+  "stated": "White-winged Crossbill"
+ },
+ "birds/mareca-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_349.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate349",
+  "common": "American Widgeon",
+  "stated": "American Widgeon"
+ },
+ "birds/mareca-strepera.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_352.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate352",
+  "common": "Gadwall Duck",
+  "stated": "Gadwall Duck"
+ },
+ "birds/megaceryle-alcyon.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_77.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate77",
+  "common": "Belted Kingfisher",
+  "stated": "Belted Kingfisher"
+ },
+ "birds/megaceryle-torquata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Ceryle_stellata_-_1820-1863_-_Print_-_Iconographia_Zoologica_-_Special_Collections_University_of_Amsterdam_-_UBA01_IZ16800267.tif",
+  "licence": "Public domain",
+  "artist": "",
+  "common": "Ringed Kingfisher"
+ },
+ "birds/megascops-asio.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_97.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate97",
+  "common": "Little Screech Owl",
+  "stated": "Little Screech Owl"
+ },
+ "birds/melanerpes-aurifrons.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Melanerpes_aurifronsAQBIP04CA.jpg",
+  "licence": "Public domain",
+  "artist": "United States Department of the Interior",
+  "common": "Golden-fronted Woodpecker"
+ },
+ "birds/melanerpes-erythrocephalus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_27.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate27",
+  "common": "Red-headed Woodpecker",
+  "stated": "Red-headed Woodpecker"
+ },
+ "birds/melanerpes-formicivorus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_2)_(6306529604).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Acorn Woodpecker"
+ },
+ "birds/melanerpes-lewis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:American_bird_magazine,_ornithology_(1904)_(17930277040).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Lewis's Woodpecker"
+ },
+ "birds/melanitta-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_413.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate413",
+  "common": "American Scoter Duck",
+  "stated": "American Scoter Duck"
+ },
+ "birds/melanitta-deglandi.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_247.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate247",
+  "common": "Velvet Duck",
+  "stated": "Velvet Duck"
+ },
+ "birds/melanitta-perspicillata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_320.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate320",
+  "common": "Black or Surf Duck",
+  "stated": "Black or Surf Duck"
+ },
+ "birds/meleagris-gallopavo-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_6.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate6",
+  "common": "Great American Hen and Young",
+  "stated": "Great American Hen and Young"
+ },
+ "birds/meleagris-gallopavo.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_1.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate1",
+  "common": "Wild Turkey or Great American Cock",
+  "stated": "Wild Turkey or Great American Cock"
+ },
+ "birds/melopsittacus-undulatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Keulemans_Onze_vogels_1_05.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Budgerigar"
+ },
+ "birds/melospiza-georgiana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_64.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate64",
+  "common": "Swamp Sparrow",
+  "stated": "Swamp Sparrow"
+ },
+ "birds/melospiza-lincolnii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_193.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate193",
+  "common": "Lincoln Finch",
+  "stated": "Lincoln Finch"
+ },
+ "birds/melospiza-melodia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_25.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate25",
+  "common": "Song Sparrow",
+  "stated": "Song Sparrow"
+ },
+ "birds/melozone-fusca.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Pipilo_mesoleucus.jpg",
+  "licence": "Public domain",
+  "artist": "",
+  "common": "Canyon Towhee"
+ },
+ "birds/mergellus-albellus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_351.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate351",
+  "common": "Smew or White Nun",
+  "stated": "Smew or White Nun"
+ },
+ "birds/mergus-merganser.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_335.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate335",
+  "common": "Goosander",
+  "stated": "Goosander"
+ },
+ "birds/mergus-serrator.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_406.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate406",
+  "common": "Red-breasted Merganser",
+  "stated": "Red-breasted Merganser"
+ },
+ "birds/mimus-polyglottos.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_21.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate21",
+  "common": "Mocking Bird",
+  "stated": "Mocking Bird"
+ },
+ "birds/mniotilta-varia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_90.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate90",
+  "common": "Black & White Creeper",
+  "stated": "Black & White Creeper"
+ },
+ "birds/molothrus-ater.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_99.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate99",
+  "common": "Cow-pen Bird",
+  "stated": "Cow-pen Bird"
+ },
+ "birds/morus-bassanus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_330.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate330",
+  "common": "Gannet",
+  "stated": "Gannet"
+ },
+ "birds/mycteria-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_216.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate216",
+  "common": "Wood Ibiss",
+  "stated": "Wood Ibiss"
+ },
+ "birds/myiarchus-cinerascens.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Bird_lore_(1909)_(14775470403).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Ash-throated Flycatcher"
+ },
+ "birds/myiarchus-crinitus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_129.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate129",
+  "common": "Great Crested Flycatcher",
+  "stated": "Great Crested Flycatcher"
+ },
+ "birds/myiarchus-tuberculifer.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Myiarchus_tuberculifer_1847.jpg",
+  "licence": "Public domain",
+  "artist": "in Alcide Dessalines d'Orbigny",
+  "common": "Dusky-capped Flycatcher"
+ },
+ "birds/myiarchus-tyrannulus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Myiarchus_mexicanus.jpg",
+  "licence": "Public domain",
+  "artist": "",
+  "common": "Brown-crested Flycatcher"
+ },
+ "birds/myiopsitta-monachus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Conurus_monachus_-_1796-1808_-_Print_-_Iconographia_Zoologica_-_Special_Collections_University_of_Amsterdam_-_UBA01_IZ18500185.tif",
+  "licence": "Public domain",
+  "artist": "Jacques Barraband",
+  "common": "Monk Parakeet"
+ },
+ "birds/nannopterum-auritum-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_258.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate258",
+  "common": "Double-crested Cormorant",
+  "stated": "Double-crested Cormorant"
+ },
+ "birds/nannopterum-auritum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_253.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate253",
+  "common": "Florida Cormorant",
+  "stated": "Florida Cormorant"
+ },
+ "birds/nannopterum-brasilianum.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Phalacrocorax_brasilianus_(GM)_LCCN2003662380.jpg",
+  "licence": "Public domain",
+  "artist": "Popular Graphic Arts",
+  "common": "Neotropic Cormorant"
+ },
+ "birds/nucifraga-columbiana.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Clark%27s_Crow-1.jpg",
+  "licence": "Public domain",
+  "artist": "John James Audubon",
+  "common": "Clark's Nutcracker"
+ },
+ "birds/numenius-americanus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_231.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate231",
+  "common": "Long-billed Curlew",
+  "stated": "Long-billed Curlew"
+ },
+ "birds/numenius-borealis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_208.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate208",
+  "common": "Esquimaux Curlew",
+  "stated": "Esquimaux Curlew"
+ },
+ "birds/numenius-hudsonicus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_237.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate237",
+  "common": "Hudsonian Curlew",
+  "stated": "Hudsonian Curlew"
+ },
+ "birds/nyctanassa-violacea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_340.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate340",
+  "common": "Yellow-Crowned Heron",
+  "stated": "Yellow-Crowned Heron"
+ },
+ "birds/nycticorax-nycticorax.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_236.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate236",
+  "common": "Night Heron, or Qua bird",
+  "stated": "Night Heron, or Qua bird"
+ },
+ "birds/oceanites-oceanicus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_271.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate271",
+  "common": "Stormy Petrel",
+  "stated": "Stormy Petrel"
+ },
+ "birds/onychoprion-fuscatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_235.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate235",
+  "common": "Sooty Tern",
+  "stated": "Sooty Tern"
+ },
+ "birds/oporornis-agilis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_138.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate138",
+  "common": "Connecticut Warbler",
+  "stated": "Connecticut Warbler"
+ },
+ "birds/oreortyx-pictus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_429.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate429",
+  "common": "Plumed Partridge and Thick-legged Partridge",
+  "stated": "Plumed Partridge and Thick-legged Partridge"
+ },
+ "birds/ortygornis-pondicerianus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Francolinus_pondicerianus_(Hardwicke).jpg",
+  "licence": "Public domain",
+  "artist": "Thomas Hardwicke",
+  "common": "Grey Francolin"
+ },
+ "birds/oxyura-jamaicensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_347.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate347",
+  "common": "Ruddy Duck",
+  "stated": "Ruddy Duck"
+ },
+ "birds/padda-oryzivora.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Keulemans_Onze_vogels_1_44.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Java Sparrow"
+ },
+ "birds/pagophila-eburnea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_289.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate289",
+  "common": "Ivory Gull",
+  "stated": "Ivory Gull"
+ },
+ "birds/pandion-haliaetus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_81.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate81",
+  "common": "Fish Hawk, or Osprey",
+  "stated": "Fish Hawk, or Osprey"
+ },
+ "birds/parabuteo-unicinctus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_396.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate396",
+  "common": "Louisiana Hawk",
+  "stated": "Louisiana Hawk"
+ },
+ "birds/parkesia-motacilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_19.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate19",
+  "common": "Louisiana Water Thrush",
+  "stated": "Louisiana Water Thrush"
+ },
+ "birds/paroaria-capitata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Foreign_finches_in_captivity_BHL17195852.jpg",
+  "licence": "Public domain",
+  "artist": "Butler, Arthur G.",
+  "common": "Yellow-billed Cardinal"
+ },
+ "birds/paroaria-coronata.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Keulemans_Onze_vogels_2_41.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Red-crested Cardinal"
+ },
+ "birds/passer-domesticus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Coloured_figures_of_the_birds_of_the_British_Islands_-_issued_by_Lord_Lilford_(10560250954).jpg",
+  "licence": "Public domain",
+  "artist": "Keulemans, J. G.; Lilford, Thomas Littleton Powys; Newton, Alfred; Salvin, Osbert; Thorburn, Archibald",
+  "common": "House Sparrow"
+ },
+ "birds/passer-montanus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Coloured_figures_of_the_birds_of_the_British_Islands_-_issued_by_Lord_Lilford_(10560216806).jpg",
+  "licence": "Public domain",
+  "artist": "Keulemans, J. G.; Lilford, Thomas Littleton Powys; Newton, Alfred; Salvin, Osbert; Thorburn, Archibald",
+  "common": "Eurasian Tree Sparrow"
+ },
+ "birds/passerculus-sandwichensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_109.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate109",
+  "common": "Savannah Finch",
+  "stated": "Savannah Finch"
+ },
+ "birds/passerella-iliaca.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_108.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate108",
+  "common": "Fox-coloured Sparrow",
+  "stated": "Fox-coloured Sparrow"
+ },
+ "birds/passerina-caerulea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_122.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate122",
+  "common": "Blue Grosbeak",
+  "stated": "Blue Grosbeak"
+ },
+ "birds/passerina-ciris.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_53.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate53",
+  "common": "Painted Finch",
+  "stated": "Painted Finch"
+ },
+ "birds/passerina-cyanea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_74.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate74",
+  "common": "Indigo Bird",
+  "stated": "Indigo Bird"
+ },
+ "birds/passerina-versicolor.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Key_to_North_American_birds._Containing_a_concise_account_of_every_species_of_living_and_fossil_bird_at_present_known_from_the_continent_north_of_the_Mexican_and_United_States_boundary,_inclusive_of_(14562836120).jpg",
+  "licence": "No restrictions",
+  "artist": "Coues, Elliott, 1842-1899",
+  "common": "Varied Bunting"
+ },
+ "birds/patagioenas-fasciata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_371.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate371",
+  "common": "Band-tailed Pigeon",
+  "stated": "Band-tailed Pigeon"
+ },
+ "birds/patagioenas-leucocephala.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_177.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate177",
+  "common": "White-crowned Pigeon",
+  "stated": "White-crowned Pigeon"
+ },
+ "birds/pavo-cristatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:J_Smit_nach_Joseph_Wolf_Pavo_Cristatus.jpg",
+  "licence": "Public domain",
+  "artist": "J. Smit nach Joseph Wolf (1820-1899)",
+  "common": "Indian Peafowl"
+ },
+ "birds/pelecanus-erythrorhynchos.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_314.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate314",
+  "common": "American White Pelican",
+  "stated": "American White Pelican"
+ },
+ "birds/pelecanus-occidentalis-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_427.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate427",
+  "common": "Brown Pelican",
+  "stated": "Brown Pelican"
+ },
+ "birds/pelecanus-occidentalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_251.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate251",
+  "common": "Brown Pelican",
+  "stated": "Brown Pelican"
+ },
+ "birds/perdix-perdix.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Archibald_Thorburn_English_partridge_with_gorse_and_thistles.jpg",
+  "licence": "Public domain",
+  "artist": "Archibald Thorburn",
+  "common": "Gray Partridge"
+ },
+ "birds/perisoreus-canadensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_107.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate107",
+  "common": "Canada Jay",
+  "stated": "Canada Jay"
+ },
+ "birds/petrochelidon-fulva.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Petrochelidon_fulva_1894.jpg",
+  "licence": "Public domain",
+  "artist": "Richard Bowdler Sharpe",
+  "common": "Cave Swallow"
+ },
+ "birds/petrochelidon-pyrrhonota.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_68.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate68",
+  "common": "Republican, or Cliff Swallow",
+  "stated": "Republican, or Cliff Swallow"
+ },
+ "birds/peucaea-aestivalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_165.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate165",
+  "common": "Bachman's Finch",
+  "stated": "Bachman's Finch"
+ },
+ "birds/peucaea-cassinii.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Peucaea_cassinii.png",
+  "licence": "Public domain",
+  "artist": "Spencer Fullerton Baird",
+  "common": "Cassin's Sparrow"
+ },
+ "birds/phaethon-lepturus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_263.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate263",
+  "common": "Tropic Bird",
+  "stated": "Tropic Bird"
+ },
+ "birds/phaethon-rubricauda.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Bird_illustration_by_Elizabeth_Gould_for_Birds_of_Australia,_digitally_enhanced_from_rawpixel%27s_own_facsimile_book588.jpg",
+  "licence": "CC BY-SA 4.0",
+  "artist": "Rawpixel",
+  "common": "Red-tailed Tropicbird"
+ },
+ "birds/phainopepla-nitens.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_29)_(6306537388).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Phainopepla"
+ },
+ "birds/phalacrocorax-carbo.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_267.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate267",
+  "common": "Common Cormorant",
+  "stated": "Common Cormorant"
+ },
+ "birds/phalaropus-fulicarius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_256.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate256",
+  "common": "Red Phalarope",
+  "stated": "Red Phalarope"
+ },
+ "birds/phalaropus-lobatus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_215.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate215",
+  "common": "Hyperborean phalarope",
+  "stated": "Hyperborean phalarope"
+ },
+ "birds/phalaropus-tricolor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_255.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate255",
+  "common": "Wilson's Phalarope",
+  "stated": "Wilson's Phalarope"
+ },
+ "birds/phasianus-colchicus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_history_of_the_birds_of_Europe_(Pl._701)_(6989249082).jpg",
+  "licence": "Public domain",
+  "artist": "Dresser, H. E.; Dresser, H. E.; Keulemans, J. G.; Neale, Edward; Sharpe, Richard Bowdler; Thorburn, Archibald; Wolf, Jos",
+  "common": "Ring-necked Pheasant"
+ },
+ "birds/pheucticus-ludovicianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_127.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate127",
+  "common": "Rose-breasted Grosbeak",
+  "stated": "Rose-breasted Grosbeak"
+ },
+ "birds/phoenicopterus-ruber.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_America_(Pl._375)_(8592728880).jpg",
+  "licence": "Public domain",
+  "artist": "Audubon, John James; Bowen, John T.",
+  "common": "American Flamingo"
+ },
+ "birds/pica-hudsonia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_361.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate361",
+  "common": "American Magpie",
+  "stated": "American Magpie"
+ },
+ "birds/pica-nuttalli.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Bird_lore_(1918)_(14568654319).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Yellow-billed Magpie"
+ },
+ "birds/picoides-arcticus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_132.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate132",
+  "common": "Three-toed Woodpecker",
+  "stated": "Three-toed Woodpecker"
+ },
+ "birds/picoides-dorsalis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:132_Three-toed_Woodpecker.jpg",
+  "licence": "Public domain",
+  "artist": "John James Audubon",
+  "common": "American Three-toed Woodpecker"
+ },
+ "birds/pinguinus-impennis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_345.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate345",
+  "common": "Great Auk",
+  "stated": "Great Auk"
+ },
+ "birds/pinicola-enucleator.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_362.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate362",
+  "common": "Pine Grosbeak",
+  "stated": "Pine Grosbeak"
+ },
+ "birds/pipilo-erythrophthalmus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_29.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate29",
+  "common": "Towee Bunting",
+  "stated": "Towee Bunting"
+ },
+ "birds/piranga-flava.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_British_Guiana,_vol._2_(1921),_plate_09_(8295081774)_Piranga_flava_macconnelli.jpg",
+  "licence": "Public domain",
+  "artist": "Henrik Gr\u00f8nvold",
+  "common": "Hepatic Tanager"
+ },
+ "birds/piranga-rubra.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_44.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate44",
+  "common": "Summer Red Bird",
+  "stated": "Summer Red Bird"
+ },
+ "birds/pitangus-sulphuratus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:SaurophagusDerbianusWolf.jpg",
+  "licence": "Public domain",
+  "artist": "Joseph Wolf",
+  "common": "Great Kiskadee"
+ },
+ "birds/platalea-ajaja.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_325.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate325",
+  "common": "Roseate Spoonbill",
+  "stated": "Roseate Spoonbill"
+ },
+ "birds/plectrophenax-nivalis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_189.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate189",
+  "common": "Snow Bunting",
+  "stated": "Snow Bunting"
+ },
+ "birds/plegadis-falcinellus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_391.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate391",
+  "common": "Glossy Ibis",
+  "stated": "Glossy Ibis"
+ },
+ "birds/pluvialis-dominica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_302.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate302",
+  "common": "Golden Plover",
+  "stated": "Golden Plover"
+ },
+ "birds/pluvialis-squatarola.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_338.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate338",
+  "common": "Black-bellied Plover",
+  "stated": "Black-bellied Plover"
+ },
+ "birds/podiceps-auritus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_260.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate260",
+  "common": "Horned Grebe",
+  "stated": "Horned Grebe"
+ },
+ "birds/podiceps-grisegena.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_300.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate300",
+  "common": "Red-necked Grebe",
+  "stated": "Red-necked Grebe"
+ },
+ "birds/podiceps-nigricollis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_409.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate409",
+  "common": "Eared Grebe",
+  "stated": "Eared Grebe"
+ },
+ "birds/podilymbus-podiceps.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_248.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate248",
+  "common": "American Pied-billed",
+  "stated": "American Pied-billed"
+ },
+ "birds/poecile-carolinensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_160.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate160",
+  "common": "Carolina Titmouse",
+  "stated": "Carolina Titmouse"
+ },
+ "birds/poecile-hudsonicus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_194.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate194",
+  "common": "Canadian Titmouse",
+  "stated": "Canadian Titmouse"
+ },
+ "birds/poecile-rufescens.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Alaska_(1901)_(17760847818).jpg",
+  "licence": "No restrictions",
+  "artist": "Harriman Alaska Expedition (1899); Harriman, Edward Henry, 1848-1909; Merriam, C. Hart (Clinton Hart), 1855-1942; Washin",
+  "common": "Chestnut-backed Chickadee"
+ },
+ "birds/polioptila-caerulea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_84.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate84",
+  "common": "Blue-Grey Fly-catcher",
+  "stated": "Blue-Grey Fly-catcher"
+ },
+ "birds/polysticta-stelleri.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_434.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate434",
+  "common": "Western Duck",
+  "stated": "Western Duck"
+ },
+ "birds/pooecetes-gramineus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_94.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate94",
+  "common": "Grass Finch, or Bay-winged Bunting",
+  "stated": "Grass Finch, or Bay-winged Bunting"
+ },
+ "birds/porphyrio-martinica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_307.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate307",
+  "common": "Purple Gallinule",
+  "stated": "Purple Gallinule"
+ },
+ "birds/porphyrio-poliocephalus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Porphyro_porphyrio.jpg",
+  "licence": "Public domain",
+  "artist": "Elizabeth Gould.",
+  "common": "Gray-headed Swamphen"
+ },
+ "birds/porzana-carolina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_233.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate233",
+  "common": "Sora; or Rail",
+  "stated": "Sora; or Rail"
+ },
+ "birds/progne-subis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_22.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate22",
+  "common": "Purple Martin",
+  "stated": "Purple Martin"
+ },
+ "birds/protonotaria-citrea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_3.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate3",
+  "common": "Prothonotary Warbler",
+  "stated": "Prothonotary Warbler"
+ },
+ "birds/psaltriparus-minimus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_of_California_in_relation_to_the_fruit_industry_(1907)_(20358099296).jpg",
+  "licence": "No restrictions",
+  "artist": "Beal, F. E. L. (Foster Ellenborough Lascelles), 1840-1916",
+  "common": "Bushtit"
+ },
+ "birds/psittacula-krameri.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Keulemans_Onze_vogels_3_09.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Rose-ringed Parakeet"
+ },
+ "birds/puffinus-lherminieri.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_301.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate301",
+  "common": "Dusky Petrel",
+  "stated": "Dusky Petrel"
+ },
+ "birds/puffinus-puffinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_297.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate297",
+  "common": "Manks Shearwater",
+  "stated": "Manks Shearwater"
+ },
+ "birds/pycnonotus-jocosus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Pycnonotus_jocosus_-_1700-1880_-_Print_-_Iconographia_Zoologica_-_Special_Collections_University_of_Amsterdam_-_UBA01_IZ16400029.tif",
+  "licence": "Public domain",
+  "artist": "",
+  "common": "Red-whiskered Bulbul"
+ },
+ "birds/pyrocephalus-rubinus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_zoology_of_the_voyage_of_H.M.S._Beagle_(Birds_Pl._6)_(8430585122).jpg",
+  "licence": "Public domain",
+  "artist": "Bell, Thomas; Darwin, Charles; Gould, Elizabeth; Gould, John; Owen, Richard; Waterhouse, G. R.",
+  "common": "Vermilion Flycatcher"
+ },
+ "birds/quiscalus-major.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_187.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate187",
+  "common": "Boat-tailed Grackle",
+  "stated": "Boat-tailed Grackle"
+ },
+ "birds/quiscalus-mexicanus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1901)_(14562055707).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Great-tailed Grackle"
+ },
+ "birds/quiscalus-quiscula.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_7.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate7",
+  "common": "Purple Grakle or Common Crow Blackbird",
+  "stated": "Purple Grakle or Common Crow Blackbird"
+ },
+ "birds/rallus-crepitans.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_204.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate204",
+  "common": "Salt Water Marsh Hen",
+  "stated": "Salt Water Marsh Hen"
+ },
+ "birds/rallus-elegans.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_203.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate203",
+  "common": "Fresh Water Marsh Hen",
+  "stated": "Fresh Water Marsh Hen"
+ },
+ "birds/rallus-limicola.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_205.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate205",
+  "common": "Virginia Rail",
+  "stated": "Virginia Rail"
+ },
+ "birds/rallus-obsoletus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_game_birds_of_California_(1918)_(14568650688).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Ridgway's Rail"
+ },
+ "birds/ramosomyia-violiceps.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_monograph_of_the_Trochilid%C3%A6,_or_family_of_humming-birds_(Plate_284)_(8551707370).jpg",
+  "licence": "Public domain",
+  "artist": "Gould, John; Hullmandel & Walton; Richter, Henry Constantine; Walter & Cohn",
+  "common": "Violet-crowned Hummingbird"
+ },
+ "birds/recurvirostra-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_321.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate321",
+  "common": "American Avocet",
+  "stated": "American Avocet"
+ },
+ "birds/regulus-satrapa.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_183.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate183",
+  "common": "American Golden crested-Wren",
+  "stated": "American Golden crested-Wren"
+ },
+ "birds/riparia-riparia.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:GouldBirdsEuropeIISand_Martin.jpg",
+  "licence": "Public domain",
+  "artist": "J and E Gould E Lear",
+  "common": "Bank Swallow"
+ },
+ "birds/rissa-tridactyla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_224.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate224",
+  "common": "Kittiwake Gull",
+  "stated": "Kittiwake Gull"
+ },
+ "birds/rostrhamus-sociabilis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1902)_(14748223071).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Snail Kite"
+ },
+ "birds/rynchops-niger.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_327.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate327",
+  "common": "Black Skimmer",
+  "stated": "Black Skimmer"
+ },
+ "birds/sayornis-phoebe.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_120.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate120",
+  "common": "Pewit Flycatcher",
+  "stated": "Pewit Flycatcher"
+ },
+ "birds/sayornis-saya.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Sayornis_saya_saya_1841.jpg",
+  "licence": "Public domain",
+  "artist": "William Swainson (1789-1855)",
+  "common": "Say's Phoebe"
+ },
+ "birds/scolopax-minor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_269.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate269",
+  "common": "American Woodcock",
+  "stated": "American Woodcock"
+ },
+ "birds/seiurus-aurocapilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_143.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate143",
+  "common": "Golden-crowned Thrush",
+  "stated": "Golden-crowned Thrush"
+ },
+ "birds/selasphorus-calliope.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi3Goul_0112.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Calliope Hummingbird"
+ },
+ "birds/selasphorus-platycercus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:MonographTrochi3Goul_0104.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "Broad-tailed Hummingbird"
+ },
+ "birds/selasphorus-rufus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_383.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate383",
+  "common": "Ruff-necked Humming-bird",
+  "stated": "Ruff-necked Humming-bird"
+ },
+ "birds/selasphorus-sasin.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1905)_(14569192497).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Allen's Hummingbird"
+ },
+ "birds/setophaga-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_15.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate15",
+  "common": "Blue Yellow back Warbler",
+  "stated": "Blue Yellow back Warbler"
+ },
+ "birds/setophaga-caerulescens-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_155.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate155",
+  "common": "Black-throated Blue Warbler",
+  "stated": "Black-throated Blue Warbler"
+ },
+ "birds/setophaga-caerulescens.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_148.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate148",
+  "common": "Pine Swamp Warbler",
+  "stated": "Pine Swamp Warbler"
+ },
+ "birds/setophaga-castanea-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_88.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate88",
+  "common": "Autumnal Warbler",
+  "stated": "Autumnal Warbler"
+ },
+ "birds/setophaga-castanea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_69.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate69",
+  "common": "Bay-breasted Warbler",
+  "stated": "Bay-breasted Warbler"
+ },
+ "birds/setophaga-cerulea-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_49.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate49",
+  "common": "Blue-green Warbler",
+  "stated": "Blue-green Warbler"
+ },
+ "birds/setophaga-cerulea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_48.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate48",
+  "common": "Azure Warbler",
+  "stated": "Azure Warbler"
+ },
+ "birds/setophaga-citrina-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_9.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate9",
+  "common": "Selby's Flycatcher",
+  "stated": "Selby's Flycatcher"
+ },
+ "birds/setophaga-citrina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_110.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate110",
+  "common": "Hooded Warbler",
+  "stated": "Hooded Warbler"
+ },
+ "birds/setophaga-coronata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_153.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate153",
+  "common": "Yellow-crown Warbler",
+  "stated": "Yellow-crown Warbler"
+ },
+ "birds/setophaga-discolor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_14.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate14",
+  "common": "Prairie Warbler",
+  "stated": "Prairie Warbler"
+ },
+ "birds/setophaga-dominica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_85.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate85",
+  "common": "Yellow Throated Warbler",
+  "stated": "Yellow Throated Warbler"
+ },
+ "birds/setophaga-fusca-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_135.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate135",
+  "common": "Blackburnian Warbler",
+  "stated": "Blackburnian Warbler"
+ },
+ "birds/setophaga-fusca.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_134.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate134",
+  "common": "Hemlock Warbler",
+  "stated": "Hemlock Warbler"
+ },
+ "birds/setophaga-kirtlandii.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Annals_of_the_Lyceum_of_Natural_History_of_New-York_(1852)_(18413589895).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Kirtland's Warbler"
+ },
+ "birds/setophaga-magnolia-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_50.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate50",
+  "common": "Black & Yellow Warbler",
+  "stated": "Black & Yellow Warbler"
+ },
+ "birds/setophaga-magnolia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_123.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate123",
+  "common": "Black & Yellow Warblers",
+  "stated": "Black & Yellow Warblers"
+ },
+ "birds/setophaga-palmarum-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_163.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate163",
+  "common": "",
+  "stated": "Images from"
+ },
+ "birds/setophaga-palmarum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_145.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate145",
+  "common": "Yellow Red-poll Warbler",
+  "stated": "Yellow Red-poll Warbler"
+ },
+ "birds/setophaga-pensylvanica.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_59.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate59",
+  "common": "Chestnut-sided Warbler",
+  "stated": "Chestnut-sided Warbler"
+ },
+ "birds/setophaga-petechia-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_65.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate65",
+  "common": "Rathbone Warbler",
+  "stated": "Rathbone Warbler"
+ },
+ "birds/setophaga-petechia-3.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_95.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate95",
+  "common": "Blue-eyed yellow Warbler",
+  "stated": "Blue-eyed yellow Warbler"
+ },
+ "birds/setophaga-petechia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_35.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate35",
+  "common": "Children's Warbler",
+  "stated": "Children's Warbler"
+ },
+ "birds/setophaga-pinus-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_30.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate30",
+  "common": "Vigors Vireo",
+  "stated": "Vigors Vireo"
+ },
+ "birds/setophaga-pinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_140.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate140",
+  "common": "Pine Creeping Warbler",
+  "stated": "Pine Creeping Warbler"
+ },
+ "birds/setophaga-ruticilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_40.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate40",
+  "common": "American Redstart",
+  "stated": "American Redstart"
+ },
+ "birds/setophaga-striata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_133.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate133",
+  "common": "Black-poll Warbler",
+  "stated": "Black-poll Warbler"
+ },
+ "birds/setophaga-tigrina.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Field_book_of_wild_birds_and_their_music_(6260097669).jpg",
+  "licence": "Public domain",
+  "artist": "Mathews, F. Schuyler",
+  "common": "Cape May Warbler"
+ },
+ "birds/sialia-sialis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_113.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate113",
+  "common": "Blue-bird",
+  "stated": "Blue-bird"
+ },
+ "birds/sicalis-flaveola.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_Jamaica_(20129916501).jpg",
+  "licence": "Public domain",
+  "artist": "Gosse, Philip Henry",
+  "common": "Saffron Finch"
+ },
+ "birds/sitta-canadensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_105.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate105",
+  "common": "Red-breasted Nuthatch",
+  "stated": "Red-breasted Nuthatch"
+ },
+ "birds/sitta-carolinensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_152.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate152",
+  "common": "White-breasted Black-capped Nuthatch",
+  "stated": "White-breasted Black-capped Nuthatch"
+ },
+ "birds/sitta-pusilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_125.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate125",
+  "common": "Brown-headed Nuthatch",
+  "stated": "Brown-headed Nuthatch"
+ },
+ "birds/somateria-mollissima.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_246.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate246",
+  "common": "Eider Duck",
+  "stated": "Eider Duck"
+ },
+ "birds/somateria-spectabilis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_277.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate277",
+  "common": "King Duck",
+  "stated": "King Duck"
+ },
+ "birds/spatula-clypeata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_331.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate331",
+  "common": "Shoveller Duck",
+  "stated": "Shoveller Duck"
+ },
+ "birds/spatula-cyanoptera.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_game_birds_of_California_(Pl._4)_(6714571247).jpg",
+  "licence": "Public domain",
+  "artist": "Bryant, H. C.; Grinnell, Joseph; Storer, Tracy Irwin",
+  "common": "Cinnamon Teal"
+ },
+ "birds/spatula-discors.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_316.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate316",
+  "common": "Blue-Winged Teal",
+  "stated": "Blue-Winged Teal"
+ },
+ "birds/sphyrapicus-ruber.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Nature_neighbors,_embracing_birds,_plants,_animals,_minerals,_in_natural_colors_by_color_photography,_containing_articles_by_Gerald_Alan_Abbott,_Dr._Albert_Schneider,_William_Kerr_Higley...and_other_(14561969408).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Red-breasted Sapsucker"
+ },
+ "birds/sphyrapicus-varius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_190.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate190",
+  "common": "Yellow bellied Woodpecker; S. varius",
+  "stated": "Yellow bellied Woodpecker; S. varius"
+ },
+ "birds/spinus-lawrencei.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_California_(Plate_19)_(7699540814).jpg",
+  "licence": "CC BY 2.0",
+  "artist": "Brooks, Allan; Dawson, William Leon; Dickey, Donald R.; Finley, William L.; Pierce, Wright M.",
+  "common": "Lawrence's Goldfinch"
+ },
+ "birds/spinus-pinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_180.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate180",
+  "common": "Pine Finch",
+  "stated": "Pine Finch"
+ },
+ "birds/spinus-psaltria.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Bulletin_-_Biological_Survey_(1908)_(20242724609).jpg",
+  "licence": "No restrictions",
+  "artist": "United States. Bureau of Biological Survey",
+  "common": "Lesser Goldfinch"
+ },
+ "birds/spinus-tristis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_33.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate33",
+  "common": "American Goldfinch",
+  "stated": "American Goldfinch"
+ },
+ "birds/spiza-americana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_388.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate388",
+  "common": "Black-Throated Bunting",
+  "stated": "Black-Throated Bunting"
+ },
+ "birds/spizella-passerina.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_104.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate104",
+  "common": "Chipping Sparrow",
+  "stated": "Chipping Sparrow"
+ },
+ "birds/spizella-pusilla.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_139.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate139",
+  "common": "Field Sparrow",
+  "stated": "Field Sparrow"
+ },
+ "birds/spizelloides-arborea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_188.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate188",
+  "common": "Tree Sparrow",
+  "stated": "Tree Sparrow"
+ },
+ "birds/starnoenas-cyanocephala.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_172.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate172",
+  "common": "Blue-headed Pigeon",
+  "stated": "Blue-headed Pigeon"
+ },
+ "birds/stelgidopteryx-serripennis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Stelgidopteryx_serripennis_1894.jpg",
+  "licence": "Public domain",
+  "artist": "Richard Bowdler Sharpe",
+  "common": "Northern Rough-winged Swallow"
+ },
+ "birds/stercorarius-longicaudus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_268.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate268",
+  "common": "Arctic Yager",
+  "stated": "Arctic Yager"
+ },
+ "birds/stercorarius-parasiticus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_273.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate273",
+  "common": "Richardson's Jager",
+  "stated": "Richardson's Jager"
+ },
+ "birds/stercorarius-pomarinus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_254.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate254",
+  "common": "Jager",
+  "stated": "Jager"
+ },
+ "birds/sterna-dougallii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_240.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate240",
+  "common": "Roseate Tern",
+  "stated": "Roseate Tern"
+ },
+ "birds/sterna-forsteri.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_414.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate414",
+  "common": "Havell's Tern and Trudeau's Tern",
+  "stated": "Havell's Tern and Trudeau's Tern"
+ },
+ "birds/sterna-hirundo.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_311.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate311",
+  "common": "Great Tern",
+  "stated": "Great Tern"
+ },
+ "birds/sterna-paradisaea.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_250.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate250",
+  "common": "Arctic Tern",
+  "stated": "Arctic Tern"
+ },
+ "birds/sternula-antillarum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_322.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate322",
+  "common": "Lesser Tern",
+  "stated": "Lesser Tern"
+ },
+ "birds/streptopelia-decaocto.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:TurturStoliczkaeKeulemans.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Eurasian Collared-Dove"
+ },
+ "birds/strix-nebulosa.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_355.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate355",
+  "common": "Great Cinereous Owl",
+  "stated": "Great Cinereous Owl"
+ },
+ "birds/strix-varia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_46.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate46",
+  "common": "Plat",
+  "stated": "Plat"
+ },
+ "birds/sturnella-magna.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_136.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate136",
+  "common": "Meadow Lark",
+  "stated": "Meadow Lark"
+ },
+ "birds/sturnella-neglecta.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_America_(Pl._489)_(8595336900).jpg",
+  "licence": "Public domain",
+  "artist": "Audubon, John James; Bowen, John T.",
+  "common": "Western Meadowlark"
+ },
+ "birds/sturnus-vulgaris.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:BirdsAsiaJohnGoVGoul_0180.jpg",
+  "licence": "Public domain",
+  "artist": "John Gould / Henry Constantine Richter",
+  "common": "European Starling"
+ },
+ "birds/sula-leucogaster.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_207.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate207",
+  "common": "Booby Gannet",
+  "stated": "Booby Gannet"
+ },
+ "birds/sula-sula.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_Australia_(16085098474).jpg",
+  "licence": "Public domain",
+  "artist": "Broinowski, Gracius J.",
+  "common": "Red-footed Booby"
+ },
+ "birds/surnia-ulula.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_382.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate382",
+  "common": "Hawk Owl",
+  "stated": "Hawk Owl"
+ },
+ "birds/tachybaptus-dominicus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_Jamaica_(19501819684).jpg",
+  "licence": "Public domain",
+  "artist": "Gosse, Philip Henry",
+  "common": "Least Grebe"
+ },
+ "birds/tachycineta-bicolor.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_100.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate100",
+  "common": "White-bellied Swallow",
+  "stated": "White-bellied Swallow"
+ },
+ "birds/tachycineta-thalassina.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Tachycineta_thalassina_1894.jpg",
+  "licence": "Public domain",
+  "artist": "Richard Bowdler Sharpe",
+  "common": "Violet-green Swallow"
+ },
+ "birds/thalasseus-maximus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_274.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate274",
+  "common": "Cayenne Tern",
+  "stated": "Cayenne Tern"
+ },
+ "birds/thalasseus-sandvicensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_280.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate280",
+  "common": "Sandwich Tern",
+  "stated": "Sandwich Tern"
+ },
+ "birds/thryomanes-bewickii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_18.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate18",
+  "common": "Bewick's Wren",
+  "stated": "Bewick's Wren"
+ },
+ "birds/thryothorus-ludovicianus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_78.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate78",
+  "common": "Great Carolina Wren",
+  "stated": "Great Carolina Wren"
+ },
+ "birds/toxostoma-crissale.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:The_birds_of_California_-_a_complete,_scientific_and_popular_account_of_the_580_species_and_subspecies_of_birds_found_in_the_state_(1923)_(20196915430).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Crissal Thrasher"
+ },
+ "birds/toxostoma-longirostre.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Toxostoma_longirostre_Boundary_Survey_Painting.jpg",
+  "licence": "Public domain",
+  "artist": "Painting by Spencer F. Baird Scan or photo by Earwig ( talk page in German )",
+  "common": "Long-billed Thrasher"
+ },
+ "birds/toxostoma-redivivum.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1902)_(14775547273).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "California Thrasher"
+ },
+ "birds/toxostoma-rufum.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_116.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate116",
+  "common": "Ferruginous Thrush",
+  "stated": "Ferruginous Thrush"
+ },
+ "birds/tringa-flavipes.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_290.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate290",
+  "common": "Yellow Shank",
+  "stated": "Yellow Shank"
+ },
+ "birds/tringa-melanoleuca.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_310.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate310",
+  "common": "Tell-tale Godwit or Snipe",
+  "stated": "Tell-tale Godwit or Snipe"
+ },
+ "birds/tringa-nebularia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_270.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate270",
+  "common": "Greenshank",
+  "stated": "Greenshank"
+ },
+ "birds/tringa-semipalmata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_275.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate275",
+  "common": "Semipalmated Snipe or Willet",
+  "stated": "Semipalmated Snipe or Willet"
+ },
+ "birds/tringa-solitaria.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_291.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate291",
+  "common": "Solitary Sandpiper",
+  "stated": "Solitary Sandpiper"
+ },
+ "birds/troglodytes-aedon-2.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_83.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate83",
+  "common": "House Wren",
+  "stated": "House Wren"
+ },
+ "birds/troglodytes-aedon.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_179.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate179",
+  "common": "Wood Wren",
+  "stated": "Wood Wren"
+ },
+ "birds/troglodytes-hiemalis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Field_book_of_wild_birds_and_their_music_(6260100027).jpg",
+  "licence": "Public domain",
+  "artist": "Mathews, F. Schuyler",
+  "common": "Winter Wren"
+ },
+ "birds/troglodytes-pacificus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:AnorthuraFumigataKeulemans.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Pacific Wren"
+ },
+ "birds/trogon-ambiguus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:A_monograph_of_the_Trogonidae,_or_family_of_trogons_(26698273138).jpg",
+  "licence": "Public domain",
+  "artist": "John Gould",
+  "common": "Coppery-tailed Trogon"
+ },
+ "birds/turdus-migratorius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_131.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate131",
+  "common": "American Robin",
+  "stated": "American Robin"
+ },
+ "birds/tympanuchus-cupido.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_186.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate186",
+  "common": "Pinnated Grouse",
+  "stated": "Pinnated Grouse"
+ },
+ "birds/tympanuchus-phasianellus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_386.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate386",
+  "common": "Sharp-tailed Grouse",
+  "stated": "Sharp-tailed Grouse"
+ },
+ "birds/tyrannus-couchii.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Report_on_the_United_States_and_Mexican_boundary_survey_0135a_Tyrannus_couchii.jpg",
+  "licence": "Public domain",
+  "artist": "United States Department of the Interior",
+  "common": "Couch's Kingbird"
+ },
+ "birds/tyrannus-dominicensis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_170.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate170",
+  "common": "Piping Flycatcher",
+  "stated": "Piping Flycatcher"
+ },
+ "birds/tyrannus-savana.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_168.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate168",
+  "common": "Fork-tailed Flycatcher",
+  "stated": "Fork-tailed Flycatcher"
+ },
+ "birds/tyrannus-tyrannus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_79.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate79",
+  "common": "Tyrant Fly-catcher",
+  "stated": "Tyrant Fly-catcher"
+ },
+ "birds/tyrannus-verticalis.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1906)_(14563799729).jpg",
+  "licence": "Public domain",
+  "artist": "Internet Archive Book Images",
+  "common": "Western Kingbird"
+ },
+ "birds/tyto-furcata.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_171.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate171",
+  "common": "Barn Owl",
+  "stated": "Barn Owl"
+ },
+ "birds/uria-aalge.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_218.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate218",
+  "common": "Foolish Guillemot",
+  "stated": "Foolish Guillemot"
+ },
+ "birds/uria-lomvia.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_245.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate245",
+  "common": "Uria Brunnichi",
+  "stated": "Uria Brunnichi"
+ },
+ "birds/urile-penicillatus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1901)_(14563633420).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Brandt's Cormorant"
+ },
+ "birds/vermivora-bachmanii.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_185.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate185",
+  "common": "Bachman's Warbler",
+  "stated": "Bachman's Warbler"
+ },
+ "birds/vermivora-cyanoptera.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_20.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate20",
+  "common": "Blue-winged Yellow Warbler",
+  "stated": "Blue-winged Yellow Warbler"
+ },
+ "birds/vidua-macroura.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Vidua_macroura_1869.jpg",
+  "licence": "Public domain",
+  "artist": "John Gerrard Keulemans",
+  "common": "Pin-tailed Whydah"
+ },
+ "birds/vireo-atricapilla.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustrations_of_the_birds_of_California,_Texas,_Oregon,_British_and_Russian_America_(Plate_24)_(6306012031).jpg",
+  "licence": "Public domain",
+  "artist": "Bowen, John T.; Cassin, John; Hitchcock, William E.; J.B. Lippincott & Co.; White, George G.",
+  "common": "Black-capped Vireo"
+ },
+ "birds/vireo-flavifrons.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_119.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate119",
+  "common": "Yellow-throated Vireo",
+  "stated": "Yellow-throated Vireo"
+ },
+ "birds/vireo-gilvus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_118.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate118",
+  "common": "Warbling Flycatcher",
+  "stated": "Warbling Flycatcher"
+ },
+ "birds/vireo-griseus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_63.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate63",
+  "common": "White-eyed Flycatcher, or Vireo",
+  "stated": "White-eyed Flycatcher, or Vireo"
+ },
+ "birds/vireo-olivaceus.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_150.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate150",
+  "common": "Red-eyed Vireo",
+  "stated": "Red-eyed Vireo"
+ },
+ "birds/vireo-solitarius.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_28.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate28",
+  "common": "Vireo Solitarius",
+  "stated": "Vireo Solitarius"
+ },
+ "birds/xema-sabini.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_287.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate287",
+  "common": "Fork-tailed Gull",
+  "stated": "Fork-tailed Gull"
+ },
+ "birds/zenaida-aurita.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_162.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate162",
+  "common": "",
+  "stated": "Images from"
+ },
+ "birds/zenaida-macroura.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_17.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate17",
+  "common": "Carolina Pigeon",
+  "stated": "Carolina Pigeon"
+ },
+ "birds/zonotrichia-albicollis.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_8.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate8",
+  "common": "White throated Sparrow",
+  "stated": "White throated Sparrow"
+ },
+ "birds/zonotrichia-atricapilla.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:Birds_and_nature_(1904)_(14749994002).jpg",
+  "licence": "No restrictions",
+  "artist": "Internet Archive Book Images",
+  "common": "Golden-crowned Sparrow"
+ },
+ "birds/zonotrichia-leucophrys.png": {
+  "source": "audubon",
+  "url": "https://commons.wikimedia.org/wiki/File:Illustration_from_Birds_of_America_(1827)_by_John_James_Audubon,_digitally_enhanced_by_rawpixel-com_114.jpg",
+  "licence": "CC BY-SA 4.0",
+  "sheet": "plate114",
+  "common": "White-crowned Sparrow",
+  "stated": "White-crowned Sparrow"
+ },
+ "birds/zosterops-japonicus.png": {
+  "source": "commons",
+  "url": "https://commons.wikimedia.org/wiki/File:%E3%80%8E%E9%B3%A5%E5%90%88%E3%80%8F_%E6%A1%83%E8%8A%B1%E3%81%AB%E7%9B%AE%E7%99%BD-Japanese_White-eyes_on_a_Branch_of_Peach_Tree,%E2%80%9D_from_the_Series_An_Array_of_Birds_(Tori_awase),_from_Spring_Rain_Surimono_Album_(Harusame_surimono-j%C5%8D,_vol._3)_MET_DP138936.jpg",
+  "licence": "CC0",
+  "artist": "Kubo Shunman",
+  "common": "Warbling White-eye"
+ }
+}

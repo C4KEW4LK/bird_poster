@@ -1,0 +1,60 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv-rembg/
+.venv-pio/
+venv/
+
+# The artwork pipeline's inputs and outputs: scans, mattes, cut-outs. Workstation
+# only; nothing the frame runs depends on them and plates are re-scrapeable.
+wikimedia-scrape/
+
+# ESP Web Tools page assembled by firmware/tools/webflash.py
+firmware/webflash/dist/
+
+# Full-size plates for the web, split from packs/card by export_web_plates.py
+firmware/webplates/
+firmware/webplates.key
+
+# Research logs, one-off scripts and their outputs. What the tooling needs from
+# them - region lists, the alias tables, the firmware reference - lives in
+# assets/regions, scripts/names and firmware/docs.
+notes/
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# The plate artwork: 2 GB of PNGs, the input to bake_plates.py. The packs baked
+# from it are committed (firmware/packs/), and each style's manifest, species
+# list and attribution are too; the pictures themselves stay on the workstation.
+assets/artwork/*/birds/
+
+# Renders and comparisons from the host harness
+firmware/out/
+
+# The artwork pipeline: workstation-only, like the artwork it works on. None of
+# it is needed to build the firmware or the flasher - they run on the packs
+# committed in firmware/packs/ - so it stays on the machine that curates and
+# bakes: scraping and naming (scripts/, assets/regions/, the BirdNET label
+# sets), the name checks (tests/), and the bake tools.
+scripts/
+tests/
+assets/regions/
+assets/birdnet_labels_*.txt
+assets/birdnet-v3-inat-ids.json
+assets/artwork/*/species-extra.txt
+firmware/tools/artwork.py
+firmware/tools/bake_plates.py
+firmware/tools/bake_masks.py
+firmware/tools/name_aliases.py
+# Gould at full width and its specimen: the frame sets Gould Condensed
+assets/fonts/gould/Gould-Regular.ttf
+assets/fonts/gould/Gould-specimen.png
+# Subset fonts for a hand-flashed image; the flasher makes its own every build
+firmware/data/
