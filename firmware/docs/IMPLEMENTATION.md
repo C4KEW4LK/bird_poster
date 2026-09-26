@@ -1,5 +1,10 @@
 # Implementation reference
 
+> **Only tested on hardware with the XIAO ESP32-S3 Plus in the EE02, with the
+> Australian plates.** The reTerminal E1004 pin map and SD card handling, and
+> the European and North American packs, compile and render on the desktop
+> harness but have not been run on a board.
+
 Constants, pin numbers and algorithms needed to write the C++ port, gathered so
 they don't have to be re-derived. Everything here was read out of this repo or
 verified against live hardware documentation on 2026-09-04.

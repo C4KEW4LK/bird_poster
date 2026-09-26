@@ -4,6 +4,8 @@ A battery e-ink bird frame: it asks the network which birds have been seen
 nearby, draws them as public-domain illustrations packed onto one page, and goes
 back to sleep.
 
+Inspired by [Fugleramme](https://github.com/arnegiacomo/fugleramme).
+
 <p align="center">
   <img src="images/output_example.bmp" alt="A page from the frame: five Australian birds from Gould's plates - Rufous Whistler, Latham's Snipe, Nankeen Kestrel, Little Eagle and Great Egret - each with its common and scientific name, and the date in the corner" width="480">
 </p>
@@ -44,8 +46,8 @@ Two boards carry the same 13.3" Spectra 6 panel:
 - Seeed's [**reTerminal E1004**](https://wiki.seeedstudio.com/getting_started_with_reterminal_e1004/)
   — the same glass in a case with a battery, 32 MB flash and a microSD slot.
 
-The 8 MB PSRAM both have is the reason for the ESP32-S3: the packer's
-occupancy grid and the sprite masks do not fit in internal SRAM. Pin maps,
+The firmware needs the 8 MB of PSRAM, since the packer's occupancy
+grid and the sprite masks do not fit in internal SRAM. Pin maps,
 the battery budget and the build order are in
 [`firmware/docs/IMPLEMENTATION.md`](firmware/docs/IMPLEMENTATION.md).
 
@@ -62,9 +64,6 @@ curated for this project. Each species is matched to its illustration by
 scientific name, background-removed, and packed onto a paper-toned page by its
 silhouette, every bird at one size. An empty window shows a status page.
 
-Half the point of this project is showing off some amazing public-domain
-natural-history illustration: every bird is cut from a real plate.
-
 Artwork is **not** limited to what a classifier can name. Images are keyed on
 the scientific name, so a plate for a bird BirdNET has no label for is still
 reachable from iNaturalist or eBird — which matters, because 335 of the 871
@@ -78,38 +77,14 @@ bird species recorded in Australia have no BirdNET v2.4 label at all.
 
 ### The plate pack
 
-The frame never reads a PNG. Each region's artwork is baked into one **plate
-pack** (format `FGPL` v6, baked on the workstation that holds the artwork), which is what the
-flash or the SD card holds and what the flasher and the release ship. Per
-species it carries the silhouette the packer places by, the pixels, the box
-its name needs, and every spelling a source might ask with (BirdNET and
-iNaturalist disagree on binomials, so each spelling is its own index row
-pointing at the same pixels).
-
-The pixels are compressed the way the six-ink panel can bear, not the way a
-screen would want:
-
-- **Luma and chroma apart.** Brightness and colour are posterised separately,
-  because the eye resolves **shading about three times more finely than hue**
-  (Mullen 1985 — the same fact behind JPEG's and video's chroma subsampling).
-  So the brightness plane keeps every pixel and the colour plane one sample
-  per 4×4 block.
-- **15 grey levels a pixel** — chosen per bird by k-means over its painted
-  pixels, so a dark bird spends its levels in the dark. The sixteenth code is
-  "outside the silhouette", which makes the luma plane the packer's shape and
-  the renderer's pixels in one.
-- **16 colours a bird, one per 4×4 block** — also clustered per bird, weighted
-  the way the frame's dither weights chroma. The device interpolates the
-  colour between blocks when it draws, so the grid never shows.
-- **zlib over the nibble planes.** Posterised planes are flat runs, which
-  deflate well; a dithered image would be noise, which does not. That is why
-  the pack is *not* pre-dithered: the dither runs on the device at the size
-  the packer chose, because a dither rescaled is a dither wrong.
-
-That comes to 240 colours a sprite for roughly 18-33 KB a bird at 400-500 px,
-and it is why 724 species fit a 13.6 MB pack. The colour under transparent
-pixels is zeroed in the cut-outs for the same reason: PNG cannot compress
-paper grain either.
+Each region's artwork is baked into one **plate pack**, which is
+what the flash or SD card holds and what the flasher ships. Per species it
+holds the silhouette, a posterised sprite and every spelling a source might
+use for the name. Sprites are posterised to 15 grey levels a pixel and 16
+colours a bird (one per 4×4 block), then zlib-compressed, resulting in ~18-33 KB a bird,
+and dithered on the device at the size they are drawn.
+The format is covered in
+[`firmware/README.md`](firmware/README.md#how-a-page-is-drawn).
 
 The packs are committed in [`firmware/packs/`](firmware/packs/), each baked
 to fill its room (`--fit` shrinks the sprite size from 1200 px until the pack
@@ -128,9 +103,9 @@ baked from them. Rebaking needs the cut-outs on the workstation.
 
 ### Full-size plates from the web
 
-A pack in flash holds each bird at the size its partition allows. When a bird
+A pack in flash holds each bird at the size its partition allows (~400px for EE02). When a bird
 is drawn much larger than that - a page of one or two birds - the frame fetches
-the same plate at full size (1200 px) from the web and falls back to flash if
+the same plate at full size (1200 px) from the web and falls back to local if
 the site does not answer. The flasher's build publishes them beside the page,
 one file a species, at `https://c4kew4lk.github.io/bird_poster/plates/<region>/`,
 which is the frame's default; any other copy (`firmware/tools/export_web_plates.py`)
@@ -174,12 +149,10 @@ cd firmware && pio test -e native            # host tests: packer, sources, rend
 `pio` comes from PlatformIO (`pip install platformio`). The Python tooling
 runs under `uv sync` (`uv run ruff check`, `uv run mypy` are what CI runs).
 
-The repository holds what building and deploying needs: the firmware, the
-baked packs, the fonts, and the flasher. The artwork and the pipeline that
-curates it and bakes the packs - the cut-out PNGs, the scraping and naming
-scripts, the BirdNET label sets and region lists, the bake tools - live on the
-workstation that makes the packs and are not committed; after a rebake, the
-new packs are.
+This repository holds what you need to build and flash the frame: the
+firmware, the baked plate packs, the fonts and the flasher. The source artwork
+and the tools that bake the packs are not included; only the finished packs
+are committed.
 
 ## Repository layout
 
