@@ -81,6 +81,10 @@ struct App {
   // fetch, a render and the 30 s panel refresh, all of which block.
   std::string phase;
   std::function<void()> onProgress;
+  // Run once, just before the next page goes to the glass, then cleared.
+  // main.cpp sets it to turn the radio off when nothing after the refresh
+  // needs the network, so WiFi is not up through the 30 s the glass takes.
+  std::function<void()> beforeRefresh;
   void progress(const std::string &what);
 
   bool begin();  // filesystem, pack, font, settings, state
@@ -154,6 +158,10 @@ struct App {
   // "Refresh 123", counting the refresh about to happen, for the page and the
   // status page; empty while counting is off.
   std::string refreshNote() const;
+  // A hash of everything that decides how the next bird page looks - the
+  // birds and their names, the date, the layout, every drawing setting, the
+  // firmware. Equal to State::pageSig when that page is already on the glass.
+  uint32_t pageSignature() const;
   // Where the web supplement asks for a species' full-size plate.
   std::string webPlateUrl(const std::string &name) const;
   // Start the refresh count again from nothing.

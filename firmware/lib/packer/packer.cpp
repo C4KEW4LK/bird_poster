@@ -1247,6 +1247,25 @@ Sprite spriteAt(const std::vector<Mask> &sources, const std::vector<bool> &flips
   return withLabel(i, dim, art, box, gap);
 }
 
+// `stamp` undone: the bird's own bits cleared from the grid. Exact because
+// placed sprites never share a bit - every one was placed clear of the rest.
+void unstamp(Mask &grid, const Mask &sprite, int x, int y) {
+  const size_t sw = sprite.stride() - 1;
+  for (int r = 0; r < sprite.height(); ++r) {
+    const uint64_t *srow = sprite.row(r);
+    uint64_t *g = grid.row(y + r);
+    for (size_t i = 0; i < sw; ++i) {
+      const uint64_t v = srow[i];
+      if (!v) continue;
+      const size_t bit = size_t(x) + i * kBits;
+      const size_t w0 = bit >> 6;
+      const unsigned sh = unsigned(bit & 63);
+      g[w0] &= ~(v << sh);
+      if (sh) g[w0 + 1] &= ~(v >> (kBits - sh));
+    }
+  }
+}
+
 bool fitsAt(const Mask &occ, const Mask &m, int x, int y, int boxW, int boxH) {
   if (x < 0 || y < 0 || x + m.width() > boxW || y + m.height() > boxH) return false;
   for (int r = 0; r < m.height(); ++r)
@@ -1398,12 +1417,17 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
   const int px = labels.empty() ? 0 : std::max(kMinLabelPx, namePx);
   const int gap = int(std::lround(px * kLabelGap));
 
-  // Every bird's sprite as placed, so the occupancy of "everyone but me" can
-  // be rebuilt as each one changes.
+  // Every bird's sprite as placed, and one grid of all of them. Each bird is
+  // lifted out of the grid while it is tried and put back where it lands, so
+  // "everyone but me" costs one sprite's worth of work rather than a rebuild
+  // from every other bird.
   const size_t n = placed.size();
   std::vector<Sprite> sprites(n);
-  for (size_t k = 0; k < n; ++k)
+  Mask occ(boxW, boxH);
+  for (size_t k = 0; k < n; ++k) {
     sprites[k] = spriteAt(sources, flips, labels, placed[k].index, placed[k].dim, px, gap);
+    stamp(occ, sprites[k].mask, placed[k].x - sprites[k].artX, placed[k].y - sprites[k].artY);
+  }
 
   // Smallest first: they have the most to gain, and a big bird growing first
   // would take the room a small one beside it needed.
@@ -1424,29 +1448,23 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
   for (int round = 0; round < std::max(1, rounds); ++round) {
   bool moved = false;
   for (size_t k : order) {
-    Mask occ(boxW, boxH);
-    for (size_t j = 0; j < n; ++j) {
-      if (j == k) continue;
-      stamp(occ, sprites[j].mask, placed[j].x - sprites[j].artX, placed[j].y - sprites[j].artY);
-    }
     const Sprite &cur = sprites[k];
     const int sx = placed[k].x - cur.artX, sy = placed[k].y - cur.artY;
     const int sw = cur.mask.width(), sh = cur.mask.height();
 
-    // Bisect the factor. A candidate is tried with its centre where the
-    // bird's is, then holding each edge, since the room is often to one side.
     // What is left of the budget at this bird's current size.
     float cap = float(fromDim[k]) * maxFactor / float(std::max(1, placed[k].dim));
     if (roundStep > 1.0f) cap = std::min(cap, roundStep);  // this round's share only
-    if (cap <= 1.0f) continue;
-    float lo = 1.0f, hi = cap;
-    Sprite best;
-    int bx = 0, by = 0;
-    bool grown = false;
-    for (int step = 0; step < 6; ++step) {
-      const float mid = (lo + hi) / 2;
-      const int dim = int(std::lround(placed[k].dim * mid));
-      if (dim <= placed[k].dim) break;
+    // The least growth worth a redraw: two pixels on the longest side or one
+    // percent, whichever is more. Below that it is only the rounding moving.
+    const int minDim = std::max(placed[k].dim + 2, int(std::ceil(placed[k].dim * 1.01f)));
+    const int maxDim = int(std::lround(placed[k].dim * cap));
+    if (maxDim < minDim) continue;
+
+    unstamp(occ, cur.mask, sx, sy);
+    // A candidate is tried with its centre where the bird's is, then holding
+    // each edge, since the room is often to one side, then shifted.
+    auto tryAt = [&](int dim, Sprite &out, int &ox, int &oy) -> bool {
       Sprite cand = spriteAt(sources, flips, labels, placed[k].index, dim, px, gap);
       const int cw = cand.mask.width(), ch = cand.mask.height();
       const int tries[5][2] = {
@@ -1456,29 +1474,51 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
           {sx + (sw - cw) / 2, sy},                  // top
           {sx + (sw - cw) / 2, sy + sh - ch},        // bottom
       };
-      bool ok = false;
       for (const auto &t : tries) {
         if (fitsAt(occ, cand.mask, t[0], t[1], boxW, boxH)) {
-          best = std::move(cand);
-          bx = t[0], by = t[1];
-          ok = grown = true;
-          break;
+          out = std::move(cand);
+          ox = t[0], oy = t[1];
+          return true;
         }
       }
       // Then, shifted from where it stands: the room may be off to one side.
-      for (size_t si = 0; !ok && si < shifts.size(); ++si) {
-        const int x = sx + (sw - cw) / 2 + shifts[si].first, y = sy + (sh - ch) / 2 + shifts[si].second;
+      for (const auto &[dx, dy] : shifts) {
+        const int x = sx + (sw - cw) / 2 + dx, y = sy + (sh - ch) / 2 + dy;
         if (fitsAt(occ, cand.mask, x, y, boxW, boxH)) {
-          best = std::move(cand);
-          bx = x, by = y;
-          ok = grown = true;
+          out = std::move(cand);
+          ox = x, oy = y;
+          return true;
         }
       }
-      if (ok) lo = mid;
-      else hi = mid;
+      return false;
+    };
+
+    // The least growth first. A bird boxed in on every side - most of them,
+    // a few rounds in - fails here once, where a bisection from the top
+    // would have failed at every size it tried on the way down.
+    Sprite best;
+    int bx = 0, by = 0;
+    if (!tryAt(minDim, best, bx, by)) {
+      stamp(occ, cur.mask, sx, sy);
+      continue;
     }
-    if (!grown) continue;
+    // Then bisect between that and the cap, to within a percent: finer than
+    // that, each step buys a pixel or two for another scale and erode.
+    int lo = minDim, hi = maxDim + 1;  // lo fits; hi is not known to
+    while (hi - lo > std::max(1, lo / 100)) {
+      const int mid = (lo + hi) / 2;
+      Sprite cand;
+      int cx = 0, cy = 0;
+      if (tryAt(mid, cand, cx, cy)) {
+        lo = mid;
+        best = std::move(cand);
+        bx = cx, by = cy;
+      } else {
+        hi = mid;
+      }
+    }
     moved = true;
+    stamp(occ, best.mask, bx, by);
     placed[k].dim = best.dim;
     placed[k].x = bx + best.artX;
     placed[k].y = by + best.artY;

@@ -599,6 +599,14 @@ bool App::present() {
     Serial.println("panel: BUSY never released - is the FPC seated?");
     return false;
   }
+  if (beforeRefresh) {
+    const std::function<void()> hook = std::move(beforeRefresh);
+    beforeRefresh = nullptr;
+    hook();
+  }
+  // With the radio off there is nothing to serve while the glass works, so
+  // the chip sleeps through the wait rather than spinning at full clock.
+  panel.sleepWhileBusy = WiFi.getMode() == WIFI_OFF;
   progress("sending the page to the glass");
   const uint32_t t0 = millis();
   if (!panel.push(last, settings.rotation)) {
@@ -647,6 +655,38 @@ std::string App::webPlateUrl(const std::string &name) const {
     }
   }
   return url + ".bin";
+}
+
+uint32_t App::pageSignature() const {
+  uint32_t h = 2166136261u;  // FNV-1a
+  const auto add = [&h](const std::string &s) {
+    for (char c : s) h = (h ^ uint8_t(c)) * 16777619u;
+    h = (h ^ 0xffu) * 16777619u;  // a separator, so "ab","c" is not "a","bc"
+  };
+  const auto num = [&add](long v) { add(std::to_string(v)); };
+  for (size_t i = 0; i < pageBirds.size(); ++i) {
+    add(pageBirds[i]);
+    add(i < pageCommon.size() ? pageCommon[i] : "");
+  }
+  // The date as it would be printed: a new day is a new page, a new hour is not.
+  const std::time_t now = std::time(nullptr);
+  if (settings.showDate && now > 100000) {
+    std::tm tm{};
+    localtime_r(&now, &tm);
+    add(formatDate(tm, settings.dateStyle, settings.dateOrder));
+  }
+  add(refreshNote());  // counting refreshes changes the page every time, as it should
+  add(kFirmwareVersion);
+  add(settings.pack);
+  add(settings.webPlates ? settings.webPlatesUrl : "");
+  for (long v : {long(state.layout), long(settings.rotation), long(settings.names),
+                 long(settings.commonCase), long(settings.labelSize), long(settings.sciPercent),
+                 long(settings.packStyle), long(settings.showDate), long(settings.dateStyle),
+                 long(settings.dateOrder), long(settings.dateEdge), long(settings.dateAlign),
+                 long(settings.vivid), long(settings.sharpen), long(settings.edges),
+                 long(settings.cream)})
+    num(v);
+  return h ? h : 1;  // 0 means "no page"
 }
 
 std::string App::refreshNote() const {

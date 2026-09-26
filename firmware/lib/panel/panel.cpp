@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <driver/gpio.h>
+#include <esp_sleep.h>
 
 namespace birdposter {
 
@@ -57,7 +59,22 @@ bool Panel::waitReady(uint32_t timeoutMs) {
   delay(10);
   const uint32_t start = millis();
   while (digitalRead(pins::kBusy) == LOW) {
-    if (millis() - start > timeoutMs) return false;
+    const uint32_t spent = millis() - start;
+    if (spent > timeoutMs) return false;
+    if (sleepWhileBusy) {
+      // Light sleep until BUSY goes high, or the timeout. The panel's pins
+      // hold their levels through it and the CPU draws next to nothing; a
+      // refresh is thirty seconds of this. Level-triggered, so a BUSY that
+      // rose between the read above and here wakes it at once.
+      gpio_wakeup_enable(gpio_num_t(pins::kBusy), GPIO_INTR_HIGH_LEVEL);
+      esp_sleep_enable_gpio_wakeup();
+      esp_sleep_enable_timer_wakeup(uint64_t(timeoutMs - spent) * 1000 + 1000);
+      esp_light_sleep_start();
+      gpio_wakeup_disable(gpio_num_t(pins::kBusy));
+      esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_GPIO);
+      esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+      continue;
+    }
     if (onWait) onWait();
     delay(10);
   }

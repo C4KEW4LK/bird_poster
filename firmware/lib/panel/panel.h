@@ -115,6 +115,11 @@ class Panel {
   // the caller can keep serving its web UI meanwhile. May be empty.
   std::function<void()> onWait;
 
+  // Light-sleep through BUSY waits instead of polling. Only with the radio
+  // off - WiFi does not survive it - and `onWait` is not called meanwhile, so
+  // nothing is served while it is on.
+  bool sleepWhileBusy = false;
+
  private:
   enum class Chip { Master, Slave, Both };
   void select(Chip chip);

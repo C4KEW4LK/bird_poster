@@ -65,8 +65,8 @@ void loadSettings(Settings &s) {
   s.intervalMin = p.getInt("interval", s.intervalMin);
   // New keys in minutes; the old ones held whole hours.
   const auto quiet = [&p](const char *key, const char *oldKey, int fallback) {
-    if (p.isKey(key)) return std::clamp(p.getInt(key, fallback), 0, 24 * 60 - 1);
-    if (p.isKey(oldKey)) return std::clamp(p.getInt(oldKey, 0), 0, 23) * 60;
+    if (p.isKey(key)) return std::clamp<int>(p.getInt(key, fallback), 0, 24 * 60 - 1);
+    if (p.isKey(oldKey)) return std::clamp<int>(p.getInt(oldKey, 0), 0, 23) * 60;
     return fallback;
   };
   s.quietFrom = quiet("quietfromm", "quietfrom", s.quietFrom);
@@ -139,6 +139,7 @@ void loadState(State &s) {
   s.glass = getStr(p, "glass", "");
   s.refreshes = p.getUInt("refreshes", 0);
   s.refreshesSince = p.getUInt("refsince", 0);
+  s.pageSig = p.getUInt("pagesig", 0);
   p.end();
 }
 
@@ -157,6 +158,7 @@ void saveState(const State &s) {
   p.putString("glass", s.glass.c_str());
   p.putUInt("refreshes", s.refreshes);
   p.putUInt("refsince", s.refreshesSince);
+  p.putUInt("pagesig", s.pageSig);
   p.end();
 }
 

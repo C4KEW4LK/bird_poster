@@ -16,6 +16,8 @@
 // sleep is a reboot: the next wake starts from `State`, not from RAM.
 #include <Arduino.h>
 #include <ESPmDNS.h>
+#include <algorithm>
+#include <cstring>
 #include <WiFi.h>
 #include <driver/rtc_io.h>
 #include <esp_sleep.h>
@@ -36,6 +38,7 @@ App app;
 WebUi ui(app);
 
 constexpr uint32_t kJoinTimeoutMs = 20000;
+constexpr uint32_t kFastJoinMs = 4000;  // straight to the remembered access point, before a scan
 constexpr uint32_t kNtpTimeoutMs = 8000;
 constexpr uint32_t kPortalIdleMs = 30 * 60 * 1000;  // untouched this long: sleep
 constexpr int kFailuresBeforeAp = 3;  // joins in a row that fail before the AP comes up
@@ -67,27 +70,80 @@ Key keyPressed() {
   return Key::None;
 }
 
+// The access point the last join landed on, kept in RTC memory: it survives
+// deep sleep but not a power cut, and costs no flash writes. Joining with the
+// channel and BSSID given skips the scan of every channel, which is most of
+// the time a join takes. `rtcKey` ties it to the network it was learnt on.
+RTC_DATA_ATTR uint8_t rtcBssid[6];
+RTC_DATA_ATTR int32_t rtcChannel = 0;
+RTC_DATA_ATTR uint32_t rtcKey = 0;
+
+uint32_t networkKey() {
+  uint32_t h = 2166136261u;  // FNV-1a over ssid, NUL, password
+  for (char c : app.settings.wifiSsid) h = (h ^ uint8_t(c)) * 16777619u;
+  h *= 16777619u;
+  for (char c : app.settings.wifiPass) h = (h ^ uint8_t(c)) * 16777619u;
+  return h;
+}
+
+bool waitJoined(uint32_t ms) {
+  const uint32_t start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < ms) {
+    delay(50);
+  }
+  return WiFi.status() == WL_CONNECTED;
+}
+
 bool joinWifi() {
   if (!app.settings.configured()) return false;
   WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
   WiFi.setHostname(app.settings.hostname.c_str());
-  WiFi.begin(app.settings.wifiSsid.c_str(), app.settings.wifiPass.c_str());
-  Serial.printf("wifi: joining %s", app.settings.wifiSsid.c_str());
+  const char *ssid = app.settings.wifiSsid.c_str(), *pass = app.settings.wifiPass.c_str();
   const uint32_t start = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - start < kJoinTimeoutMs) {
-    delay(250);
-    Serial.print('.');
+  const uint32_t key = networkKey();
+  bool joined = false;
+  if (rtcChannel > 0 && rtcKey == key) {
+    Serial.printf("wifi: joining %s on channel %d\n", ssid, int(rtcChannel));
+    WiFi.begin(ssid, pass, rtcChannel, rtcBssid);
+    joined = waitJoined(kFastJoinMs);
+    if (!joined) {
+      // Moved channel, a different access point, or gone: forget it and scan.
+      Serial.println("wifi: remembered access point did not answer, scanning");
+      rtcChannel = 0;
+      WiFi.disconnect();
+      delay(100);
+    }
   }
-  Serial.println();
-  if (WiFi.status() != WL_CONNECTED) {
+  if (!joined) {
+    Serial.printf("wifi: joining %s\n", ssid);
+    WiFi.begin(ssid, pass);
+    // What is left of the usual budget, but never under five seconds for the scan.
+    const uint32_t spent = uint32_t(millis() - start);
+    joined = waitJoined(kJoinTimeoutMs - std::min<uint32_t>(kJoinTimeoutMs - 5000, spent));
+  }
+  if (!joined) {
     Serial.println("wifi: failed");
     return false;
   }
-  Serial.printf("wifi: %s\n", WiFi.localIP().toString().c_str());
+  memcpy(rtcBssid, WiFi.BSSID(), sizeof rtcBssid);
+  rtcChannel = WiFi.channel();
+  rtcKey = key;
+  Serial.printf("wifi: %s in %lu ms\n", WiFi.localIP().toString().c_str(),
+                (unsigned long)(millis() - start));
   MDNS.begin(app.settings.hostname.c_str());
   MDNS.addService("http", "tcp", 80);
   return true;
+}
+
+// The radio off for good this wake. Called just before the glass refresh
+// when the frame will sleep straight after it: nothing past that point
+// needs the network, and the refresh is the longest thing a wake does.
+void radioOff() {
+  MDNS.end();
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+  Serial.println("wifi: off for the refresh");
 }
 
 void syncClock() {
@@ -129,8 +185,11 @@ void goToSleep() {
 }
 
 // The ordinary cycle, once WiFi is up: fetch, choose, draw. Records what
-// happened in State either way.
-void drawNewPage() {
+// happened in State either way. With `skipIfSame`, a page that would come out
+// exactly as the one already on the glass is not drawn at all: the refresh is
+// the most expensive thing a wake does, and redrawing the same birds in the
+// same places buys nothing.
+void drawNewPage(bool skipIfSame = false) {
   app.progress("syncing the clock");
   syncClock();
   std::vector<int> page;
@@ -145,6 +204,13 @@ void drawNewPage() {
     app.progress("");
     return;
   }
+  const uint32_t sig = app.pageSignature();
+  if (skipIfSame && app.state.glass == "birds" && sig == app.state.pageSig) {
+    app.state.lastResult = "unchanged - kept the page on the glass";
+    Serial.println("page: unchanged, not redrawn");
+    app.progress("");
+    return;
+  }
   std::string names;
   for (size_t i = 0; i < app.pageBirds.size(); ++i)
     names += (i ? ", " : "") + (app.pageCommon[i].empty() ? app.pageBirds[i] : app.pageCommon[i]);
@@ -154,6 +220,7 @@ void drawNewPage() {
     app.state.lastRender = uint32_t(std::time(nullptr));
     app.state.lastBirds = names;
     app.state.lastResult = "drew " + std::to_string(page.size()) + " birds";
+    app.state.pageSig = sig;
     app.state.showingStatus = false;
   } else {
     app.state.lastResult = "render failed";
@@ -319,6 +386,8 @@ void setup() {
     servePortal(false, true);
     app.state.showingStatus = false;
     ++app.state.layout;
+    // Still serving the settings after this page if WiFi was switched on.
+    if (!app.state.portalOn) app.beforeRefresh = radioOff;
     drawNewPage();
     // Just joined from the setup network: stay reachable a while after the
     // first page, since whoever set it up is likely still at the settings.
@@ -332,11 +401,15 @@ void setup() {
     std::vector<int> page;
     app.state.fetchOk = app.fetchBirds(page);
     if (!app.state.fetchOk) app.state.lastResult = app.fetchError;
+    app.beforeRefresh = radioOff;
     app.showStatus();
     goToSleep();
   }
 
-  if (woke != Key::None || !app.inQuietHours()) drawNewPage();
+  if (woke != Key::None || !app.inQuietHours()) {
+    app.beforeRefresh = radioOff;
+    drawNewPage(woke == Key::None);  // a key asked for a page: draw it regardless
+  }
   else Serial.println("quiet hours: not drawing");
   goToSleep();
 }

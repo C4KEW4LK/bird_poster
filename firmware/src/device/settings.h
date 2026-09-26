@@ -117,6 +117,7 @@ struct State {
   std::string glass;           // what is on the panel: birds, status, setup, pattern
   uint32_t refreshes = 0;      // glass refreshes counted, while counting is on
   uint32_t refreshesSince = 0; // epoch seconds the count started, 0 for not yet
+  uint32_t pageSig = 0;        // App::pageSignature() of the bird page on the glass, 0 for none
 };
 
 void loadSettings(Settings &s);
