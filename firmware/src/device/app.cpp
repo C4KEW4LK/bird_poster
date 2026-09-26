@@ -402,6 +402,10 @@ SourceConfig App::sourceConfig() const {
   cfg.ebirdKey = settings.ebirdKey;
   cfg.ebirdLocale = settings.ebirdLocale;
   cfg.listUrl = settings.listUrl;
+  // Every bird in the window wants the whole window: the newest 200 calls can
+  // be a quarter of an hour of dawn chorus, and a species heard before them
+  // would be missed.
+  if (everyBird()) cfg.limit = 1000;
   return cfg;
 }
 
@@ -434,9 +438,12 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
   if (!got) return false;
   progress("choosing from " + std::to_string(seen.size()) + " species");
   const auto drawable = [this](const std::string &name) { return plates.find(name) >= 0; };
+  // Every bird: as many as were heard, up to `birds`, the most-heard first
+  // if there are more. Cycling has nothing to rotate through then.
+  const bool every = everyBird();
   const size_t want = size_t(std::max(1, std::min(settings.birds, 40)));
   std::vector<Sighting> page = choose(seen, drawable, settings.mode, want);
-  if (settings.cycleHours > 0) {
+  if (settings.cycleHours > 0 && !every) {
     // Rank everything drawable, then rotate: random among what the window
     // has not shown, topped up with the longest-unseen.
     const std::vector<Sighting> ranked = choose(seen, drawable, settings.mode, seen.size());
@@ -456,7 +463,9 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
     pageCommon.push_back(s.common);
   }
   if (plateIndices.empty()) {
-    fetchError = "no sighting matched a plate (" + std::to_string(seen.size()) + " species seen)";
+    fetchError = every && seen.empty()
+                     ? "nothing detected since " + localTime(windowStart(settings.lookback, settings.lookbackUnit))
+                     : "no sighting matched a plate (" + std::to_string(seen.size()) + " species seen)";
     return false;
   }
   return true;
@@ -776,7 +785,7 @@ std::vector<std::string> App::statusLines() {
   lines.push_back("Refresh: every " + std::to_string(settings.intervalMin) + " min, " +
                   (settings.quietFrom == settings.quietTo ? std::string("never quiet")
                                                           : "quiet " + std::string(quiet)) +
-                  ", " + std::to_string(settings.birds) + " birds, " +
+                  ", " + (everyBird() ? "every bird detected, up to " + std::to_string(settings.birds) : std::to_string(settings.birds) + " birds") + ", " +
                   (settings.portrait() ? "portrait" : "landscape"));
   {
     // What happens next, so the glass explains its own silence.

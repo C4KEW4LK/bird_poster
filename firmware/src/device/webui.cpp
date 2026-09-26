@@ -100,14 +100,16 @@ button:disabled{opacity:.6;cursor:wait}
 <div class="inat"><label>iNaturalist API</label><select name="inatv" title="v2 answers with only the fields the frame reads - about an eighth of the bytes - but iNaturalist still calls it in development and may change it without notice. v1 is the frozen, documented API; it sends the whole record for every species, so each fetch is longer on the radio."><option value="2" %INATV2%>v2 - lean, may change</option><option value="1" %INATV1%>v1 - stable, slower</option></select></div></div>
 <small class="inat">v2 sends only what the frame reads (about an eighth of the bytes) but iNaturalist may still change it; v1 is frozen and sends everything, so a fetch takes longer. If v2 stops working, switch.</small></div>
 <div class="window"><label>Look back</label><div class="row"><input name="lookback" id="lookback" type="number" min="1" max="10000" value="%LOOKBACK%"><select name="lookbackunit" id="lookbackunit" onchange="lbChanged()"><option value="0" %LB0%>minutes</option><option value="1" %LB1%>hours</option><option value="2" %LB2%>days</option><option value="3" %LB3%>since the last page</option></select></div>
-<small>Which sightings count: the top birds seen in this window. BirdNET-Go is asked for its last 200 detections and the window is applied to those.</small></div>
+<small>Which sightings count: the top birds seen in this window. BirdNET-Go is asked for its last 200 detections (1000 with "every bird" on) and the window is applied to those.</small></div>
 <div class="online" %OFFLINE%><div class="actions"><button type="submit" formaction="/test" formnovalidate id="testbtn">Test source</button><span id="testing" hidden><span class="spin"></span>Asking the source&hellip;</span></div>
 <small>Asks the source with the values above, saved or not, and says what came back. A few seconds usually; up to 30 if nothing answers at the address.</small></div>
 
 <h2>Page</h2>
 %PACKS%
-<div class="row"><div><label>Birds on the page</label><input name="birds" type="number" min="1" max="40" value="%BIRDS%"></div>
+<div class="row"><div><label id="birdslabel">Birds on the page</label><input name="birds" id="birds" type="number" min="1" max="40" value="%BIRDS%"></div>
 <div><label>Hangs</label><select name="rotation"><option value="1" %ROT1%>Landscape</option><option value="3" %ROT3%>Landscape, flipped</option><option value="0" %ROT0%>Portrait</option><option value="2" %ROT2%>Portrait, flipped</option></select></div></div>
+<div class="birdnet"><label><input type="checkbox" name="everybird" id="everybird" value="1" %EVERYON% onchange="srcChanged()" style="width:auto;margin-right:.4rem">Every bird detected in the look-back window</label><input type="hidden" name="everybird" value="0">
+<small>Instead of a set number, the page holds every species BirdNET-Go heard in the window, up to the number above (the most heard, if more). With the window set to "since the last page", each page is exactly what was heard since the one before; if nothing was, the last page stays up and the window keeps growing until something is.</small></div>
 <div class="row"><div><label>Names</label><select name="names"><option value="0" %NAMES0%>Both</option><option value="1" %NAMES1%>Just scientific</option><option value="2" %NAMES2%>Just common</option><option value="3" %NAMES3%>None</option></select></div>
 <div><label>Common name case</label><select name="namecase"><option value="1" %CASE1%>ALL CAPS</option><option value="0" %CASE0%>As given</option><option value="2" %CASE2%>lower case</option></select></div></div>
 <div class="row"><div><label>Name size</label><select name="label"><option value="0" %LBL0%>Small</option><option value="1" %LBL1%>Medium</option><option value="2" %LBL2%>Large</option><option value="3" %LBL3%>Extra large</option></select></div>
@@ -122,7 +124,7 @@ button:disabled{opacity:.6;cursor:wait}
 <small>The date the page was drawn, in the name font at the name size. The order applies to the numeric styles; 09/26/2026 is month first. The birds are packed around it, never under it. Left off until the frame's clock has been set from the network.</small>
 <label><input type="checkbox" name="countref" value="1" %COUNTON% style="width:auto;margin-right:.4rem">Count refreshes (battery test)</label><input type="hidden" name="countref" value="0">
 <small>Counts every refresh of the glass and writes the running total small on the page, at the other end of the date's strip, and on the status page. Run a charged battery flat and the last number on the glass is how many refreshes it lasted; the count survives the battery going flat. Reset it from the status box at the top.</small>
-<label>Cycle birds - no repeat for, hours</label><input name="cycle" type="number" min="0" max="8760" value="%CYCLE%">
+<label>Cycle birds - no repeat for, hours</label><input name="cycle" id="cycle" type="number" min="0" max="8760" value="%CYCLE%">
 <small>0 draws the most seen (or rarest) every time. Above 0, each page is a random pick of the birds not drawn in that many hours (24 a day, 168 a week), so the frame works through everything seen nearby before repeating.</small>
 <div class="row"><div><label>Colour</label><select name="vivid"><option value="0" %VIV0%>0 - Least vivid</option><option value="1" %VIV1%>1</option><option value="2" %VIV2%>2</option><option value="3" %VIV3%>3</option><option value="4" %VIV4%>4 - Most vivid</option></select></div>
 <div><label>Detail</label><select name="sharpen"><option value="0" %SHP0%>0 - Softest</option><option value="1" %SHP1%>1</option><option value="2" %SHP2%>2</option><option value="3" %SHP3%>3</option><option value="4" %SHP4%>4 - Sharpest</option></select></div>
@@ -188,7 +190,9 @@ var show=function(c,on){document.querySelectorAll('.'+c).forEach(function(e){e.h
 show('birdnet',v=='birdnet');show('list',v=='list');show('ebird',v=='ebird');
 show('place',v=='inat'||v=='ebird'||v=='ala');show('inat',v=='inat');show('window',v!='list');
 var m=document.getElementById('mode'),r=document.getElementById('rarest'),no=!(v=='inat'||v=='ebird');
-r.disabled=no;r.hidden=no;if(no&&m.value=='rarest')m.value='most';}
+r.disabled=no;r.hidden=no;if(no&&m.value=='rarest')m.value='most';
+var every=v=='birdnet'&&document.getElementById('everybird').checked;
+document.getElementById('birdslabel').textContent=every?'Most birds on the page':'Birds on the page';document.getElementById('cycle').disabled=every;}
 srcChanged();
 function findPlace(){var q=document.getElementById('place').value.trim(),out=document.getElementById('places');
 if(!q)return;out.textContent='looking\u2026';
@@ -633,6 +637,7 @@ String render(App &app, const std::string &error = "") {
     page.replace("%SCI" + String(v) + "%", sel(s.sciPercent == v));
   for (int k = 0; k < 4; ++k) page.replace("%PKS" + String(k) + "%", sel(int(s.packStyle) == k));
   page.replace("%DATEON%", s.showDate ? "checked" : "");
+  page.replace("%EVERYON%", s.everyBird ? "checked" : "");
   page.replace("%COUNTON%", s.countRefreshes ? "checked" : "");
   page.replace("%WEBON%", s.webPlates ? "checked" : "");
   page.replace("%WEBURL%", esc(s.webPlatesUrl));
@@ -841,6 +846,7 @@ void WebUi::begin(bool captive) {
       notes += " The source's details: " + problem;
     }
     s.birds = argInt("birds", 1, 40, s.birds);
+    s.everyBird = argInt("everybird", 0, 1, int(s.everyBird)) == 1;
     s.rotation = argInt("rotation", 0, 3, s.rotation);
     s.names = NameStyle(argInt("names", 0, 3, int(s.names)));
     s.commonCase = NameCase(argInt("namecase", 0, 2, int(s.commonCase)));

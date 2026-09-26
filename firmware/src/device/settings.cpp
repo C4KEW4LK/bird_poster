@@ -37,6 +37,7 @@ void loadSettings(Settings &s) {
   s.lookbackUnit = Settings::Lookback(p.getUChar("lookbu", uint8_t(s.lookbackUnit)) & 3);
   s.inatVersion = p.getUChar("inatv", uint8_t(s.inatVersion)) == 1 ? 1 : 2;
   s.birds = p.getInt("birds", s.birds);
+  s.everyBird = p.getBool("everybird", s.everyBird);
   s.rotation = p.getInt("rotation", s.rotation) & 3;
   // A new key: the old "names" was a bool, and reading it as a style would
   // turn "on" into "Scientific only".
@@ -95,6 +96,7 @@ void saveSettings(const Settings &s) {
   p.putUChar("lookbu", uint8_t(s.lookbackUnit));
   p.putUChar("inatv", uint8_t(s.inatVersion));
   p.putInt("birds", s.birds);
+  p.putBool("everybird", s.everyBird);
   p.putInt("rotation", s.rotation & 3);
   p.putUChar("namestyle", uint8_t(s.names));
   p.putUChar("namecase", uint8_t(s.commonCase));

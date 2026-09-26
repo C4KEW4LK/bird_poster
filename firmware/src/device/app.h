@@ -160,6 +160,8 @@ struct App {
   void resetRefreshCount();
   std::string clockTime(std::time_t t) const;  // HH:MM, or "never"
   bool inQuietHours() const { return inQuietHours(std::time(nullptr)); }
+  // The page holds every species in the window rather than a set number.
+  bool everyBird() const { return settings.everyBird && settings.source == Source::BirdNet; }
   bool inQuietHours(std::time_t t) const;
   // How long the next deep sleep lasts from `now`: the refresh interval, or
   // through to the end of the quiet window.

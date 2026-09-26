@@ -39,6 +39,10 @@ struct Settings {
   int inatVersion = 2;  // iNaturalist API: 2 lean but may change, 1 frozen but 8x the bytes
 
   int birds = 10;       // on the page; the packer copes with up to 40
+  // BirdNET-Go only: every species detected in the look-back window, with
+  // `birds` the most rather than the exact number - so a quiet hour draws two
+  // and a dawn chorus fills the page.
+  bool everyBird = false;
   int rotation = 1;     // quarter turns from the panel's portrait; 1 = landscape
   NameStyle names = NameStyle::Both;  // what goes under each bird
   NameCase commonCase = NameCase::Upper;  // how the common name is cased
