@@ -116,6 +116,8 @@ button:disabled{opacity:.6;cursor:wait}
 <div><label>Scientific name size</label><select name="scipct"><option value="100" %SCI100%>100% - same as the common name</option><option value="90" %SCI90%>90%</option><option value="80" %SCI80%>80%</option><option value="70" %SCI70%>70%</option><option value="60" %SCI60%>60%</option><option value="50" %SCI50%>50% - half the size</option></select></div></div>
 <div class="row"><div><label>Arrangement</label><select name="packstyle"><option value="0" %PKS0%>Classic - a cluster from the middle out</option><option value="1" %PKS1%>Grid - evenly spaced, grown to fit</option><option value="2" %PKS2%>Scattered - evenly spread, no rows</option><option value="3" %PKS3%>Hero - one bird large, the rest around it</option></select></div></div>
 <small>Classic packs the birds into the centre of the page at one size. Grid and Scattered start them evenly apart and let each grow into the room beside it, which fills a busy page harder and draws the birds at more than one size. Hero gives the middle of the page to the first bird the source ranked and rings the others around it.</small>
+<label><input type="checkbox" name="shuffle" value="1" %SHUFON% style="width:auto;margin-right:.4rem">Shuffle the birds' order</label><input type="hidden" name="shuffle" value="0">
+<small>The same birds, handed to the layout in a new random order every page, rather than the most seen (or rarest) first. The first bird takes the middle of the page, so this moves which bird gets it - with Hero, which bird is the hero.</small>
 <label><input type="checkbox" name="date" value="1" %DATEON% style="width:auto;margin-right:.4rem">Show today's date</label><input type="hidden" name="date" value="0">
 <div class="row"><div><label>Date style</label><select name="datestyle"><option value="0" %DST0%>26/09/26</option><option value="1" %DST1%>26/09/2026</option><option value="2" %DST2%>26 Sep 2026</option><option value="3" %DST3%>26 September 2026</option><option value="4" %DST4%>Saturday 26 September 2026</option></select></div>
 <div><label>Short date order</label><select name="dateorder"><option value="0" %DOR0%>Day first - UK, AU</option><option value="1" %DOR1%>Month first - US</option></select></div></div>
@@ -136,7 +138,7 @@ button:disabled{opacity:.6;cursor:wait}
 <small>The glass has six dull inks and the dither blurs fine lines. Colour pushes saturation, Detail sharpens what contrast there is, and Edges draws a line along every boundary it finds - faint ones included, which is what keeps a white bird off the page. Pick all three by eye. Paper prints the page on cream instead of white: the background and the plates' own pale paper take the same warm tone, so the birds sit into the page rather than on it. The glass has no cream ink, so it comes out as a fine stipple of yellow and white.</small>
 
 <h2>Schedule</h2>
-<div class="row"><div><label>Refresh every, minutes</label><input name="interval" id="interval" type="number" min="10" max="1440" value="%INTERVAL%" required></div>
+<div class="row"><div><label>Refresh every, minutes</label><input name="interval" id="interval" type="number" min="1" max="1440" value="%INTERVAL%" required></div>
 <div><label>Quiet from</label><input name="quietfrom" id="quietfrom" type="time" value="%QFROM%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="22:00"></div>
 <div><label>until</label><input name="quietto" id="quietto" type="time" value="%QTO%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="06:00"></div></div>
 <small id="quietnote">No new pages between these times, in the frame's timezone; the keys still work. The same time twice means never quiet.</small>
@@ -178,7 +180,7 @@ button:disabled{opacity:.6;cursor:wait}
 <p><b>Artwork.</b> Australian plates: John Gould, <i>The Birds of Australia</i> (1840&ndash;48), lithographed by Elizabeth Gould and H.&nbsp;C. Richter; scans digitally enhanced by <a href="https://www.rawpixel.com/" target="_blank">rawpixel</a>, CC&nbsp;BY-SA&nbsp;4.0, cut for this project under the same licence, with supplementary plates from other public-domain works via <a href="https://commons.wikimedia.org/" target="_blank">Wikimedia Commons</a>, each credited in the style's manifest. European plates: John Gould, <i>The Birds of Europe</i> (1832&ndash;37), and the von Wright brothers, <i>Svenska F&aring;glar</i>; rawpixel-enhanced scans CC&nbsp;BY-SA&nbsp;4.0 and Finnish National Gallery scans CC0; cut-outs by Arne Giacomo Munthe-Kaas for Fugleramme, CC&nbsp;BY-SA&nbsp;4.0. North American plates: John James Audubon, <i>The Birds of America</i> (1827&ndash;38), engraved by Robert Havell; rawpixel-enhanced scans CC&nbsp;BY-SA&nbsp;4.0, cut for this project under the same licence.</p>
 <p><b>Names on the page</b> are set in Gentium Book Plus (SIL International) and a display face derived from Playfair Display (Claus Eggers S&oslash;rensen), both under the SIL Open Font License 1.1.</p>
 <p><b>Sightings</b> come from BirdNET-Go, <a href="https://www.inaturalist.org/" target="_blank">iNaturalist</a>, <a href="https://ebird.org/" target="_blank">eBird</a> (Cornell Lab of Ornithology) or the <a href="https://www.ala.org.au/" target="_blank">Atlas of Living Australia</a>, as chosen above; species names follow the BirdNET label sets.</p>
-<p><b>Code.</b> The firmware is MIT, on <a href="https://github.com/C4KEW4LK/bird_poster" target="_blank">GitHub</a>. It carries ArduinoJson (Beno&icirc;t Blanchon, MIT), tinf (J&oslash;rgen Ibsen, zlib licence), stb_truetype (Sean Barrett, public domain), the QR Code generator (Project Nayuki, MIT) and the Arduino core for the ESP32.</p>
+<p><b>Code.</b> The firmware is MIT, on <a href="https://github.com/C4KEW4LK/bird_poster" target="_blank">GitHub</a>. It carries ArduinoJson (Beno&icirc;t Blanchon, MIT), stb_truetype (Sean Barrett, public domain), the QR Code generator (Project Nayuki, MIT) and the Arduino core for the ESP32.</p>
 </details>
 <p><small>Keys on the frame: 1 keeps WiFi on for setup, 2 shows the status page, 3 fetches a new page. Drawing a page takes about 40 seconds; the glass flashes while it does.</small></p>
 <script>
@@ -639,6 +641,7 @@ String render(App &app, const std::string &error = "") {
   page.replace("%DATEON%", s.showDate ? "checked" : "");
   page.replace("%EVERYON%", s.everyBird ? "checked" : "");
   page.replace("%COUNTON%", s.countRefreshes ? "checked" : "");
+  page.replace("%SHUFON%", s.shuffleBirds ? "checked" : "");
   page.replace("%WEBON%", s.webPlates ? "checked" : "");
   page.replace("%WEBURL%", esc(s.webPlatesUrl));
   page.replace("%WEBLAST%", app.lastWebPlates.empty() ? String("")
@@ -856,6 +859,7 @@ void WebUi::begin(bool captive) {
     // The checkbox comes before a hidden "0" of the same name, and the server
     // reads the first: "1" when ticked, the hidden "0" when not.
     s.showDate = argInt("date", 0, 1, int(s.showDate)) == 1;
+    s.shuffleBirds = argInt("shuffle", 0, 1, int(s.shuffleBirds)) == 1;
     const bool counting = argInt("countref", 0, 1, int(s.countRefreshes)) == 1;
     // Turning the counter on starts a fresh count: a test begins from 0.
     if (counting && !s.countRefreshes) app.resetRefreshCount();
@@ -875,7 +879,7 @@ void WebUi::begin(bool captive) {
     s.edges = argInt("edges", 0, 4, s.edges);
     s.cream = argInt("cream", 0, 4, s.cream);
     s.cycleHours = argInt("cycle", 0, 8760, s.cycleHours);
-    s.intervalMin = argInt("interval", 10, 1440, s.intervalMin);
+    s.intervalMin = argInt("interval", 1, 1440, s.intervalMin);
     s.quietFrom = argTime("quietfrom", s.quietFrom);
     s.quietTo = argTime("quietto", s.quietTo);
     if (server.hasArg("pack") && arg("pack") != s.pack &&

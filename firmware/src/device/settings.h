@@ -49,6 +49,7 @@ struct Settings {
   LabelSize labelSize = LabelSize::Medium;
   int sciPercent = 70;  // scientific name under a common one, % of its size
   PackStyle packStyle = PackStyle::Classic;  // how the birds are arranged on the page
+  bool shuffleBirds = false;  // the chosen birds in a random order, not the source's ranking
   bool showDate = false;  // today's date along one edge of the bird page
   bool countRefreshes = false;  // count every refresh of the glass, for a battery test
   // Full-size plates from the web, for a bird drawn much larger than its

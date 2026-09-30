@@ -101,16 +101,17 @@ sprites a few hundred KB more.
 | --- | --- |
 | `lib/packer/` | the silhouette packer. Arduino-free, so both environments share it |
 | `lib/source/` | where the birds come from: BirdNET-Go, iNaturalist, eBird, the Atlas of Living Australia or a JSON list, a user setting. Also Arduino-free |
-| `lib/plates/` | reader for the plate pack: index in RAM, sprites and silhouettes inflated on demand |
+| `lib/plates/` | reader for the plate pack: index in RAM, sprites and silhouettes decoded on demand by the range coder (`planecoder.cpp`) |
 | `lib/render/` | canvas, sprite blit, Floyd-Steinberg to the six inks, TrueType labels, QR codes, and the three pages (birds, setup, status). Arduino-free |
 | `lib/panel/` | the T133A01 driver: init, stream a frame to the two controllers, refresh, sleep. Arduino |
-| `lib/tinf`, `lib/stb_truetype`, `lib/qrcodegen` | vendored: zlib inflate, TrueType rasteriser, QR encoder. Licences alongside |
+| `lib/stb_truetype`, `lib/qrcodegen` | vendored: TrueType rasteriser, QR encoder. Licences alongside |
 | `test/` | host tests over `lib/`, run with `pio test -e native` |
 | `src/native/` | host harness: pack and render to a file, print the numbers |
 | `src/device/` | the frame: settings in NVS, WiFi, the web UI and captive portal, the keys, the sleep loop |
 | `tools/webflash.py` | Python: build the images and serve `webflash/` as an ESP Web Tools page, so the board flashes from Chrome/Edge |
 | `tools/subset_font.py` | Python: the two faces cut down to what the frame draws |
 | `tools/export_web_plates.py` | Python: the card packs split into one file a species, for the web |
+| `tools/planecoder.py` | Python: the packs' context-model range coder, and `--train` to relearn the luma prior (`lib/plates/plane_prior.h`) |
 | `packs/` | the baked plate packs, one per board and region; baked on the workstation that holds the artwork, which is not in the repository |
 
 Two environments because the packer and the dither are the risky parts and
@@ -123,7 +124,11 @@ Wake, do one thing, sleep. On the timer it joins WiFi, sets the clock from NTP,
 asks the source for recent sightings, keeps the ones it has a plate for, packs
 them, dithers the page and pushes it to the glass - about 40 seconds awake, 30
 of them the panel's own refresh - then deep-sleeps for the interval (default an
-hour, none during the quiet hours). Everything it learned is in NVS before it
+hour, as short as a minute, none during the quiet hours). The interval runs
+wake to wake: the time spent awake comes off the sleep, so a wake that
+outlasts it goes straight into the next. Every page is a new layout of the
+birds - the layout number moves on each time - so the same birds come out in
+new places. Everything it learned is in NVS before it
 sleeps, because deep sleep is a reboot.
 
 **The three keys** (GPIO 2, 3 and 5, active low, all RTC-capable so they wake it):
@@ -226,12 +231,15 @@ reports *no filesystem* with the image plainly written is that.
 
 The pack (`tools/bake_plates.py`, format in its docstring) carries each
 species as a 1-bit silhouette for the packer and a posterised sprite for the
-panel, both zlib, plus mass, label box and flip. Sprites are *not*
+panel, plus mass, label box and flip. Sprites are *not*
 pre-dithered: a dither is only right at the size it is drawn at, and the
 packer's scale search decides that at render time. A sprite is two planes,
 luminance and chrominance posterised apart - JPEG's observation applied to a
-palette: 15 luma levels a pixel, 16 (Cb, Cr) pairs one per 4x4 block, both
-k-means with chroma weighted as the dither weights it. That is 240 colours a
+palette: 15 luma levels a pixel, 16 (Cb, Cr) pairs one per 2x2 block, both
+k-means with chroma weighted as the dither weights it. The chroma is fitted,
+by least squares, to the blend the frame draws it with, not averaged per
+block, and the 16 pairs go to the colours that differ rather than to the
+largest fields. That is 240 colours a
 sprite for about what 15 used to cost, and the difference is a cockatoo's
 yellow crest or a kookaburra's rust tail surviving the bake. The sixteenth
 luma code is "outside": that one plane is the sprite's shape for the packer
@@ -240,7 +248,10 @@ paper in the luma - transparency the dither never has to know about. A
 sixteenth level was tried and could not be told from fifteen on the page; a
 separate silhouette stream cost the same bytes as the runs of the sentinel
 do. The paper halo the cut leaves outside the silhouette measured 0.0% of a
-sprite's ink, so it is not stored. The reader expands the planes to a luma
+sprite's ink, so it is not stored. Both planes are range-coded
+(`lib/plates/planecoder.cpp`, `tools/planecoder.py`), each code in the context
+of its decoded neighbours - about two-thirds of zlib's bytes, which the pack
+spends on the 2x2 chroma and a larger sprite. The reader expands the planes to a luma
 code a pixel and a chroma pair a block, and a pixel's colour is made as it is
 drawn, the chroma interpolated between block centres. A plate drawn larger
 than it was baked is filled in by Catmull-Rom (bilinear below 1.5x, a box
@@ -301,7 +312,7 @@ The pack has to fit the 13.94 MiB `plates` partition beside the fonts, which
 go in subset (`tools/subset_font.py`: Gentium to Latin, 883 KB to 63; Gould
 Condensed to capitals and a name's punctuation, `--caps`, 33 KB - a name it
 cannot set falls back to the label face). The EE02 packs are baked to fill
-what is left, 396-516 px on the long side by region; on a 10-bird page most
+what is left, 452-596 px on the long side by region; on a 10-bird page most
 birds are drawn near that size, and a page of one or two birds fetches the
 full-size plate from the web when it can (see *Full-size plates from the
 web* above).
@@ -315,6 +326,10 @@ Beyond the birds and their names, all set from the web UI:
 - **Paper** - white, or four strengths of cream, multiplied over the page
   before the dither so the plates' own paper takes the same tone.
 - **Scientific name size** - 100% down to 50% of the common name.
+- **Shuffle the birds' order** - the chosen birds handed to the layout in a
+  new random order every page, rather than the most seen (or rarest) first.
+  The first bird takes the middle of the page, so this moves which bird gets
+  it - with Hero, which bird is the hero.
 - **Count refreshes** - a battery test: every refresh of the glass is counted,
   the running total is drawn small in the date's strip and on the status
   page, and it survives the battery going flat; reset from the status box.
@@ -447,6 +462,9 @@ arrangement of the same birds. Two levers, neither costing packing quality:
   land far apart rather than cycling through a few arrangements.
 - **`flipFor`** decides mirroring from the bird's own name *and* the layout, so
   an arriving bird still cannot re-roll its neighbours.
+- **The packers' seed.** Grid, Scattered and Hero break ties from a seed; the
+  layout picks which run of seeds (layout 0 is the seeds it always used), so
+  those styles rearrange too rather than only flipping birds.
 
 Ten Australian plates at 1600×1200, same set:
 
@@ -468,7 +486,10 @@ than the variety is worth. The *rule* is the port; the digest is not.
 
 The layout number must never be what triggers a render - on the Pi the trigger
 key is computed with it pinned, and it advances only once a render is already
-due. An e-ink refresh is the expensive thing, not the pack.
+due. An e-ink refresh is the expensive thing, not the pack. The frame advances
+it at the start of every page it draws, so each page is a new arrangement; a
+consequence is that the skip of a page identical to the one on the glass no
+longer fires, since the layout is part of what makes it identical.
 
 ## Known-rough
 

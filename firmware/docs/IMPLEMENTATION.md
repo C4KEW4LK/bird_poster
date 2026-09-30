@@ -29,7 +29,7 @@ pair. `firmware/lib/panel/panel.h` holds both pin maps behind `BOARD_E1004`;
 | Panel power enable | 43 | 12 |
 | User keys 1 / 2 / 3 | 2 / 3 / 5 | 3 / 4 / 5 (KEY0-2, front panel) |
 | Battery sense | none | ADC on 1, enable on 21, 1:2 divider |
-| Flash | 16 MB, one regional pack | 32 MB: every regional pack at ~400 px, chosen in settings - or one region alone at ~600-760 px, chosen at flash time |
+| Flash | 16 MB, one regional pack | 32 MB: every regional pack at ~380-510 px, chosen in settings - or one region alone at ~690-900 px, chosen at flash time |
 | SD slot | none | CS 14, MISO 8, detect 15 (LOW = card), power 16 (HIGH = on); CLK and MOSI shared with the panel |
 | Also on board | - | PCF8563 RTC, SHT4x on I2C 19/20, buzzer 45, LED 48 |
 
@@ -53,8 +53,8 @@ then push to the glass, so the two never contend within a page anyway.
 sample estimate, then the real bake confirmed and shrunk again if over), so
 a pack fills the room it has rather than stopping at a fixed 448: the XIAO's
 EU pack had sat at 10.2 of 13.4 MB. The E1004 gets two kinds of flash image
-from this - the three regions sharing the partition at about 400 px, or one
-region with all 30 MB at 600-760 px (`firmware/packs/e1004-one/`), the
+from this - the three regions sharing the partition at 380-510 px, or one
+region with all 30 MB at 690-900 px (`firmware/packs/e1004-one/`), the
 region then chosen on the flasher page instead of in settings. The firmware
 tells them apart by what it finds: several `/plates-<region>.bin` and the
 settings page grows an artwork picker; one and it does not.
@@ -83,6 +83,25 @@ among the centres being (x - 1.5) / 4), after `loadSprite` has given every
 unpainted block its painted neighbours' mean so the blend at the outline
 leans on the bird. `bake_plates.reconstruct` does the same, so what the
 tools show is what the frame draws. Nothing in the file changed.
+The bake later took the blend into account too: the block chroma is fitted by
+least squares through it, the 16 pairs clustered from those fitted values as
+distinct colours (weighted by the square root of their count, so a large dull
+field cannot take half the table), and the pairs fitted again once the codes
+are fixed. Against the block means that is 25% less error in colourful
+pixels, and fewer chroma bytes; still no change to the file.
+
+v7 did change the file. Both fits now weight a pixel by its brightness, so
+the black between a rosella's yellow scallop edges stops dragging the block's
+chroma to grey. zlib gave way to a context-model range coder
+(`planecoder`): each code is coded with odds picked by its decoded neighbours
+- up, left and the slope of the row above for luma, from a prior learned over
+278 plates and compiled in; up, left and the block's luma band for chroma,
+from flat, and only for blocks with something painted in them. Against zlib
+that is 65% of the luma bytes and 76% of the chroma. The saving went on 2x2
+chroma blocks - thin colour between dark marks, which 4x4 averaged away,
+kept at 86-99% where it had been 71-97% - and on resolution, since `--fit`
+bakes as large as the budget allows. tinf went with zlib. The decoder is
+about 2.7x inflate's time a pixel on the host.
 
 ### The EE02 pin map - not documented by Seeed
 
@@ -243,7 +262,11 @@ changes two things, and neither costs packing quality:
 computed with the layout pinned, and the counter advances only once a render is
 already due — so the refresh budget is unchanged and a page is still a function
 of its species set. The ESP32 wants the same discipline for the same reason: an
-e-ink refresh is the expensive thing, not the pack.
+e-ink refresh is the expensive thing, not the pack. It advances the layout at
+the start of every page it draws, so the timer - never the layout - decides
+when there is a render, and each render is a new arrangement. That also means
+the skip of a page identical to the one on the glass no longer fires: the
+layout is part of the page's signature.
 
 ---
 

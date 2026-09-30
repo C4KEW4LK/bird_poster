@@ -51,6 +51,7 @@ void loadSettings(Settings &s) {
   s.packStyle = style <= uint8_t(PackStyle::Hero) ? PackStyle(style) : PackStyle::Classic;
   s.showDate = p.getBool("date", s.showDate);
   s.countRefreshes = p.getBool("countref", s.countRefreshes);
+  s.shuffleBirds = p.getBool("shuffle", s.shuffleBirds);
   s.webPlates = p.getBool("webplates", s.webPlates);
   s.webPlatesUrl = getStr(p, "weburl", s.webPlatesUrl);
   s.dateStyle = DateStyle(std::min<int>(4, p.getUChar("datestyle", uint8_t(s.dateStyle))));
@@ -105,6 +106,7 @@ void saveSettings(const Settings &s) {
   p.putUChar("packstyle", uint8_t(s.packStyle));
   p.putBool("date", s.showDate);
   p.putBool("countref", s.countRefreshes);
+  p.putBool("shuffle", s.shuffleBirds);
   p.putBool("webplates", s.webPlates);
   p.putString("weburl", s.webPlatesUrl.c_str());
   p.putUChar("datestyle", uint8_t(s.dateStyle));

@@ -1350,11 +1350,13 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
       sprites.push_back(spriteAt(sources, flips, labels, i, dim, px, gap));
     }
     // Each try differs only in how ties are broken, so a scale fits if any of
-    // them can place the set.
+    // them can place the set. The layout picks which run of tries: layout 0
+    // is seeds 0.., the next the run after it, so every layout is a new page.
     bool ok = false;
-    for (int t = 0; t < std::max(1, opt.tries) && !ok; ++t) {
+    const int tries = std::max(1, opt.tries);
+    for (int t = 0; t < tries && !ok; ++t) {
       PackOptions o = opt;
-      o.seed = uint32_t(t);
+      o.seed = uint32_t(variant) * uint32_t(tries) + uint32_t(t);
       ok = o.hero    ? packHero(sprites, boxW, boxH, result, o)
          : o.voronoi ? packVoronoi(sprites, boxW, boxH, result, o)
          : o.grid   ? packGrid(sprites, boxW, boxH, result, o)

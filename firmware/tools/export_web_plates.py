@@ -18,12 +18,12 @@ Wrangler takes up to 20,000. A deployment replaces every asset, so nothing
 outside the keyed folder stays.
 
 The frame's flash holds each region at the size its partition allows (about
-400 px on an EE02). When a bird is drawn much larger than that - a page of one
+450-600 px on an EE02). When a bird is drawn much larger than that - a page of one
 or two birds - the frame asks the web for the same plate at full size and
 falls back to the one in flash if the site does not answer. This writes what
 it asks for:
 
-    <out>/<region>/<Scientific_name>.bin    one sprite ('FGPS' v1)
+    <out>/<region>/<Scientific_name>.bin    one sprite ('FGPS' v2)
     <out>/<region>/index.json               the names and the size baked at
 
 from `firmware/packs/card/<region>.bin`, the E1004's SD-card packs, which are
@@ -35,10 +35,13 @@ root, or <out> whole and put /{region} in the URL. The name in the file name is
 the scientific name with spaces as underscores; the frame percent-encodes the
 rest.
 
-FGPS v1, little-endian: magic u32 'FGPS', version u32 = 1, source u16, w u16,
-h u16, luma u8[16], cb i8[16], cr i8[16], luma_len u32, chroma_len u32, then
-the zlib luma plane and the zlib chroma plane exactly as a pack record holds
-them (see bake_plates.py).
+FGPS v2, little-endian: magic u32 'FGPS', version u32 = 2, block u8, source
+u16, w u16, h u16, luma u8[16], cb i8[16], cr i8[16], luma_len u32, chroma_len
+u32, then the coded luma plane and the coded chroma plane exactly as a pack
+record holds them (see bake_plates.py; FGPL v7). A frame on firmware from
+before v7 cannot read these, nor the new firmware v1 sprites: re-export after
+rebaking the card packs, and the frame falls back to its flash plates until
+the two match.
 """
 
 from __future__ import annotations
@@ -53,17 +56,17 @@ from datetime import date
 from pathlib import Path
 
 FIRMWARE = Path(__file__).resolve().parents[1]
-PACK_MAGIC, PACK_VERSION = 0x4C504746, 6
-SPRITE_MAGIC, SPRITE_VERSION = 0x53504746, 1
+PACK_MAGIC, PACK_VERSION = 0x4C504746, 7
+SPRITE_MAGIC, SPRITE_VERSION = 0x53504746, 2
 
 
 def read_pack(path: Path):
-    """The header and index of an FGPL v6 pack, and where its payload starts."""
+    """The header and index of an FGPL v7 pack, and where its payload starts."""
     data = path.read_bytes()
-    magic, version, depth, source, count = struct.unpack_from("<IIBHI", data, 0)
+    magic, version, depth, block, source, count = struct.unpack_from("<IIBBHI", data, 0)
     if magic != PACK_MAGIC or version != PACK_VERSION or depth != 4:
-        raise SystemExit(f"{path}: not an FGPL v6 pack")
-    at = 15 + 3  # header, then the paper tone
+        raise SystemExit(f"{path}: not an FGPL v7 pack")
+    at = 16 + 3  # header, then the paper tone
     records = []
     for _ in range(count):
         (name_len,) = struct.unpack_from("<H", data, at)
@@ -76,16 +79,16 @@ def read_pack(path: Path):
         offset, luma_len, chroma_len = struct.unpack_from("<III", data, at)
         at += 12
         records.append((name, w, h, alias, tables, offset, luma_len, chroma_len))
-    return data, source, records, at
+    return data, block, source, records, at
 
 
 def export(pack: Path, out: Path) -> int:
-    data, source, records, payload = read_pack(pack)
+    data, block, source, records, payload = read_pack(pack)
     out.mkdir(parents=True, exist_ok=True)
     names = []
     for name, w, h, _alias, tables, offset, luma_len, chroma_len in records:
         streams = data[payload + offset : payload + offset + luma_len + chroma_len]
-        head = struct.pack("<IIHHH", SPRITE_MAGIC, SPRITE_VERSION, source, w, h)
+        head = struct.pack("<IIBHHH", SPRITE_MAGIC, SPRITE_VERSION, block, source, w, h)
         head += tables + struct.pack("<II", luma_len, chroma_len)
         (out / (name.replace(" ", "_") + ".bin")).write_bytes(head + streams)
         names.append(name)

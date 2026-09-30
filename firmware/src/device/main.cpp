@@ -167,7 +167,14 @@ void goToSleep() {
   saveState(app.state);
   app.unmountCard();  // a powered card idles at a milliamp or two; the slot goes dark with the chip
 
-  const uint64_t seconds = app.sleepSeconds(std::time(nullptr));
+  // The interval runs wake to wake, so the time spent awake comes off the
+  // sleep; a wake that outlasts the interval goes straight into the next.
+  const std::time_t now = std::time(nullptr);
+  uint64_t seconds = app.sleepSeconds(now);
+  if (!app.inQuietHours(now)) {
+    const uint64_t awake = millis() / 1000;
+    seconds = seconds > awake ? seconds - awake : 1;
+  }
   Serial.printf("sleep: %llu s\n", (unsigned long long)seconds);
   Serial.flush();
 
@@ -185,11 +192,12 @@ void goToSleep() {
 }
 
 // The ordinary cycle, once WiFi is up: fetch, choose, draw. Records what
-// happened in State either way. With `skipIfSame`, a page that would come out
-// exactly as the one already on the glass is not drawn at all: the refresh is
-// the most expensive thing a wake does, and redrawing the same birds in the
-// same places buys nothing.
+// happened in State either way. Every page is a new layout, so the same
+// birds come out in new places each time. With `skipIfSame`, a page that
+// would come out exactly as the one already on the glass is not drawn at all -
+// which, with the layout always moving on, is now never.
 void drawNewPage(bool skipIfSame = false) {
+  ++app.state.layout;
   app.progress("syncing the clock");
   syncClock();
   std::vector<int> page;
@@ -262,7 +270,6 @@ void servePortal(bool captive, bool untilSetUp = false) {
         return;
       case WebUi::Request::Refresh:
         if (WiFi.status() == WL_CONNECTED) {
-          ++app.state.layout;
           drawNewPage();
         } else {
           app.fetchError = "not joined to a network";
@@ -284,7 +291,6 @@ void servePortal(bool captive, bool untilSetUp = false) {
         break;
       case Key::Three:
         if (WiFi.status() == WL_CONNECTED) {
-          ++app.state.layout;
           drawNewPage();
         }
         touch();
@@ -343,7 +349,6 @@ void setup() {
 
   if (key == Key::One) app.state.portalOn = true;
   if (key == Key::Two) app.state.showingStatus = !app.state.showingStatus;
-  if (key == Key::Three) ++app.state.layout;
   saveState(app.state);
 
   if (!app.settings.configured()) {
@@ -385,7 +390,6 @@ void setup() {
     Serial.println("setup: joined, waiting for a source");
     servePortal(false, true);
     app.state.showingStatus = false;
-    ++app.state.layout;
     // Still serving the settings after this page if WiFi was switched on.
     if (!app.state.portalOn) app.beforeRefresh = radioOff;
     drawNewPage();

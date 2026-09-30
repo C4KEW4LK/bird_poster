@@ -113,12 +113,12 @@ BOARDS: dict[str, dict[str, Any]] = {
         "packs_per_image": 3,
         "budget": 10.2,
         # And a second kind of image: one region with the whole partition to
-        # itself, which buys about 1.5x the sprite size (600-760 px against
-        # 400) at the cost of choosing the region at flash time. Baked as
+        # itself, which buys about 1.5x the sprite size (690-900 px against
+        # 380-510) at the cost of choosing the region at flash time. Baked as
         # its own board key, since the budget is what a pack is baked to.
         "alone": {"key": "e1004-one", "budget": 30.0},
         # The E1004 also reads a pack from its SD card, where the plates keep
-        # the full size they shipped at rather than the 400 px that fits a
+        # the full size they shipped at rather than the ~450 px that fits a
         # third of the flash. Those packs are baked separately and offered as
         # files to copy to the card, not flashed.
         "card": True,
@@ -175,11 +175,11 @@ def tool_python() -> Path:
 
 def pack_source(path: Path) -> int:
     """The sprite size a pack was baked at, from its header: what the page
-    tells people an image buys them. (FGPL v6: magic, version, depth u8,
-    source u16.)"""
+    tells people an image buys them. (FGPL v7: magic, version, depth u8,
+    block u8, source u16.)"""
     with path.open("rb") as fh:
-        head = fh.read(11)
-    return struct.unpack("<H", head[9:11])[0] if len(head) == 11 else 0
+        head = fh.read(12)
+    return struct.unpack("<H", head[10:12])[0] if len(head) == 12 else 0
 
 
 def pack_for(board: str, style: str, bake: bool) -> Path:

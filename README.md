@@ -81,8 +81,48 @@ Each region's artwork is baked into one **plate pack**, which is
 what the flash or SD card holds and what the flasher ships. Per species it
 holds the silhouette, a posterised sprite and every spelling a source might
 use for the name. Sprites are posterised to 15 grey levels a pixel and 16
-colours a bird (one per 4×4 block), then zlib-compressed, resulting in ~18-33 KB a bird,
-and dithered on the device at the size they are drawn.
+colours a bird (one per 2×2 block), then compressed without further loss by
+predicting each pixel from the ones already next to it. A bird comes to about
+19 KB in the EE02's Australian pack, roughly a third smaller than the
+general-purpose compression used in zip files and PNGs would make it. The
+device dithers each bird to the panel's six inks at the size it is drawn.
+
+<p align="center">
+  <img src="images/baking_comparison.png" alt="A Nankeen Kestrel plate, unbaked and as baked into the EE02 pack, each in colour, with close-ups of the two heads in colour and dithered to the panel's six inks" width="640">
+</p>
+
+*Before and after baking: the Nankeen Kestrel at its 452 px EE02 size, with close-ups in
+colour and dithered as the panel shows it.*
+
+<p align="center">
+  <img src="images/baking_comparison_rosella.png" alt="A pair of Eastern Rosellas, unbaked and as baked into the EE02 pack, each in colour, with close-ups of the upper bird's head and wing in colour and dithered to the panel's six inks" width="640">
+</p>
+
+*The same for a colourful plate, the Eastern Rosella. Where the bake falls
+short is the large red areas: the breast's shading from scarlet to crimson is
+a change of hue more than of lightness, and with only 16 colours for the whole
+bird it is posterised into a few flatter bands of red. After dithering the difference is hidden, as seen in the close-ups.*
+
+### How the packs are compressed
+
+Each sprite is two planes: a grey level for every pixel (one of 15, or
+"transparent"), and a colour for every 2×2 block (one of the bird's 16).
+Both are compressed without loss by a range coder driven by a context model.
+Before each value is stored, the coder estimates how likely every possible
+value is from what has already been decoded around it, then spends few bits on
+a likely value and more on a surprising one.
+
+- **Grey levels** are predicted from the pixel to the left, the pixel above,
+  and the slope of the row above, starting from odds learned across a few
+  hundred plates and built into the firmware.
+- **Colours** are predicted from the block to the left, the block above and
+  the block's own brightness. Blocks wholly outside the bird are not stored.
+
+When the 16 colours are fitted, each pixel counts in proportion to its
+brightness. Colour barely shows on a dark pixel, so this stops the black in a
+block pulling its colour towards grey, and thin coloured detail between dark
+markings - a rosella's yellow feather edges - keeps its colour.
+
 The format is covered in
 [`firmware/README.md`](firmware/README.md#how-a-page-is-drawn).
 
@@ -92,9 +132,9 @@ fits the budget, confirmed against the real bake):
 
 | pack | birds at | for |
 | --- | ---: | --- |
-| `ee02/<region>.bin` | 396–516 px | the XIAO in the EE02, ~13.6 MB, one region |
-| `e1004/<region>.bin` | 336 px | the E1004's 31 MB shared by all three regions |
-| `e1004-one/<region>.bin` | 608–768 px | the E1004's 31 MB given to one region |
+| `ee02/<region>.bin` | 452–596 px | the XIAO in the EE02, ~13.6 MB, one region |
+| `e1004/<region>.bin` | 380–508 px | the E1004's 31 MB shared by all three regions |
+| `e1004-one/<region>.bin` | 692–896 px | the E1004's 31 MB given to one region |
 | `card/<region>.bin` | 1200 px | the E1004's microSD card, and the web plates, at full size |
 
 The artwork PNGs themselves (2 GB) are not in the repository - only each
@@ -103,7 +143,7 @@ baked from them. Rebaking needs the cut-outs on the workstation.
 
 ### Full-size plates from the web
 
-A pack in flash holds each bird at the size its partition allows (~400px for EE02). When a bird
+A pack in flash holds each bird at the size its partition allows (452-596 px for EE02). When a bird
 is drawn much larger than that - a page of one or two birds - the frame fetches
 the same plate at full size (1200 px) from the web and falls back to local if
 the site does not answer. The flasher's build publishes them beside the page,
@@ -131,9 +171,12 @@ to the [GitHub release](https://github.com/C4KEW4LK/bird_poster/releases) for
 flashing with `esptool`.
 
 On the frame's own settings page, besides the source: the arrangement
-(classic, grid, scattered or one hero bird), how the names are set, colour,
-detail and edge strength for the dither, a cream paper tone, today's date on
-the page, and a refresh counter for measuring battery life.
+(classic, grid, scattered or one hero bird), the birds' order shuffled or the
+source's ranking, how the names are set, colour, detail and edge strength for
+the dither, a cream paper tone, today's date on the page, the refresh interval
+(as short as a minute), and a refresh counter for measuring battery life. Every
+page is a new arrangement of the birds, so the same birds come out in new
+places each time.
 
 ## Build
 
@@ -164,7 +207,8 @@ firmware/       the product: C++ for the ESP32-S3, plus a desktop harness for
   src/native/   the desktop harness
   test/         host tests over lib/ (pio test -e native)
   tools/        webflash.py (the flasher page), subset_font.py (the fonts for
-                the frame), export_web_plates.py (the full-size web plates)
+                the frame), export_web_plates.py (the full-size web plates),
+                planecoder.py (the packs' range coder and its learned prior)
   packs/        the baked packs the flasher and the release ship
   webflash/     the flasher page
   docs/         IMPLEMENTATION.md — pins, packer constants, battery, sources
@@ -173,7 +217,8 @@ assets/
                 credits for every plate in the packs
   fonts/        the label faces (OFL): Gentium Book Plus Italic, and Gould
                 Condensed, an engraved cut of Playfair Display made for this project
-images/         pictures for this README: a page as the frame draws it
+images/         pictures for this README: a page as the frame draws it, and
+                birds before and after baking
 ```
 
 ## License

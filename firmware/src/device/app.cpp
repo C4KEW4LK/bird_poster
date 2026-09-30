@@ -16,6 +16,7 @@
 #endif
 
 #include <algorithm>
+#include <random>
 
 namespace birdposter {
 
@@ -454,6 +455,12 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
     page = cycle(ranked, lastShown, std::time(nullptr), settings.cycleHours, want,
                  uint32_t(std::time(nullptr)) ^ uint32_t(state.layout));
   }
+  if (settings.shuffleBirds) {
+    // Seeded by the layout, which every page moves on: a new order each page,
+    // and the same one again for the same layout.
+    std::mt19937 rng(uint32_t(state.layout) * 2654435761u ^ 0x5bd1e995u);
+    std::shuffle(page.begin(), page.end(), rng);
+  }
   plateIndices.clear();
   pageBirds.clear();
   pageCommon.clear();
@@ -720,7 +727,7 @@ std::string App::clockTime(std::time_t t) const {
 }
 
 uint64_t App::sleepSeconds(std::time_t now) const {
-  uint64_t seconds = uint64_t(std::max(10, settings.intervalMin)) * 60;
+  uint64_t seconds = uint64_t(std::max(1, settings.intervalMin)) * 60;
   if (!inQuietHours(now)) return seconds;
   // Sleep straight through to the end of the quiet window.
   std::tm tm{};

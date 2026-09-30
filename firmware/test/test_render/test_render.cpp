@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "pages.h"
+#include "planecoder.h"
 #include "plates.h"
 #include "render.h"
 
@@ -263,46 +264,111 @@ void test_a_name_pair_reserves_room_for_both_lines() {
   TEST_ASSERT_TRUE(inkBottom < inkTop);
 }
 
-// A v5 pack built by hand, byte by byte, and read back: the format is the
+// A v7 pack built by hand, byte by byte, and read back: the format is the
 // interface between the bake and the frame, and this is where it is pinned.
 namespace {
 void put16(std::vector<uint8_t> &b, uint32_t v) { b.push_back(v & 255); b.push_back((v >> 8) & 255); }
 void put32(std::vector<uint8_t> &b, uint32_t v) { put16(b, v & 0xFFFF); put16(b, v >> 16); }
-// A zlib stream with one stored block, which tinf inflates like any other.
-std::vector<uint8_t> storedZlib(const std::vector<uint8_t> &data) {
-  std::vector<uint8_t> z{0x78, 0x01, 0x01};
-  put16(z, uint32_t(data.size()));
-  put16(z, uint32_t(~data.size() & 0xFFFF));
-  z.insert(z.end(), data.begin(), data.end());
-  uint32_t a = 1, s = 0;
-  for (uint8_t d : data) { a = (a + d) % 65521; s = (s + a) % 65521; }
-  const uint32_t adler = (s << 16) | a;
-  z.push_back(adler >> 24); z.push_back((adler >> 16) & 255); z.push_back((adler >> 8) & 255); z.push_back(adler & 255);
-  return z;
+
+// The plane the Python coder was run on to make the bytes below: whatever
+// either side changes, the two must still agree to the byte.
+constexpr int kFixW = 12, kFixH = 9;
+std::vector<uint8_t> fixtureLuma() {
+  std::vector<uint8_t> l;
+  for (int y = 0; y < kFixH; ++y)
+    for (int x = 0; x < kFixW; ++x) l.push_back((x + y) % 7 == 0 ? 15 : uint8_t((x * 3 + y * 5) % 15));
+  return l;
 }
+std::vector<uint8_t> fixtureChroma() {
+  std::vector<uint8_t> c;
+  for (int by = 0; by < 5; ++by)
+    for (int bx = 0; bx < 6; ++bx) c.push_back(uint8_t((bx * 7 + by * 3) % 16));
+  return c;
+}
+// planecoder.encode_luma / encode_chroma(block 2) of the planes above. The
+// luma bytes depend on plane_prior.h: retrain it and these are regenerated.
+const std::vector<uint8_t> kPyLuma{
+    0x04, 0x84, 0xAB, 0xBB, 0x04, 0x2A, 0x7E, 0xE7, 0x18, 0xF7, 0x75, 0x50, 0x7D, 0xC8, 0x41,
+    0xB8, 0xD2, 0x43, 0x97, 0x8E, 0x3E, 0xE0, 0xA5, 0x63, 0x9B, 0x43, 0xA0, 0xA4, 0xDD, 0x1F,
+    0x63, 0x4D, 0x55, 0x9C, 0x2C, 0x23, 0x6B, 0xDE, 0x61, 0xD4, 0xCF, 0x31, 0x6A, 0xBA, 0x57,
+    0x3B, 0x8B, 0xE4, 0x9B, 0x4C, 0xC4, 0xA1, 0xBD, 0x05, 0xE1, 0xB8, 0x97, 0xE0, 0x45, 0xF3,
+    0x58, 0x5E, 0x5D, 0x09, 0xEB, 0x9A, 0x42, 0xD8, 0x2B, 0x85, 0x00, 0xF2, 0xAB, 0x09, 0x9C,
+    0xE2, 0x60, 0xDB, 0xF1, 0xCB, 0xE0, 0x36, 0xF3};
+const std::vector<uint8_t> kPyChroma{0x07, 0xE5, 0xC3, 0x32, 0x33, 0x33, 0x33, 0x32, 0x33,
+                                     0x23, 0x33, 0x33, 0x33, 0x26, 0x61, 0xA2, 0xAF};
 }  // namespace
 
-void test_a_v6_pack_round_trips_through_the_reader() {
-  // An 8x4 sprite, two chroma blocks. Inside the silhouette: row 0 x0-3,
-  // row 1 x4-7, row 2 all, row 3 none; a nibble per pixel, 15 outside, else
-  // the pixel's index inside (0-14, so the last inside pixel wraps to 0).
+void test_the_plane_coder_agrees_with_the_bake_to_the_byte() {
+  const std::vector<uint8_t> luma = fixtureLuma(), chroma = fixtureChroma();
+  TEST_ASSERT_TRUE(planecoder::encodeLuma(luma.data(), kFixW, kFixH) == kPyLuma);
+  TEST_ASSERT_TRUE(planecoder::encodeChroma(chroma.data(), luma.data(), kFixW, kFixH, 2) == kPyChroma);
+
+  std::vector<uint8_t> l(luma.size()), c(chroma.size());
+  TEST_ASSERT_TRUE(planecoder::decodeLuma(kPyLuma.data(), kPyLuma.size(), kFixW, kFixH, l.data()));
+  TEST_ASSERT_TRUE(l == luma);
+  TEST_ASSERT_TRUE(planecoder::decodeChroma(kPyChroma.data(), kPyChroma.size(), l.data(), kFixW,
+                                            kFixH, 2, c.data()));
+  // Every block here has something painted in it, so every code comes back.
+  TEST_ASSERT_TRUE(c == chroma);
+}
+
+void test_the_plane_coder_round_trips_and_refuses_a_cut_stream() {
+  // A bird-like plane: a disc of smooth shading with noise, outside around it.
+  constexpr int w = 97, h = 61;
+  std::vector<uint8_t> luma(size_t(w) * h), chroma(size_t((w + 1) / 2) * ((h + 1) / 2));
+  uint32_t seed = 12345;
+  const auto rnd = [&seed] { return (seed = seed * 1103515245u + 12345u) >> 16; };
+  for (int y = 0; y < h; ++y)
+    for (int x = 0; x < w; ++x) {
+      const int dx = x - w / 2, dy = y - h / 2;
+      luma[size_t(y) * w + x] =
+          dx * dx + dy * dy > 28 * 28 ? 15 : uint8_t(std::min(14, int((x + y) / 12 + rnd() % 3)));
+    }
+  for (auto &c : chroma) c = uint8_t(rnd() % 4 == 0 ? rnd() % 16 : 3);
+
+  const std::vector<uint8_t> zl = planecoder::encodeLuma(luma.data(), w, h);
+  const std::vector<uint8_t> zc = planecoder::encodeChroma(chroma.data(), luma.data(), w, h, 2);
+  std::vector<uint8_t> l(luma.size()), c(chroma.size());
+  TEST_ASSERT_TRUE(planecoder::decodeLuma(zl.data(), zl.size(), w, h, l.data()));
+  TEST_ASSERT_TRUE(l == luma);
+  TEST_ASSERT_TRUE(planecoder::decodeChroma(zc.data(), zc.size(), l.data(), w, h, 2, c.data()));
+  // The painted blocks come back; the rest are 0 and never stored.
+  for (int by = 0; by < (h + 1) / 2; ++by)
+    for (int bx = 0; bx < (w + 1) / 2; ++bx) {
+      bool painted = false;
+      for (int y = by * 2; y < std::min(h, by * 2 + 2); ++y)
+        for (int x = bx * 2; x < std::min(w, bx * 2 + 2); ++x) painted |= luma[size_t(y) * w + x] != 15;
+      const size_t i = size_t(by) * ((w + 1) / 2) + bx;
+      TEST_ASSERT_EQUAL_UINT8(painted ? chroma[i] : 0, c[i]);
+    }
+  // A stream one byte short, or one byte long, is not this plane.
+  TEST_ASSERT_FALSE(planecoder::decodeLuma(zl.data(), zl.size() - 1, w, h, l.data()));
+  std::vector<uint8_t> longer = zl;
+  longer.push_back(0);
+  TEST_ASSERT_FALSE(planecoder::decodeLuma(longer.data(), longer.size(), w, h, l.data()));
+}
+
+void test_a_v7_pack_round_trips_through_the_reader() {
+  // An 8x4 sprite, four by two chroma blocks. Inside the silhouette: row 0
+  // x0-3, row 1 x4-7, row 2 all, row 3 none; 15 outside, else the pixel's
+  // index inside (0-14, so the last inside pixel wraps to 0).
   std::vector<uint8_t> luma;
-  {
-    std::vector<uint8_t> n;
-    int inside = 0;
-    for (int y = 0; y < 4; ++y)
-      for (int x = 0; x < 8; ++x) {
-        const bool in = (y == 0 && x < 4) || (y == 1 && x >= 4) || y == 2;
-        n.push_back(in ? uint8_t(inside++ % 15) : 15);
-      }
-    for (size_t i = 0; i < n.size(); i += 2) luma.push_back(uint8_t((n[i] << 4) | n[i + 1]));
-  }
-  const std::vector<uint8_t> chroma{0x01};  // block 0 -> code 0, block 1 -> code 1
-  const std::vector<uint8_t> zl = storedZlib(luma), zc = storedZlib(chroma);
+  int inside = 0;
+  for (int y = 0; y < 4; ++y)
+    for (int x = 0; x < 8; ++x) {
+      const bool in = (y == 0 && x < 4) || (y == 1 && x >= 4) || y == 2;
+      luma.push_back(in ? uint8_t(inside++ % 15) : 15);
+    }
+  // The right-hand column of blocks is code 1, the rest code 0.
+  std::vector<uint8_t> chroma(8, 0);
+  chroma[3] = chroma[7] = 1;
+  const std::vector<uint8_t> zl = planecoder::encodeLuma(luma.data(), 8, 4);
+  const std::vector<uint8_t> zc = planecoder::encodeChroma(chroma.data(), luma.data(), 8, 4, 2);
 
   std::vector<uint8_t> pack{'F', 'G', 'P', 'L'};
-  put32(pack, 6);
+  put32(pack, 7);
   pack.push_back(4);  // depth
+  pack.push_back(2);  // chroma block
   put16(pack, 8);     // source
   put32(pack, 1);     // count
   pack.push_back(242); pack.push_back(237); pack.push_back(226);
@@ -342,11 +408,12 @@ void test_a_v6_pack_round_trips_through_the_reader() {
   TEST_ASSERT_FALSE(s.painted(0, 3));
   // (0,0): painted index 0, block 0 -> code 0 -> Y 0, no chroma -> black.
   TEST_ASSERT_EQUAL_UINT16(rgb565(0, 0, 0), s.at(0, 0));
-  // (6,1): painted index 6 -> Y 96. Past the last block centre, so the
-  // chroma is block 1's alone, not a blend: cb +50, cr -50.
-  const int y = 96, r = y - 50, b = y + 50;
+  // (7,1): painted index 7 -> Y 112. Past the last block centre across, and
+  // between two code-1 blocks down, so the chroma is code 1's alone, not a
+  // blend: cb +50, cr -50.
+  const int y = 112, r = y - 50, b = y + 50;
   const int g = int(std::lround((y - 0.299 * r - 0.114 * b) / 0.587));
-  TEST_ASSERT_EQUAL_UINT16(rgb565(r, g, b), s.at(6, 1));
+  TEST_ASSERT_EQUAL_UINT16(rgb565(r, g, b), s.at(7, 1));
   // (7,2): inside index 15 wraps to code 0.
   TEST_ASSERT_EQUAL_UINT8(0, s.luma[2 * 8 + 7]);
 
@@ -392,7 +459,9 @@ int main() {
   RUN_TEST(test_edge_ink_draws_a_faint_boundary_and_nothing_else);
   RUN_TEST(test_edge_ink_favours_light_over_dark);
   RUN_TEST(test_a_name_pair_reserves_room_for_both_lines);
-  RUN_TEST(test_a_v6_pack_round_trips_through_the_reader);
+  RUN_TEST(test_the_plane_coder_agrees_with_the_bake_to_the_byte);
+  RUN_TEST(test_the_plane_coder_round_trips_and_refuses_a_cut_stream);
+  RUN_TEST(test_a_v7_pack_round_trips_through_the_reader);
   RUN_TEST(test_a_pack_that_is_not_a_pack_is_refused);
   return UNITY_END();
 }

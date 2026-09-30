@@ -1,4 +1,4 @@
-// Reader for the plate pack `tools/bake_plates.py` writes (FGPL v6).
+// Reader for the plate pack `tools/bake_plates.py` writes (FGPL v7).
 //
 // The pack is the SD card's replacement: one file in the flash filesystem that
 // carries every species the frame can draw - silhouette, pixels, label
@@ -6,12 +6,12 @@
 // and the streams are pulled by offset when a bird is actually on the page,
 // so a 550-species pack costs 60 KB to open, not 13 MB.
 //
-// Pixels come as two posterised planes, luma per pixel and chroma per 4x4
+// Pixels come as two posterised planes, luma per pixel and chroma per 2x2
 // block; luma code 15 means outside the silhouette, so the one plane is the
-// sprite's shape for the packer and its pixels for the renderer. loadSprite()
-// expands the planes; the colour of a pixel is made when it is drawn, with
-// the chroma interpolated between blocks. See the bake tool's docstring for
-// the layout.
+// sprite's shape for the packer and its pixels for the renderer. Both are
+// range-coded (planecoder.h). loadSprite() expands the planes; the colour of a
+// pixel is made when it is drawn, with the chroma interpolated between blocks.
+// See the bake tool's docstring for the layout.
 //
 // Arduino-free: the file is reached through `Reader`, which the device backs
 // with LittleFS and the host harness with stdio, so the same code renders a
@@ -42,15 +42,14 @@ struct PlateEntry {
   uint32_t offset = 0, lumaLen = 0, chromaLen = 0;
 };
 
-constexpr int kChromaBlock = 4;  // pixels a side per chroma sample, as baked
+constexpr int kChromaBlock = 2;  // pixels a side per chroma sample, as baked (the pack says so too)
 constexpr uint8_t kOutside = 15;  // the luma code that is not a level
 
 // One sprite's pixels, expanded: a luma code a pixel, the silhouette bit a
 // pixel, and the chroma a block - *not* a colour a pixel. The colour is made
 // at `at()`, where the block's chroma is interpolated bilinearly between
-// block centres: the bake stores one chroma value per 4x4 block, and
-// repeating it over the block draws a visible 4-pixel grid across every
-// colour edge, while a value blended from the four nearest blocks reads as
+// block centres: the bake stores one chroma value per block, and repeating
+// it over the block draws a visible grid across every colour edge, while a value blended from the four nearest blocks reads as
 // the wash it was. Blocks with nothing painted in them are given their
 // painted neighbours' mean on load, so the blend at the silhouette's edge
 // leans on the bird and not on whatever code 0 happened to be.
@@ -70,14 +69,16 @@ struct SpriteImage {
   inline bool painted(int x, int y) const {
     return paint[size_t(y) * ((w + 7) / 8) + (x >> 3)] & (0x80 >> (x & 7));
   }
-  // The pixel's colour, RGB565. Fixed point: a pixel sits at (x + 0.5) / 4
+  // The pixel's colour, RGB565. Fixed point: a pixel sits at (x + 0.5) / B
   // in block units, block centres at n + 0.5, so its position among the
-  // centres is (x - 1.5) / 4 - in 1/64ths, 16 * x - 24 - split into a block
-  // index and a 6-bit fraction, clamped at the edges.
+  // centres is (x + 0.5) / B - 0.5 - in 1/64ths, kStep * x + kStep / 2 - 32
+  // with kStep = 64 / B - split into a block index and a 6-bit fraction,
+  // clamped at the edges.
+  static constexpr int kStep = 64 / kChromaBlock;
   inline uint16_t at(int x, int y) const {
     if (!direct.empty()) return direct[size_t(y) * w + x];
     const int Y = lumaTable[luma[size_t(y) * w + x] & 15];
-    int tx = 16 * x - 24, ty = 16 * y - 24;
+    int tx = kStep * x + kStep / 2 - 32, ty = kStep * y + kStep / 2 - 32;
     if (tx < 0) tx = 0;
     if (ty < 0) ty = 0;
     int bx = tx >> 6, by = ty >> 6;
@@ -107,7 +108,7 @@ struct SpriteImage {
 class Plates {
  public:
   // Parse the header and index. Returns false, with `error` set, if the file
-  // is not a v6 pack.
+  // is not a v7 pack.
   bool open(Reader reader, std::string *error = nullptr);
 
   size_t count() const { return entries_.size(); }
@@ -119,15 +120,15 @@ class Plates {
   const uint8_t *paper() const { return paper_; }  // rgb
   int source() const { return source_; }
 
-  // Inflate the silhouette into a packer mask (w x h).
+  // Decode the silhouette into a packer mask (w x h).
   bool loadMask(size_t i, Mask &out) const;
-  // Inflate the planes and expand them to codes and a colour table.
+  // Decode the planes and expand them to codes and a colour table.
   bool loadSprite(size_t i, SpriteImage &out) const;
 
   // One sprite on its own, as `tools/export_web_plates.py` writes it for the
   // frame to fetch over the network: the same planes and tables as a pack
-  // record, behind a small header ('FGPS' v1). The full-size supplement to
-  // the pack in flash; see App::showBirds.
+  // record, behind a small header. The full-size supplement to
+  // the pack in flash; see App::showBirds. ('FGPS' v2 since the pack's v7.)
   static bool decodeSingle(const std::string &file, SpriteImage &out, std::string *error = nullptr);
 
  private:
