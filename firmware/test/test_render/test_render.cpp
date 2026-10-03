@@ -348,7 +348,9 @@ void test_the_plane_coder_round_trips_and_refuses_a_cut_stream() {
   TEST_ASSERT_FALSE(planecoder::decodeLuma(longer.data(), longer.size(), w, h, l.data()));
 }
 
-void test_a_v7_pack_round_trips_through_the_reader() {
+// A whole v7 pack of one bird, built byte by byte. Shared with the margin
+// test below, which wants a pack to render rather than a format to check.
+std::vector<uint8_t> v7FixturePack() {
   // An 8x4 sprite, four by two chroma blocks. Inside the silhouette: row 0
   // x0-3, row 1 x4-7, row 2 all, row 3 none; 15 outside, else the pixel's
   // index inside (0-14, so the last inside pixel wraps to 0).
@@ -381,16 +383,25 @@ void test_a_v7_pack_round_trips_through_the_reader() {
   for (int i = 0; i < 16; ++i) pack.push_back(uint8_t(i == 1 ? int8_t(-50) : 0));  // cr
   put32(pack, 0); put32(pack, uint32_t(zl.size())); put32(pack, uint32_t(zc.size()));
   for (const auto *z : {&zl, &zc}) pack.insert(pack.end(), z->begin(), z->end());
+  return pack;
+}
 
-  Plates p;
-  std::string err;
-  const bool ok = p.open(
+// Read `pack` the way the frame reads its flash.
+bool openPack(const std::vector<uint8_t> &pack, Plates &p, std::string *err) {
+  return p.open(
       [&pack](uint32_t offset, void *dst, size_t len) {
         if (size_t(offset) + len > pack.size()) return false;
         std::memcpy(dst, pack.data() + offset, len);
         return true;
       },
-      &err);
+      err);
+}
+
+void test_a_v7_pack_round_trips_through_the_reader() {
+  const std::vector<uint8_t> pack = v7FixturePack();
+  Plates p;
+  std::string err;
+  const bool ok = openPack(pack, p, &err);
   TEST_ASSERT_TRUE_MESSAGE(ok, err.c_str());
   TEST_ASSERT_EQUAL_size_t(1, p.count());
   TEST_ASSERT_EQUAL_INT(0, p.find("Aa"));
@@ -428,6 +439,54 @@ void test_a_v7_pack_round_trips_through_the_reader() {
   TEST_ASSERT_FALSE(m.get(0, 3));
 }
 
+// The owner's margin is a border the page draws nothing in, a side at a time,
+// so a mount over the glass cannot cut a name off the edge. The birds are
+// packed into what is left, so the band around them stays paper - and paper
+// dithers to white, which is what makes this checkable.
+void test_a_page_margin_leaves_its_border_untouched() {
+  const std::vector<uint8_t> pack = v7FixturePack();
+  Plates p;
+  std::string err;
+  TEST_ASSERT_TRUE_MESSAGE(openPack(pack, p, &err), err.c_str());
+
+  const Font noFace;  // nothing loaded: the names and the date draw nothing
+  // The box every pixel the page drew falls inside.
+  const auto inkBox = [&](const BirdPageSettings &settings, int box[4]) {
+    Frame out;
+    TEST_ASSERT_TRUE(renderBirdPage(p, {0}, settings, noFace, out));
+    box[0] = out.w, box[1] = out.h, box[2] = -1, box[3] = -1;
+    for (int y = 0; y < out.h; ++y)
+      for (int x = 0; x < out.w; ++x) {
+        if (out.row(y)[x] == kWhite) continue;
+        box[0] = std::min(box[0], x), box[1] = std::min(box[1], y);
+        box[2] = std::max(box[2], x), box[3] = std::max(box[3], y);
+      }
+    TEST_ASSERT_TRUE_MESSAGE(box[2] >= 0, "nothing was drawn at all");
+  };
+
+  BirdPageSettings s;
+  int bare[4];
+  inkBox(s, bare);
+  s.marginTop = 120;
+  s.marginRight = 40;
+  s.marginBottom = 200;
+  s.marginLeft = 80;
+  int inset[4];
+  inkBox(s, inset);
+
+  const int width = bare[2] - bare[0] + 1, height = bare[3] - bare[1] + 1;
+  TEST_ASSERT_TRUE_MESSAGE(inset[0] >= s.marginLeft && inset[1] >= s.marginTop &&
+                               inset[2] < 1600 - s.marginRight && inset[3] < 1200 - s.marginBottom,
+                           "the page drew in its margin");
+  // One bird is sized off the page rather than off the room left for it, so
+  // it comes out the same size either way - the margin moves it, by half of
+  // what it took off each pair of sides, and nothing else.
+  TEST_ASSERT_INT_WITHIN(2, width, inset[2] - inset[0] + 1);
+  TEST_ASSERT_INT_WITHIN(2, height, inset[3] - inset[1] + 1);
+  TEST_ASSERT_INT_WITHIN(2, bare[0] + (s.marginLeft - s.marginRight) / 2, inset[0]);
+  TEST_ASSERT_INT_WITHIN(2, bare[1] + (s.marginTop - s.marginBottom) / 2, inset[1]);
+}
+
 void test_a_pack_that_is_not_a_pack_is_refused() {
   std::vector<uint8_t> junk(2000, 0x42);
   Plates p;
@@ -462,6 +521,7 @@ int main() {
   RUN_TEST(test_the_plane_coder_agrees_with_the_bake_to_the_byte);
   RUN_TEST(test_the_plane_coder_round_trips_and_refuses_a_cut_stream);
   RUN_TEST(test_a_v7_pack_round_trips_through_the_reader);
+  RUN_TEST(test_a_page_margin_leaves_its_border_untouched);
   RUN_TEST(test_a_pack_that_is_not_a_pack_is_refused);
   return UNITY_END();
 }

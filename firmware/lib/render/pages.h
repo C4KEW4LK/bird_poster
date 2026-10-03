@@ -78,6 +78,14 @@ struct BirdPageSettings {
   // own pale paper around each bird becomes the same cream so the birds sit
   // into the page, and dark ink barely moves. 0 is off, 4 the warmest.
   int cream = 0;
+  // A border the page draws nothing in, in page pixels, one side at a time.
+  // The glass is the whole page, so by default a bird runs off its edge and a
+  // name can end up against it; a frame in a mount wants everything held back
+  // behind the rebate, and a rebate is rarely even on all four sides. The
+  // birds are packed into what is left, so they fill it rather than float in
+  // it. Clamped per side to a quarter of that axis, so a mistyped number
+  // cannot leave a page with no room on it.
+  int marginTop = 0, marginRight = 0, marginBottom = 0, marginLeft = 0;
   bool grow = true;  // let birds grow into the gaps after the pack (off: the packed layout alone)
   PackStyle packStyle = PackStyle::Classic;  // how the page is arranged; see packer.h
   // Written along one edge of the page in the label font, at the name size,

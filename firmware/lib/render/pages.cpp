@@ -240,8 +240,18 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
   if (sources.empty()) return false;
 
   // Pack inside the margin but size off the whole page: see the host harness.
-  const int margin = int(std::lround(std::min(width, height) * kMargin));
-  const int boxW = width - 2 * margin, boxH = height - 2 * margin;
+  // kMargin is the packer's own, the same on every side; the owner's is added
+  // to it a side at a time, and clamped so a mistyped number still leaves a
+  // page to draw on.
+  const int packMargin = int(std::lround(std::min(width, height) * kMargin));
+  const auto border = [packMargin](int given, int axis) {
+    return packMargin + std::clamp(given, 0, axis / 4);
+  };
+  const int mLeft = border(settings.marginLeft, width);
+  const int mRight = border(settings.marginRight, width);
+  const int mTop = border(settings.marginTop, height);
+  const int mBottom = border(settings.marginBottom, height);
+  const int boxW = width - mLeft - mRight, boxH = height - mTop - mBottom;
   const int namePx = std::max(
       kMinLabelPx, int(std::lround(std::min(width, height) * labelScale(settings.labelSize))));
 
@@ -261,7 +271,7 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
     band = dateInset + line + namePx / 3;
   }
   const int packH = boxH - band;
-  const int originY = margin + (dateTop ? band : 0);
+  const int originX = mLeft, originY = mTop + (dateTop ? band : 0);
 
   std::vector<Placement> placed;
   int usedPx = 0;
@@ -301,7 +311,7 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
         larger && settings.spriteOverride && settings.spriteOverride(size_t(p.index), sprite);
     if (!overridden && !plates.loadSprite(size_t(idx), sprite)) return false;
     const bool enlarged = dw * 2 > sprite.w * 3 || dh * 2 > sprite.h * 3;
-    drawSprite(canvas, sprite, margin + p.x, originY + p.y, dw, dh, flips[size_t(p.index)],
+    drawSprite(canvas, sprite, originX + p.x, originY + p.y, dw, dh, flips[size_t(p.index)],
                enlarged ? settings.resample : Resample::Bilinear);
   }
   const int t2 = nowMs();
@@ -323,16 +333,16 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
       // The size this bird's box was reserved at, which is the set's except
       // for a hero's, set larger - see Placement::labelPx.
       const int px = p.labelPx > 0 ? p.labelPx : usedPx;
-      drawName(out, firstFace(first), font, first, second, margin + p.labelX, originY + p.labelY,
+      drawName(out, firstFace(first), font, first, second, originX + p.labelX, originY + p.labelY,
                p.labelW, p.labelH, px, subScale);
     }
   }
 
-  const int left = margin + dateInset, right = width - margin - dateInset;
+  const int left = mLeft + dateInset, right = width - mRight - dateInset;
   // Both lines share a baseline: the date's, or the note's own when alone.
   const int ascent = dated ? dateAscent : noteAscent, descent = dated ? dateDescent : noteDescent;
   const int baseline =
-      dateTop ? margin + dateInset + ascent : height - margin - dateInset - descent;
+      dateTop ? mTop + dateInset + ascent : height - mBottom - dateInset - descent;
   if (dated) {
     progress("writing the date");
     const int x = settings.dateAlign == DateAlign::Left     ? left

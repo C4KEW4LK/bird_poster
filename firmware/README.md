@@ -75,7 +75,8 @@ The page's settings have flags of the same names: `--pack classic|grid|scatter|h
 `--portrait`, `--count N`, `--vivid/--sharpen/--edges N`, `--cream N` (paper
 tone, 0-4), `--jitter N` (dither randomisation), `--resample
 bilinear|mitchell|catmullrom` (how an enlarged plate is filled in),
-`--sci-percent N` (scientific name size), `--date STYLE` with `--date-us` and
+`--sci-percent N` (scientific name size), `--margin PX` (or `--margins TOP
+RIGHT BOTTOM LEFT`), `--date STYLE` with `--date-us` and
 `--date-pos t|b l|c|r`, and `--note TEXT` (the refresh counter's line). For
 looking into the pipeline: `--canvas FILE.ppm` writes the page as the dither
 receives it, and `--web-sprite FILE.bin` draws the first bird from a
@@ -325,6 +326,12 @@ Beyond the birds and their names, all set from the web UI:
   numeric (day or month first) or in words; the birds are packed around it.
 - **Paper** - white, or four strengths of cream, multiplied over the page
   before the dither so the plates' own paper takes the same tone.
+- **Margin** - a border the page draws nothing in, so a mount or a bezel over
+  the glass does not cut a name off the edge. One figure for the page, or one
+  a side for a rebate that is not even; in page pixels (1600 x 1200 whichever
+  way the frame hangs), at most a quarter of the page a side. The birds are
+  packed into what is left, so a margin draws them smaller rather than leaving
+  a gap. 0, the default, is the glass itself: the birds bleed off it.
 - **Scientific name size** - 100% down to 50% of the common name.
 - **Shuffle the birds' order** - the chosen birds handed to the layout in a
   new random order every page, rather than the most seen (or rarest) first.

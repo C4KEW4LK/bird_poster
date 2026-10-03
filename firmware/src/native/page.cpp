@@ -5,7 +5,8 @@
 //   .pio/build/native/program plates.bin page.ppm [--font f.ttf] [--name-font g.ttf] [--layout N]
 //                             [--portrait] [--no-names | --name-style 0-3] [--name-case 0-2] [--count N] [--names a,b]
 //                             [--labels birdnet_labels.txt | --no-common] [--vivid 0-4] [--sharpen 0-4] [--edges 0-4] [--no-grow]
-//                             [--pack classic|grid|scatter]
+//                             [--pack classic|grid|scatter|hero]
+//                             [--margin PX | --margins TOP RIGHT BOTTOM LEFT]
 //                             [--setup] [--status]
 //
 // Common names come from a BirdNET label file ("Genus species_Common Name" a
@@ -112,6 +113,17 @@ int pageMain(int argc, char **argv) {
       settings.subNamePercent = std::atoi(argv[++i]);
     if (!std::strcmp(argv[i], "--jitter") && i + 1 < argc) settings.jitter = std::atoi(argv[++i]);
     if (!std::strcmp(argv[i], "--cream") && i + 1 < argc) settings.cream = std::atoi(argv[++i]);
+    // --margin N is the border on every side; --margins T R B L sets each.
+    if (!std::strcmp(argv[i], "--margin") && i + 1 < argc) {
+      const int m = std::atoi(argv[++i]);
+      settings.marginTop = settings.marginRight = settings.marginBottom = settings.marginLeft = m;
+    }
+    if (!std::strcmp(argv[i], "--margins") && i + 4 < argc) {
+      settings.marginTop = std::atoi(argv[++i]);
+      settings.marginRight = std::atoi(argv[++i]);
+      settings.marginBottom = std::atoi(argv[++i]);
+      settings.marginLeft = std::atoi(argv[++i]);
+    }
     if (!std::strcmp(argv[i], "--pack") && i + 1 < argc) {
       const char *v = argv[++i];
       settings.packStyle = !std::strcmp(v, "grid")      ? PackStyle::Grid

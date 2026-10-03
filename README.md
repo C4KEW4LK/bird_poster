@@ -173,7 +173,8 @@ flashing with `esptool`.
 On the frame's own settings page, besides the source: the arrangement
 (classic, grid, scattered or one hero bird), the birds' order shuffled or the
 source's ranking, how the names are set, colour, detail and edge strength for
-the dither, a cream paper tone, today's date on the page, the refresh interval
+the dither, a cream paper tone, a no-draw margin (one figure, or one a side,
+for a frame with a mount over the glass), today's date on the page, the refresh interval
 (as short as a minute), and a refresh counter for measuring battery life. Every
 page is a new arrangement of the birds, so the same birds come out in new
 places each time.

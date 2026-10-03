@@ -507,6 +507,10 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
   ps.sharpen = settings.sharpen;
   ps.edges = settings.edges;
   ps.cream = settings.cream;
+  ps.marginTop = settings.marginTopPx();
+  ps.marginRight = settings.marginRightPx();
+  ps.marginBottom = settings.marginBottomPx();
+  ps.marginLeft = settings.marginLeftPx();
   ps.commonNames = pageCommon;
   ps.commonCase = settings.commonCase;
   ps.commonFont = &nameFont;

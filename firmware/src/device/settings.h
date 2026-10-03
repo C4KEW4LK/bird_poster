@@ -69,6 +69,13 @@ struct Settings {
   int sharpen = 2;  // unsharp mask before the dither, 0 off .. 4 most
   int edges = 2;    // ink along detected edges, 0 off .. 4 strongest
   int cream = 0;    // the page printed on cream rather than white, 0 off .. 4 warmest
+  // A border the page draws nothing in, so a mount or a bezel does not cut
+  // the names off the edge. One figure for the whole page, or one a side for
+  // a rebate that is not even; in pixels of the page, which is 1600 x 1200
+  // whichever way the frame hangs.
+  bool marginPerSide = false;
+  int margin = 0;
+  int marginTop = 0, marginRight = 0, marginBottom = 0, marginLeft = 0;
   int cycleHours = 0;  // rotate: no bird twice within this many hours; 0 draws the top birds every time
 
   // Which plate pack to draw from, where the filesystem holds more than one:
@@ -83,6 +90,13 @@ struct Settings {
   // POSIX, for the quiet hours and the status page. Sydney/Canberra/Melbourne
   // with daylight saving; plain "AEST-10" is Brisbane.
   std::string tz = "AEST-10AEDT,M10.1.0,M4.1.0/3";
+
+  // What each side's border actually comes to: the one figure when the page
+  // is set to a single margin, that side's own when it is not.
+  int marginTopPx() const { return marginPerSide ? marginTop : margin; }
+  int marginRightPx() const { return marginPerSide ? marginRight : margin; }
+  int marginBottomPx() const { return marginPerSide ? marginBottom : margin; }
+  int marginLeftPx() const { return marginPerSide ? marginLeft : margin; }
 
   bool portrait() const { return (rotation & 1) == 0; }
   bool configured() const { return !wifiSsid.empty(); }

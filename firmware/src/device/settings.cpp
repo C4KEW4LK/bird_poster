@@ -62,6 +62,17 @@ void loadSettings(Settings &s) {
   s.sharpen = std::min<int>(4, p.getUChar("sharpen", uint8_t(s.sharpen)));
   s.edges = std::min<int>(4, p.getUChar("edges", uint8_t(s.edges)));
   s.cream = std::min<int>(4, p.getUChar("cream", uint8_t(s.cream)));
+  // The renderer clamps these to a quarter of their axis; the 300 here is
+  // only so a corrupt key cannot ask for a page-sized border.
+  const auto marginPx = [&p](const char *key, int fallback) {
+    return std::clamp<int>(p.getInt(key, fallback), 0, 300);
+  };
+  s.marginPerSide = p.getBool("marginps", s.marginPerSide);
+  s.margin = marginPx("margin", s.margin);
+  s.marginTop = marginPx("margint", s.marginTop);
+  s.marginRight = marginPx("marginr", s.marginRight);
+  s.marginBottom = marginPx("marginb", s.marginBottom);
+  s.marginLeft = marginPx("marginl", s.marginLeft);
   s.cycleHours = p.getInt("cycleh", s.cycleHours);  // new key: "cycle" was days
   s.intervalMin = p.getInt("interval", s.intervalMin);
   // New keys in minutes; the old ones held whole hours.
@@ -117,6 +128,12 @@ void saveSettings(const Settings &s) {
   p.putUChar("sharpen", uint8_t(s.sharpen));
   p.putUChar("edges", uint8_t(s.edges));
   p.putUChar("cream", uint8_t(s.cream));
+  p.putBool("marginps", s.marginPerSide);
+  p.putInt("margin", s.margin);
+  p.putInt("margint", s.marginTop);
+  p.putInt("marginr", s.marginRight);
+  p.putInt("marginb", s.marginBottom);
+  p.putInt("marginl", s.marginLeft);
   p.putInt("cycleh", s.cycleHours);
   p.putInt("interval", s.intervalMin);
   p.putInt("quietfromm", s.quietFrom);

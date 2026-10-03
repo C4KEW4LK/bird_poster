@@ -136,6 +136,13 @@ button:disabled{opacity:.6;cursor:wait}
 <small>For a bird drawn much larger than its plate in flash - a page of one or two birds - the frame fetches the same plate at full size from here (<code>&lt;address&gt;/Genus_species.bin</code>), and uses the one in flash if the site does not answer. A normal page never needs it. Put <code>{region}</code> in the address for a site with a folder a region. %WEBLAST%</small>
 <label>Paper</label><select name="cream"><option value="0" %CRM0%>White</option><option value="1" %CRM1%>1 - Faint cream</option><option value="2" %CRM2%>2</option><option value="3" %CRM3%>3</option><option value="4" %CRM4%>4 - Warmest cream</option></select>
 <small>The glass has six dull inks and the dither blurs fine lines. Colour pushes saturation, Detail sharpens what contrast there is, and Edges draws a line along every boundary it finds - faint ones included, which is what keeps a white bird off the page. Pick all three by eye. Paper prints the page on cream instead of white: the background and the plates' own pale paper take the same warm tone, so the birds sit into the page rather than on it. The glass has no cream ink, so it comes out as a fine stipple of yellow and white.</small>
+<div class="row"><div><label>Margin</label><select name="marginmode" id="marginmode" onchange="marginChanged()"><option value="0" %MGM0%>The same on every side</option><option value="1" %MGM1%>One a side</option></select></div>
+<div id="marginone"><label>All sides, px</label><input name="margin" type="number" min="0" max="300" value="%MARGIN%"></div></div>
+<div class="row" id="marginfour"><div><label>Top, px</label><input name="margintop" type="number" min="0" max="300" value="%MARGINT%"></div>
+<div><label>Right, px</label><input name="marginright" type="number" min="0" max="300" value="%MARGINR%"></div>
+<div><label>Bottom, px</label><input name="marginbottom" type="number" min="0" max="300" value="%MARGINB%"></div>
+<div><label>Left, px</label><input name="marginleft" type="number" min="0" max="300" value="%MARGINL%"></div></div>
+<small>A border the page draws nothing in, so a mount or a bezel over the glass does not cut the names off the edge. 0 is the glass itself: the birds bleed off it. The page is 1600 x 1200 pixels whichever way the frame hangs, and top is the top of the picture; the birds are packed into what is left, so a margin makes them smaller rather than leaving a gap. At most a quarter of the page a side.</small>
 
 <h2>Schedule</h2>
 <div class="row"><div><label>Refresh every, minutes</label><input name="interval" id="interval" type="number" min="1" max="1440" value="%INTERVAL%" required></div>
@@ -187,6 +194,9 @@ button:disabled{opacity:.6;cursor:wait}
 document.querySelectorAll('.js').forEach(function(e){if(!e.classList.contains('online')||%ONLINE%)e.hidden=false});
 function lbChanged(){document.getElementById('lookback').hidden=document.getElementById('lookbackunit').value=='3'}
 lbChanged();
+function marginChanged(){var four=document.getElementById('marginmode').value=='1';
+document.getElementById('marginone').hidden=four;document.getElementById('marginfour').hidden=!four}
+marginChanged();
 function srcChanged(){var v=document.getElementById('source').value;
 var show=function(c,on){document.querySelectorAll('.'+c).forEach(function(e){e.hidden=!on})};
 show('birdnet',v=='birdnet');show('list',v=='list');show('ebird',v=='ebird');
@@ -666,6 +676,12 @@ String render(App &app, const std::string &error = "") {
   for (int v = 0; v < 5; ++v) page.replace("%SHP" + String(v) + "%", sel(s.sharpen == v));
   for (int v = 0; v < 5; ++v) page.replace("%EDG" + String(v) + "%", sel(s.edges == v));
   for (int v = 0; v < 5; ++v) page.replace("%CRM" + String(v) + "%", sel(s.cream == v));
+  for (int v = 0; v < 2; ++v) page.replace("%MGM" + String(v) + "%", sel(int(s.marginPerSide) == v));
+  page.replace("%MARGIN%", String(s.margin));
+  page.replace("%MARGINT%", String(s.marginTop));
+  page.replace("%MARGINR%", String(s.marginRight));
+  page.replace("%MARGINB%", String(s.marginBottom));
+  page.replace("%MARGINL%", String(s.marginLeft));
   page.replace("%INTERVAL%", String(s.intervalMin));
   page.replace("%QFROM%", hhmm(s.quietFrom));
   page.replace("%QTO%", hhmm(s.quietTo));
@@ -878,6 +894,14 @@ void WebUi::begin(bool captive) {
     s.sharpen = argInt("sharpen", 0, 4, s.sharpen);
     s.edges = argInt("edges", 0, 4, s.edges);
     s.cream = argInt("cream", 0, 4, s.cream);
+    // Both sets of boxes are posted whichever is showing, so the one not in
+    // use keeps its numbers for the next time it is picked.
+    s.marginPerSide = argInt("marginmode", 0, 1, int(s.marginPerSide)) == 1;
+    s.margin = argInt("margin", 0, 300, s.margin);
+    s.marginTop = argInt("margintop", 0, 300, s.marginTop);
+    s.marginRight = argInt("marginright", 0, 300, s.marginRight);
+    s.marginBottom = argInt("marginbottom", 0, 300, s.marginBottom);
+    s.marginLeft = argInt("marginleft", 0, 300, s.marginLeft);
     s.cycleHours = argInt("cycle", 0, 8760, s.cycleHours);
     s.intervalMin = argInt("interval", 1, 1440, s.intervalMin);
     s.quietFrom = argTime("quietfrom", s.quietFrom);
