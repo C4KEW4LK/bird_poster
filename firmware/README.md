@@ -189,6 +189,12 @@ which has no global count to rank on. The status card says when the portal
 will close and when the next page is due; the glass's status page carries the
 same line.
 
+**A private BirdNET-Go.** The detections endpoint is public by default;
+`security.privatemode` closes it and answers 401. The way through is the
+detector's **Security › Subnet bypass** (`security.allowsubnetbypass`),
+which is what it intends for devices on the house network. The 401 says as
+much on the status page.
+
 **Cycle birds** (`cycleHours`, 0 off) stops the page being the same top few
 every time: `choose()` still ranks everything drawable, then `cycle()` in
 `lib/source` draws a random page from the birds not shown within the window

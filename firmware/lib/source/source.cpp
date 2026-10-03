@@ -275,8 +275,9 @@ std::vector<std::pair<std::string, std::string>> requestHeaders(const SourceConf
 
 std::string requestUrl(const SourceConfig& config, std::time_t now, Mode mode) {
   if (config.source == Source::BirdNet) {
-    // Public, no auth. The frame only reads; nothing here can change a setting
-    // on the detector or delete a recording.
+    // Public unless the detector is in private mode, which `explainStatus`
+    // says more about. The frame only reads; nothing here can change a
+    // setting on the detector or delete a recording.
     return trimSlash(config.detectorUrl) + "/api/v2/detections/recent?limit=" +
            std::to_string(config.limit);
   }
@@ -383,6 +384,14 @@ std::string explainStatus(Source source, int http, const std::string& body) {
     case 403:
       if (source == Source::eBird)
         return line + " - eBird refused the API key; check it, or make one at ebird.org/api/keygen";
+      // Detections are public by default and private mode is the one setting
+      // that closes them, so that is what a refusal means. The frame has no
+      // credential it can send, so the way through is on the detector.
+      if (source == Source::BirdNet)
+        return line +
+               " - BirdNET-Go refused the request; it is in private mode. The frame cannot sign "
+               "in, so allow its network under the detector's Security > Subnet bypass" +
+               says;
       return line + " - " + name + " refused the request" + says;
     case 404:
       return line + " - nothing at that path" +

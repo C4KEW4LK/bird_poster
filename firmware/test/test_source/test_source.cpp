@@ -80,6 +80,20 @@ void test_birdnet_url_is_the_public_v2_path() {
                            requestUrl(config, kNow).c_str());
 }
 
+// Private mode is the one setting that closes a detector's detections, so a
+// refusal from BirdNET-Go should name it, and name the one way through,
+// rather than leaving the owner to find both.
+void test_a_refused_birdnet_names_private_mode() {
+  const std::string said =
+      explainStatus(Source::BirdNet, 401, R"({"error":"Authentication required"})");
+  TEST_ASSERT_NOT_NULL(strstr(said.c_str(), "private mode"));
+  TEST_ASSERT_NOT_NULL(strstr(said.c_str(), "Subnet bypass"));
+  // And the detector's own words, which is where the 401 came with a body.
+  TEST_ASSERT_NOT_NULL(strstr(said.c_str(), "Authentication required"));
+  // Not a refusal: the other sources keep the plain wording.
+  TEST_ASSERT_NULL(strstr(explainStatus(Source::iNaturalist, 401, "").c_str(), "private mode"));
+}
+
 void test_inaturalist_url_carries_the_window_and_the_place() {
   SourceConfig config;
   config.source = Source::iNaturalist;
@@ -479,6 +493,7 @@ void test_a_json_list_takes_names_or_objects_in_the_order_given() {
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_birdnet_url_is_the_public_v2_path);
+  RUN_TEST(test_a_refused_birdnet_names_private_mode);
   RUN_TEST(test_inaturalist_url_carries_the_window_and_the_place);
   RUN_TEST(test_birdnet_detections_before_the_window_are_dropped);
   RUN_TEST(test_birdnet_repeats_are_counted_not_duplicated);
