@@ -472,7 +472,7 @@ bool pack(const std::vector<Sprite> &sprites, int width, int height,
     stamp(occ, sprite.mask, fx, fy);
     out.push_back({sprite.index, sprite.dim, fx + sprite.artX, fy + sprite.artY,
                    fx + sprite.labelX, fy + sprite.labelY, sprite.labelW, sprite.labelH,
-                   sprite.hasLabel});
+                   sprite.hasLabel, sprite.labelPx});
   }
   return true;
 }
@@ -710,7 +710,7 @@ bool packGrid(const std::vector<Sprite> &sprites, int width, int height,
       stamp(occ, m, x, y);
       out.push_back({sprite.index, sprite.dim, x + sprite.artX, y + sprite.artY,
                      x + sprite.labelX, y + sprite.labelY, sprite.labelW, sprite.labelH,
-                     sprite.hasLabel});
+                     sprite.hasLabel, sprite.labelPx});
     }
   }
   return true;
@@ -748,7 +748,7 @@ bool packHero(const std::vector<Sprite> &sprites, int width, int height,
     stamp(occ, m, x, y);
     out.push_back({sprites[0].index, sprites[0].dim, x + sprites[0].artX, y + sprites[0].artY,
                    x + sprites[0].labelX, y + sprites[0].labelY, sprites[0].labelW,
-                   sprites[0].labelH, sprites[0].hasLabel});
+                   sprites[0].labelH, sprites[0].hasLabel, sprites[0].labelPx});
   }
   if (n == 1) return true;
 
@@ -793,7 +793,7 @@ bool packHero(const std::vector<Sprite> &sprites, int width, int height,
     stamp(occ, m, fx, fy);
     out.push_back({sprite.index, sprite.dim, fx + sprite.artX, fy + sprite.artY,
                    fx + sprite.labelX, fy + sprite.labelY, sprite.labelW, sprite.labelH,
-                   sprite.hasLabel});
+                   sprite.hasLabel, sprite.labelPx});
   }
   return true;
 }
@@ -917,7 +917,7 @@ bool packVoronoi(const std::vector<Sprite> &sprites, int width, int height,
     stamp(occ, m, x, y);
     out.push_back({sprite.index, sprite.dim, x + sprite.artX, y + sprite.artY,
                    x + sprite.labelX, y + sprite.labelY, sprite.labelW, sprite.labelH,
-                   sprite.hasLabel});
+                   sprite.hasLabel, sprite.labelPx});
   }
   return true;
 }
@@ -1105,7 +1105,7 @@ bool packCoarse(const std::vector<Sprite> &sprites, int width, int height,
     coarsen(occ, width, height, cpad, coarseN, coarseB);
     out.push_back({sprite.index, sprite.dim, fx + sprite.artX, fy + sprite.artY,
                    fx + sprite.labelX, fy + sprite.labelY, sprite.labelW, sprite.labelH,
-                   sprite.hasLabel});
+                   sprite.hasLabel, sprite.labelPx});
   }
   return true;
 }
@@ -1230,9 +1230,12 @@ bool flipFor(bool baked, const char *name, int layout) {
 namespace {
 
 // A bird as the packer sees it at `dim`: the eroded silhouette, plus its
-// name's box when names are on, scaled to `px`.
+// name's box when names are on, scaled to `px`. The gap is taken off `px`
+// rather than passed in, because `px` is per bird - the hero's name is set
+// larger than the rest - and a gap measured against someone else's size would
+// crowd the big name and cast the small ones adrift.
 Sprite spriteAt(const std::vector<Mask> &sources, const std::vector<bool> &flips,
-                const std::vector<LabelBox> &labels, int i, int dim, int px, int gap) {
+                const std::vector<LabelBox> &labels, int i, int dim, int px) {
   const Mask art = sources[i].scaled(dim, flips[i]).eroded(kOverlapPx);
   if (labels.empty()) {
     Sprite s;
@@ -1241,10 +1244,12 @@ Sprite spriteAt(const std::vector<Mask> &sources, const std::vector<bool> &flips
     s.mask = art;
     return s;
   }
-  // Baked at kLabelRefPx, so scale the box to the size names landed at.
+  // Baked at kLabelRefPx, so scale the box to the size this name landed at.
   const LabelBox box{int(std::lround(double(labels[i].w) * px / kLabelRefPx)),
                      int(std::lround(double(labels[i].h) * px / kLabelRefPx))};
-  return withLabel(i, dim, art, box, gap);
+  Sprite s = withLabel(i, dim, art, box, int(std::lround(px * kLabelGap)));
+  s.labelPx = px;
+  return s;
 }
 
 // `stamp` undone: the bird's own bits cleared from the grid. Exact because
@@ -1320,7 +1325,11 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
     // Names have to shrink too: a fixed-size name never yields, so a full page
     // of them cannot converge at all.
     px = labels.empty() ? 0 : std::max(kMinLabelPx, int(std::lround(namePx * shrink)));
-    const int gap = int(std::lround(px * kLabelGap));
+    // The hero's name is set larger, so it is not read as one more caption in
+    // a page of them. It shrinks with the rest, being a multiple of their size.
+    const bool heroOf = opt.hero && n > 1;
+    const int heroPx = px == 0 ? 0 : std::max(px, int(std::lround(px * std::max(1.0f, opt.heroLabel))));
+    const auto pxFor = [&](int i) { return heroOf && i == order[0] ? heroPx : px; };
     for (int i : order) {
       int dim = std::max(kMinDim, int(base * shrink * weights[size_t(i)]));
       // The hero is grown to the page's edges instead: the short side, so it
@@ -1328,7 +1337,7 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
       // one. Its sprite is the silhouette plus its name, and only the whole
       // sprite can be measured, so the size is solved for rather than derived
       // - two corrections land within a pixel or two.
-      if (opt.hero && i == order[0] && n > 1) {
+      if (heroOf && i == order[0]) {
         // Grown until it touches the page - whichever pair of edges it reaches
         // first. Both axes have to be asked, not just the page's short side: a
         // tall bird on a portrait page meets top and bottom long before its
@@ -1337,7 +1346,7 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
         // placer refuses the hero before the other birds are ever tried.
         const double fill = std::max(0.05, double(opt.heroFill));
         for (int it = 0; it < 5; ++it) {
-          const Sprite trial = spriteAt(sources, flips, labels, i, dim, px, gap);
+          const Sprite trial = spriteAt(sources, flips, labels, i, dim, heroPx);
           const int tw = trial.mask.width(), th = trial.mask.height();
           if (tw <= 0 || th <= 0) break;
           const double room = std::min(boxW * fill / tw, boxH * fill / th);
@@ -1347,7 +1356,7 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
           dim = next == dim ? dim - 1 : next;  // never stall on a sprite still over the edge
         }
       }
-      sprites.push_back(spriteAt(sources, flips, labels, i, dim, px, gap));
+      sprites.push_back(spriteAt(sources, flips, labels, i, dim, pxFor(i)));
     }
     // Each try differs only in how ties are broken, so a scale fits if any of
     // them can place the set. The layout picks which run of tries: layout 0
@@ -1416,8 +1425,14 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
       return a.first * a.first + a.second * a.second < b.first * b.first + b.second * b.second;
     });
   }
-  const int px = labels.empty() ? 0 : std::max(kMinLabelPx, namePx);
-  const int gap = int(std::lround(px * kLabelGap));
+  // Each bird's name keeps the size the layout gave it - `namePx` is only the
+  // fallback, for a placement that came from somewhere that set no size. Grow
+  // the bird, not its name: a name that swelled with the bird would be chasing
+  // the room it was just given.
+  const auto pxFor = [&](size_t k) {
+    if (labels.empty()) return 0;
+    return std::max(kMinLabelPx, placed[k].labelPx > 0 ? placed[k].labelPx : namePx);
+  };
 
   // Every bird's sprite as placed, and one grid of all of them. Each bird is
   // lifted out of the grid while it is tried and put back where it lands, so
@@ -1427,7 +1442,7 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
   std::vector<Sprite> sprites(n);
   Mask occ(boxW, boxH);
   for (size_t k = 0; k < n; ++k) {
-    sprites[k] = spriteAt(sources, flips, labels, placed[k].index, placed[k].dim, px, gap);
+    sprites[k] = spriteAt(sources, flips, labels, placed[k].index, placed[k].dim, pxFor(k));
     stamp(occ, sprites[k].mask, placed[k].x - sprites[k].artX, placed[k].y - sprites[k].artY);
   }
 
@@ -1467,7 +1482,7 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
     // A candidate is tried with its centre where the bird's is, then holding
     // each edge, since the room is often to one side, then shifted.
     auto tryAt = [&](int dim, Sprite &out, int &ox, int &oy) -> bool {
-      Sprite cand = spriteAt(sources, flips, labels, placed[k].index, dim, px, gap);
+      Sprite cand = spriteAt(sources, flips, labels, placed[k].index, dim, pxFor(k));
       const int cw = cand.mask.width(), ch = cand.mask.height();
       const int tries[5][2] = {
           {sx + (sw - cw) / 2, sy + (sh - ch) / 2},  // centre held
@@ -1528,6 +1543,7 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
     placed[k].labelY = by + best.labelY;
     placed[k].labelW = best.labelW;
     placed[k].labelH = best.labelH;
+    placed[k].labelPx = best.labelPx;
     sprites[k] = std::move(best);
   }
   if (!moved) break;

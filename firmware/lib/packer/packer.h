@@ -123,6 +123,7 @@ struct Sprite {
   int labelW = 0;  // 0 when this sprite carries no name
   int labelH = 0;
   bool hasLabel = false;
+  int labelPx = 0;  // the font size the box was reserved for
 };
 
 struct Placement {
@@ -138,6 +139,10 @@ struct Placement {
   // packer had never agreed to.
   int labelH = 0;
   bool hasLabel = false;
+  // The size this name was measured at, which is not the same for every bird:
+  // the hero's is set larger than the rest. Draw the name at this, not at the
+  // page's `usedPx`, or it will not fill the box the packer kept clear for it.
+  int labelPx = 0;
 };
 
 // Join a bird and its name into one packable footprint. The name is centred on
@@ -200,6 +205,12 @@ struct PackOptions {
   // because a hero at full height leaves the others crowded into the margins,
   // and the more birds there are the worse that reads.
   float heroFill = 0.8f;
+  // The hero's name, as a multiple of everyone else's. One size for the set
+  // reads as a caption on the small birds and as a footnote under the big one,
+  // which is the opposite of what the page is saying; this gives the subject a
+  // name sized like the subject. Reserved before the pack, so the ring is laid
+  // around the larger box rather than over it.
+  float heroLabel = 1.6f;
   bool voronoi = false;  // centres on jittered, optionally Lloyd-relaxed seeds
   float jitter = 0.5f;   // how far a seed may stray from its cell, as a fraction of the cell
   int lloyd = 2;         // Lloyd relaxation passes: 0 leaves the jitter raw

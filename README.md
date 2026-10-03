@@ -7,7 +7,7 @@ back to sleep.
 Inspired by the awesome Bird Frame project [Fugleramme](https://github.com/arnegiacomo/fugleramme).
 
 <p align="center">
-  <img src="images/output_example.bmp" alt="A page from the frame: five Australian birds from Gould's plates - Rufous Whistler, Latham's Snipe, Nankeen Kestrel, Little Eagle and Great Egret - each with its common and scientific name, and the date in the corner" width="480">
+  <img src="images/output_example.png" alt="A page from the frame: five Australian birds from Gould's plates - Rufous Whistler, Latham's Snipe, Nankeen Kestrel, Little Eagle and Great Egret - each with its common and scientific name, and the date in the corner" width="480">
 </p>
 
 *A page as the frame draws it: 1200 x 1600, dithered to the panel's six inks.*

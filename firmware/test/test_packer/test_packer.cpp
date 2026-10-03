@@ -299,6 +299,49 @@ void test_grow_enlarges_birds_into_free_space_without_overlap() {
   }
 }
 
+// The hero's name is set larger than the ring's, and the box reserved for it
+// is larger by the same factor. The page is drawn from `labelPx`, so a hero
+// whose box was kept at everyone else's size would have had its name drawn at
+// everyone else's size - and a box kept larger than the name drawn in it would
+// hold paper the ring could have used.
+void test_the_hero_reserves_a_larger_name_than_the_ring() {
+  std::vector<Mask> sources;
+  std::vector<bool> flips;
+  for (int i = 0; i < 5; ++i) {
+    sources.push_back(shape(300 + 10 * i, 260 + 8 * i, 0x4000u + uint32_t(i)));
+    flips.push_back(false);
+  }
+  const std::vector<LabelBox> labels(sources.size(), LabelBox{600, 120});
+  const auto size = pageSize(false);
+  PackPlan plan = planFor(PackStyle::Hero);
+  plan.pack.heroLabel = 2.0f;
+
+  std::vector<Placement> placed;
+  int usedPx = 0;
+  TEST_ASSERT_TRUE(layout(sources, flips, labels, 40, size.first, size.second, size.first,
+                          size.second, placed, &usedPx, 0, plan.pack));
+  TEST_ASSERT_EQUAL_size_t(sources.size(), placed.size());
+  TEST_ASSERT_TRUE(usedPx > 0);
+
+  const int heroPx = int(std::lround(usedPx * 2.0));
+  for (const Placement& p : placed) {
+    const bool hero = p.index == 0;  // the first given takes the middle
+    TEST_ASSERT_EQUAL_INT(hero ? heroPx : usedPx, p.labelPx);
+    // Baked at kLabelRefPx, so the box is the name's size over that.
+    TEST_ASSERT_EQUAL_INT(int(std::lround(600.0 * p.labelPx / kLabelRefPx)), p.labelW);
+    TEST_ASSERT_EQUAL_INT(int(std::lround(120.0 * p.labelPx / kLabelRefPx)), p.labelH);
+  }
+
+  // And growth leaves the names where the layout set them: a bird grows, its
+  // name does not, and the hero's stays the larger of the two sizes.
+  grow(sources, flips, labels, usedPx, size.first, size.second, placed, plan.growMax,
+       plan.growNudge, plan.growRounds, plan.growStep);
+  for (const Placement& p : placed) {
+    TEST_ASSERT_EQUAL_INT(p.index == 0 ? heroPx : usedPx, p.labelPx);
+    TEST_ASSERT_EQUAL_INT(int(std::lround(600.0 * p.labelPx / kLabelRefPx)), p.labelW);
+  }
+}
+
 // Where four birds actually land, pinned, so a change anywhere above shows up
 // here as moved coordinates rather than as a page that quietly looks different.
 void test_a_whole_layout_lands_where_it_always_has() {
@@ -357,6 +400,7 @@ int main() {
   RUN_TEST(test_a_pack_leaves_no_overlap_and_nothing_off_the_page);
   RUN_TEST(test_a_sprite_that_cannot_fit_fails_instead_of_sweeping);
   RUN_TEST(test_grow_enlarges_birds_into_free_space_without_overlap);
+  RUN_TEST(test_the_hero_reserves_a_larger_name_than_the_ring);
   RUN_TEST(test_a_whole_layout_lands_where_it_always_has);
   return UNITY_END();
 }

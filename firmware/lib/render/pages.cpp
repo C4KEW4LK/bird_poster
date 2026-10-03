@@ -320,8 +320,11 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
       if (!p.hasLabel) continue;
       const PlateEntry &e = plates.entry(size_t(plateIndices[size_t(p.index)]));
       const auto [first, second] = lines(size_t(p.index), e.name);
+      // The size this bird's box was reserved at, which is the set's except
+      // for a hero's, set larger - see Placement::labelPx.
+      const int px = p.labelPx > 0 ? p.labelPx : usedPx;
       drawName(out, firstFace(first), font, first, second, margin + p.labelX, originY + p.labelY,
-               p.labelW, p.labelH, usedPx, subScale);
+               p.labelW, p.labelH, px, subScale);
     }
   }
 

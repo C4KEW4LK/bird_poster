@@ -179,6 +179,7 @@ int main(int argc, char **argv) {
     if (std::strcmp(argv[i], "--perseed") == 0) opt.voronoi = opt.perSeed = true;
     if (std::strcmp(argv[i], "--cellsize") == 0) opt.cellSize = true;
     if (std::strcmp(argv[i], "--herofill") == 0 && i + 1 < argc) opt.heroFill = float(std::atof(argv[++i]));
+    if (std::strcmp(argv[i], "--herolabel") == 0 && i + 1 < argc) opt.heroLabel = float(std::atof(argv[++i]));
     if (std::strcmp(argv[i], "--spread") == 0 && i + 1 < argc) opt.sizeSpread = float(std::atof(argv[++i]));
     if (std::strcmp(argv[i], "--seed") == 0 && i + 1 < argc) opt.seed = uint32_t(std::atoi(argv[++i]));
     if (std::strcmp(argv[i], "--bigfirst") == 0) opt.bigFirst = true;
