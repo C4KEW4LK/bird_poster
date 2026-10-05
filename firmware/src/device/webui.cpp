@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include <DNSServer.h>
+#include <LittleFS.h>
 #include <WebServer.h>
 #include <WiFi.h>
 
@@ -32,34 +33,60 @@ const char kPage[] PROGMEM = R"HTML(<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bird poster</title>
 <style>
-:root{color-scheme:light}
-body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:1rem;max-width:42rem;margin-inline:auto;background:#f4f1ea;color:#222}
-h1{font:italic 1.8rem Georgia,serif;margin:.2rem 0 .6rem}
-h2{font-size:1rem;text-transform:uppercase;letter-spacing:.06em;color:#666;margin:1.6rem 0 .4rem;border-bottom:1px solid #cfc9b8}
+:root{color-scheme:light;--ink:#26231d;--muted:#6f6858;--line:#e3dccb;--field:#cfc7b3;--paper:#f4f1ea;--green:#2a5c2a}
+body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:1rem;max-width:40rem;margin-inline:auto;background:var(--paper);color:var(--ink)}
+h1{font:italic 2rem Georgia,serif;margin:.3rem 0 .8rem}
+h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin:0 0 .2rem}
+h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:1.1rem 0 0;padding-top:.9rem;border-top:1px solid var(--line)}
 fieldset{border:0;padding:0;margin:0}
-label{display:block;margin:.5rem 0 .1rem;font-size:.9rem;color:#444}
-input,select{width:100%;box-sizing:border-box;padding:.5rem;border:1px solid #bbb;border-radius:4px;font:inherit;background:#fff}
-.row{display:flex;gap:.8rem}.row>*{flex:1}
-.status{background:#fff;border:1px solid #cfc9b8;border-radius:6px;padding:.8rem 1rem;font-size:.92rem}
-.status div{display:flex;gap:.6rem}.status b{min-width:7rem;font-weight:600;color:#555}
+.card{position:relative;background:#fff;border:1px solid var(--line);border-radius:10px;padding:1rem 1rem 1.1rem;margin:0 0 .9rem;box-shadow:0 1px 2px rgba(60,50,20,.05)}
+label{display:block;margin:.6rem 0 .2rem;font-size:.88rem;color:#4a4538}
+input,select{width:100%;box-sizing:border-box;padding:.5rem .6rem;border:1px solid var(--field);border-radius:6px;font:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #9cc29c;outline-offset:0;border-color:var(--green)}
+input[type=checkbox]{width:1.1rem;height:1.1rem;margin:0;accent-color:var(--green);flex:none}
+.row{display:flex;gap:.7rem}.row>*{flex:1;min-width:0}.row>button{flex:none!important}
+.check{display:flex;align-items:center;gap:.5rem;margin:.75rem 0 .1rem}
+.check>label{display:flex;align-items:center;gap:.55rem;margin:0;font-size:.95rem;color:var(--ink);cursor:pointer}
+.status{display:grid;grid-template-columns:auto 1fr;gap:.15rem 1rem;font-size:.92rem}
+.status div{display:contents}.status b{font-weight:600;color:var(--muted)}
 .bad{color:#b02020}
-img.preview{width:100%;height:auto;border:1px solid #cfc9b8;background:#fff;margin-top:.6rem}
-button{font:inherit;padding:.55rem 1rem;border-radius:4px;border:1px solid #666;background:#fff;cursor:pointer}
-button.primary{background:#2a5c2a;color:#fff;border-color:#2a5c2a}
-.actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+img.preview{display:block;width:100%;height:auto;border-radius:6px;margin-top:.9rem;border:1px solid var(--line)}
+button{font:inherit;padding:.55rem 1rem;border-radius:6px;border:1px solid var(--field);background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:#f7f4ec}
+button.primary{background:var(--green);color:#fff;border-color:var(--green);font-weight:600}
+button.primary:hover{background:#234d23}
+button.danger{color:#a3271d;border-color:#e1b9b3}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.9rem}
 .actions form{margin:0}
-small{color:#666}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}.grid form{margin:0}.grid button{width:100%;height:100%}.grid .wide{grid-column:1/-1}
+.savebar{position:sticky;bottom:0;z-index:4;padding:.7rem 0 .9rem;margin-top:-.2rem;background:linear-gradient(rgba(244,241,234,0),var(--paper) 35%)}
+.savebar button{width:100%;padding:.75rem;box-shadow:0 2px 8px rgba(42,92,42,.25)}
+small{color:var(--muted)}
+#quietnote{display:block;margin-top:.5rem}
 [hidden]{display:none!important}
-.busy{background:#fff8e1;border:1px solid #e0c060;border-radius:6px;padding:.6rem 1rem;margin-top:.6rem}
+.busy{background:#fff8e1;border:1px solid #e0c060;border-radius:10px;padding:.7rem 1rem;margin:0 0 .9rem}
 .places{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
 .places button{font-size:.85rem;padding:.3rem .6rem}
-.err{background:#fbe9e7;border:1px solid #d9a09a;border-radius:6px;padding:.6rem 1rem;margin:.6rem 0}
-.spin{display:inline-block;width:.9em;height:.9em;border:2px solid #999;border-top-color:#2a5c2a;border-radius:50%;vertical-align:-.15em;margin-right:.4em;animation:spin .8s linear infinite}
+.lookerr{display:block;color:#a3271d;background:#fbe9e7;border:1px solid #d9a09a;border-radius:6px;padding:.45rem .7rem;font-size:.88rem}
+.err{background:#fbe9e7;border:1px solid #d9a09a;border-radius:10px;padding:.7rem 1rem;margin:0 0 .9rem}
+.spin{display:inline-block;width:.9em;height:.9em;border:2px solid #999;border-top-color:var(--green);border-radius:50%;vertical-align:-.15em;margin-right:.4em;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 button:disabled{opacity:.6;cursor:wait}
-.credits{margin:1.2rem 0 .4rem;font-size:.85rem;color:#666}.credits summary{cursor:pointer}.credits p{margin:.4rem 0}
+.info{display:inline-block;flex:none}
+.info>summary{list-style:none;cursor:pointer;width:1.05rem;height:1.05rem;border:1.5px solid #a39c88;border-radius:50%;color:#7a7360;font:italic 700 .72rem/1 Georgia,serif;display:flex;align-items:center;justify-content:center;user-select:none}
+.info>summary::-webkit-details-marker{display:none}
+.info[open]>summary{background:var(--green);border-color:var(--green);color:#fff}
+.info>div{position:absolute;left:.6rem;right:.6rem;z-index:5;margin-top:.4rem;background:#fffdf7;border:1px solid var(--field);border-radius:8px;padding:.65rem .85rem;box-shadow:0 6px 18px rgba(0,0,0,.14);font-size:.88rem;line-height:1.45;color:#444}
+.lh{display:flex;align-items:center;gap:.4rem;margin:.6rem 0 .2rem}.lh>label{margin:0}
+@font-face{font-family:BPName;src:url(/font/name.ttf)}@font-face{font-family:BPLabel;src:url(/font/label.ttf)}
+.nameprev{position:relative;margin-top:.8rem;border:1px solid var(--line);border-radius:8px;padding:1.6rem .8rem 1.1rem;text-align:center;color:#111;line-height:1;overflow:hidden;white-space:nowrap}
+.npcap{position:absolute;top:.35rem;left:.6rem;font:600 .68rem system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+#np1{font-family:BPName,Georgia,serif}#np2{font-family:BPLabel,Georgia,serif;font-style:italic}
+.credits{margin:1.2rem 0 .4rem;font-size:.85rem;color:var(--muted)}.credits summary{cursor:pointer}.credits p{margin:.4rem 0}
+footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
 </style></head><body>
 <h1>Bird poster</h1>
+<div class="card">
 <div class="status">
 <div><b>Network</b><span>%NET%</span></div>
 <div><b>Last fetch</b><span class="%FETCHCLASS%">%FETCH%</span></div>
@@ -70,89 +97,102 @@ button:disabled{opacity:.6;cursor:wait}
 <div><b>Firmware</b><span>%VERSION%</span></div>
 %REFRESHES%
 </div>
-<div id="busy" class="busy" %BUSYSHOW%><b>Working:</b> <span id="phase">%PHASE%</span><br><small>About a minute all told; the glass flashes at the end. This page updates itself when it is done.</small></div>
 %PREVIEW%
+</div>
+<div id="busy" class="busy" %BUSYSHOW%><b>Working:</b> <span id="phase">%PHASE%</span><br><small>About a minute all told; the glass flashes at the end. This page updates itself when it is done.</small></div>
 %ERROR%
-<form method="post" action="/wifi">
+
+<form method="post" action="/wifi" class="card">
 <h2>WiFi</h2>
 <label>Networks nearby</label><div class="row"><select id="nearby" onchange="if(this.value)document.getElementsByName('ssid')[0].value=this.value"><option value="">%SCANNOTE%</option>%NETWORKS%</select><button type="submit" formaction="/action" formmethod="post" name="do" value="scan" formnovalidate style="flex:0;white-space:nowrap">Scan again</button></div>
 <label>Network name (SSID)</label><input name="ssid" value="%SSID%" maxlength="32" required list="ssids" autocomplete="off"><datalist id="ssids">%SSIDLIST%</datalist>
 <label>Password</label><input name="pass" type="password" minlength="8" maxlength="63" title="8 to 63 characters, or blank" placeholder="%PASSHINT%" autocomplete="off">
-<div class="row"><div><label>Frame's own hostname</label><input name="host" value="%HOST%" maxlength="24" pattern="[a-z0-9]([a-z0-9-]*[a-z0-9])?" title="lower-case letters, digits and hyphens, not starting or ending with a hyphen" autocapitalize="off"></div>
-<div><label>Setup network password</label><input name="appass" type="password" minlength="8" maxlength="63" placeholder="unchanged" autocomplete="off" title="at least 8 characters"></div></div>
-<small>The frame answers at http://%HOST%.local/ once joined. Passwords are not shown here; leave a field blank to keep what is saved.</small>
-<div class="actions" style="margin-top:.6rem"><button class="primary" type="submit">Save WiFi and join</button></div>
+<div class="actions"><button class="primary" type="submit">Save WiFi and join</button></div>
 </form>
+
+<form method="post" action="/frame" class="card">
+<h2>Frame</h2>
+<div class="row" style="align-items:flex-end"><div><div class="lh"><label>Hostname</label><details class="info"><summary title="More about this">i</summary><div>The frame answers at http://%HOST%.local/ on your network. A new name is used from the next time the frame joins.</div></details></div><input name="host" value="%HOST%" maxlength="24" pattern="[a-z0-9]([a-z0-9-]*[a-z0-9])?" title="lower-case letters, digits and hyphens, not starting or ending with a hyphen" autocapitalize="off"></div>
+<div><div class="lh"><label>Setup network password</label><details class="info"><summary title="More about this">i</summary><div>The password for the network the frame makes itself when it has no WiFi to join. It is not shown here; leave it blank to keep what is saved.</div></details></div><input name="appass" type="password" minlength="8" maxlength="63" placeholder="unchanged" autocomplete="off" title="at least 8 characters"></div></div>
+<div class="actions"><button class="primary" type="submit">Save</button></div>
+</form>
+
+
 
 <form method="post" action="/save" id="settings">
 %OFFLINE_NOTE%
-<h2>Birds</h2>
-<label>Source</label><select name="source" id="source" onchange="srcChanged()"><option value="inat" %SRC_INAT%>iNaturalist - what people record nearby</option><option value="ebird" %SRC_EBIRD%>eBird - what birders report nearby (needs a free key)</option><option value="ala" %SRC_ALA%>Atlas of Living Australia - every record near here</option><option value="birdnet" %SRC_BN%>BirdNET-Go - what a microphone hears here</option><option value="list" %SRC_LIST%>A JSON list of names at a URL of your own</option></select>
-<label>Show</label><select name="mode" id="mode"><option value="most" %MODE_MOST%>Most seen</option><option value="rarest" id="rarest" %MODE_RARE%>Rarest in the world</option></select>
-<small class="ebird">On eBird, "rarest" is its <i>notable</i> list: sightings eBird's own regional filters flag as unusual for the place and the season.</small>
+<div class="card">
+<h2>Bird Source</h2>
+<label>Source</label><select name="source" id="source" onchange="srcChanged()"><option value="inat" %SRC_INAT%>iNaturalist - what people record nearby</option><option value="ebird" %SRC_EBIRD%>eBird - what birders report nearby (needs a free key)</option><option value="ala" %SRC_ALA%>Atlas of Living Australia - every record near here</option><option value="birdnet" %SRC_BN%>BirdNET-Go - local detections</option><option value="list" %SRC_LIST%>A JSON list of names at a URL of your own</option></select>
+<div class="lh"><label>Layout order</label><details class="info"><summary title="More about this">i</summary><div>Which birds make the page and in what order: the first takes the middle (with Hero, it is the hero) and the rest fill out from there. <b>Most seen</b> ranks by how many sightings or detections each species has in the window. <b>Rarest in the world</b> ranks by how few times a species has been recorded anywhere, so the unusual visitor leads; iNaturalist and eBird only. On eBird, "rarest" is its <i>notable</i> list: sightings eBird's own regional filters flag as unusual for the place and the season.</div></details></div><select name="mode" id="mode"><option value="most" %MODE_MOST%>Most seen</option><option value="rarest" id="rarest" %MODE_RARE%>Rarest in the world</option></select>
 <div class="birdnet"><label>BirdNET-Go address</label><input name="detector" value="%DETECTOR%" maxlength="256" placeholder="http://birdnet-go.local:8080"></div>
-<div class="list"><label>List URL</label><input name="listurl" value="%LISTURL%" maxlength="256" placeholder="http://homeassistant.local:8123/local/birds.json">
-<small>Anything that answers with JSON: a bare list of scientific names, <code>["Turdus merula", &hellip;]</code>, or a list of objects with <code>scientific</code>, and optionally <code>common</code> and <code>count</code>. BirdNET-Go's own field names work too. The order given is the ranking when there are no counts.</small></div>
-<div class="ebird"><label>eBird API key</label><input name="ebirdkey" value="%EBIRDKEY%" maxlength="64" placeholder="from ebird.org/api/keygen" autocomplete="off">
-<small>Free and instant from <a href="https://ebird.org/api/keygen" target="_blank">ebird.org/api/keygen</a> with an eBird account. The frame only reads with it. eBird looks back 30 days at most and 50 km at most.</small>
+<div class="birdnet"><div class="lh"><label>Minimum confidence (%)</label><details class="info"><summary title="More about this">i</summary><div>Detections BirdNET-Go is less sure of than this are left out, as if they had not been heard. 0 takes everything the detector kept - it has its own threshold already, so this only ever raises the bar.</div></details></div><input name="bnconf" type="number" min="0" max="100" value="%BNCONF%"></div>
+<div class="birdnet"><div class="check"><label><input type="checkbox" name="newfirst" value="1" %NEWON%>New birds first</label><details class="info"><summary title="More about this">i</summary><div>A bird is new on the day BirdNET-Go first ever hears it - the detector marks those detections itself - and stays new until midnight, as BirdNET-Go's own "new" badge does. New birds go on the page ahead of the rest, the first of them in the middle, even when the layout order would have left them off, and stay on it all that day even if they are not heard again. Needs BirdNET-Go from July 2025 or later; an older one never marks a bird new, and the page is as without this.</div></details></div><input type="hidden" name="newfirst" value="0"></div>
+<div class="list"><div class="lh"><label>List URL</label><details class="info"><summary title="More about this">i</summary><div>Anything that answers with JSON: a bare list of scientific names, <code>["Turdus merula", &hellip;]</code>, or a list of objects with <code>scientific</code>, and optionally <code>common</code> and <code>count</code>. BirdNET-Go's own field names work too. The order given is the ranking when there are no counts.</div></details></div><input name="listurl" value="%LISTURL%" maxlength="256" placeholder="http://homeassistant.local:8123/local/birds.json"></div>
+<div class="ebird"><div class="lh"><label>eBird API key</label><details class="info"><summary title="More about this">i</summary><div>Free and instant from <a href="https://ebird.org/api/keygen" target="_blank">ebird.org/api/keygen</a> with an eBird account. The frame only reads with it. Once saved it is never shown again, here or anywhere; leave the field blank to keep it, or type a new one to replace it. eBird looks back 30 days at most and 50 km at most.</div></details></div><input name="ebirdkey" id="ebirdkey" value="" maxlength="64" placeholder="%EBIRDHINT%" data-saved="%EBIRDSAVED%" autocomplete="off">
 <label>Names in</label><select name="ebirdloc"><option value="en_AU" %EBL_AU%>Australian English - Grey Teal, Australian Wood Duck</option><option value="en" %EBL_EN%>Clements English - Gray Teal, Maned Duck</option><option value="en_NZ" %EBL_NZ%>New Zealand English</option><option value="en_UK" %EBL_UK%>British English</option><option value="en_IN" %EBL_IN%>Indian English</option><option value="en_ZA" %EBL_ZA%>South African English</option></select></div>
 <div class="place">
-<div class="js online" %OFFLINE%><label>Find a place</label><div class="row"><input id="place" placeholder="Sydney" autocomplete="off"><button type="button" onclick="findPlace()" style="flex:0;white-space:nowrap">Look up</button></div><div class="places" id="places"></div></div>
+<div class="js online" %OFFLINE%><label>Lookup location</label><div class="row"><input id="place" placeholder="Sydney" autocomplete="off"><button type="button" onclick="findPlace()" style="flex:0;white-space:nowrap">Look up</button></div><div class="places" id="places"></div></div>
 <div class="row"><div><label>Latitude</label><input name="lat" id="lat" type="number" step="any" min="-90" max="90" value="%LAT%"></div><div><label>Longitude</label><input name="lng" id="lng" type="number" step="any" min="-180" max="180" value="%LNG%"></div></div>
-<div class="row"><div><label>Radius, km</label><input name="radius" type="number" min="1" max="500" value="%RADIUS%"></div>
-<div class="inat"><label>iNaturalist API</label><select name="inatv" title="v2 answers with only the fields the frame reads - about an eighth of the bytes - but iNaturalist still calls it in development and may change it without notice. v1 is the frozen, documented API; it sends the whole record for every species, so each fetch is longer on the radio."><option value="2" %INATV2%>v2 - lean, may change</option><option value="1" %INATV1%>v1 - stable, slower</option></select></div></div>
-<small class="inat">v2 sends only what the frame reads (about an eighth of the bytes) but iNaturalist may still change it; v1 is frozen and sends everything, so a fetch takes longer. If v2 stops working, switch.</small></div>
-<div class="window"><label>Look back</label><div class="row"><input name="lookback" id="lookback" type="number" min="1" max="10000" value="%LOOKBACK%"><select name="lookbackunit" id="lookbackunit" onchange="lbChanged()"><option value="0" %LB0%>minutes</option><option value="1" %LB1%>hours</option><option value="2" %LB2%>days</option><option value="3" %LB3%>since the last page</option></select></div>
-<small>Which sightings count: the top birds seen in this window. BirdNET-Go is asked for its last 200 detections (1000 with "every bird" on) and the window is applied to those.</small></div>
-<div class="online" %OFFLINE%><div class="actions"><button type="submit" formaction="/test" formnovalidate id="testbtn">Test source</button><span id="testing" hidden><span class="spin"></span>Asking the source&hellip;</span></div>
-<small>Asks the source with the values above, saved or not, and says what came back. A few seconds usually; up to 30 if nothing answers at the address.</small></div>
+<div class="row"><div><label>Radius (km)</label><input name="radius" type="number" min="1" max="500" value="%RADIUS%"></div>
+<div class="inat"><div class="lh"><label>iNaturalist API</label><details class="info inat"><summary title="More about this">i</summary><div>v2 sends only what the frame reads (about an eighth of the bytes) but iNaturalist may still change it; v1 is frozen and sends everything, so a fetch takes longer. If v2 stops working, switch.</div></details></div><select name="inatv"><option value="2" %INATV2%>v2 - lean, may change</option><option value="1" %INATV1%>v1 - stable, slower</option></select></div></div>
+</div>
+<div class="window"><div class="lh"><label>Look back</label><details class="info"><summary title="More about this">i</summary><div>Which sightings count: the top birds seen in this window. BirdNET-Go is asked for its last 200 detections (1000 with "every bird" on) and the window is applied to those.</div></details></div><div class="row"><select name="lookbackunit" id="lookbackunit" onchange="lbChanged()"><option value="0" %LB0%>minutes</option><option value="1" %LB1%>hours</option><option value="2" %LB2%>days</option><option value="3" %LB3%>Since last update</option></select><input name="lookback" id="lookback" type="number" min="1" max="10000" value="%LOOKBACK%"></div></div>
+<div class="online" %OFFLINE%><div class="actions"><button type="submit" formaction="/test" formnovalidate id="testbtn">Test source</button><span id="testing" hidden><span class="spin"></span>Asking the source&hellip;</span><details class="info"><summary title="More about this">i</summary><div>Asks the source with the values above, saved or not, and says what came back. A few seconds usually; up to 30 if nothing answers at the address.</div></details></div></div>
+</div>
 
-<h2>Page</h2>
+<div class="card">
+<h2>Layout</h2>
 %PACKS%
-<div class="row"><div><label id="birdslabel">Birds on the page</label><input name="birds" id="birds" type="number" min="1" max="40" value="%BIRDS%"></div>
-<div><label>Hangs</label><select name="rotation"><option value="1" %ROT1%>Landscape</option><option value="3" %ROT3%>Landscape, flipped</option><option value="0" %ROT0%>Portrait</option><option value="2" %ROT2%>Portrait, flipped</option></select></div></div>
-<div class="birdnet"><label><input type="checkbox" name="everybird" id="everybird" value="1" %EVERYON% onchange="srcChanged()" style="width:auto;margin-right:.4rem">Every bird detected in the look-back window</label><input type="hidden" name="everybird" value="0">
-<small>Instead of a set number, the page holds every species BirdNET-Go heard in the window, up to the number above (the most heard, if more). With the window set to "since the last page", each page is exactly what was heard since the one before; if nothing was, the last page stays up and the window keeps growing until something is.</small></div>
-<div class="row"><div><label>Names</label><select name="names"><option value="0" %NAMES0%>Both</option><option value="1" %NAMES1%>Just scientific</option><option value="2" %NAMES2%>Just common</option><option value="3" %NAMES3%>None</option></select></div>
-<div><label>Common name case</label><select name="namecase"><option value="1" %CASE1%>ALL CAPS</option><option value="0" %CASE0%>As given</option><option value="2" %CASE2%>lower case</option></select></div></div>
-<div class="row"><div><label>Name size</label><select name="label"><option value="0" %LBL0%>Small</option><option value="1" %LBL1%>Medium</option><option value="2" %LBL2%>Large</option><option value="3" %LBL3%>Extra large</option></select></div>
-<div><label>Scientific name size</label><select name="scipct"><option value="100" %SCI100%>100% - same as the common name</option><option value="90" %SCI90%>90%</option><option value="80" %SCI80%>80%</option><option value="70" %SCI70%>70%</option><option value="60" %SCI60%>60%</option><option value="50" %SCI50%>50% - half the size</option></select></div></div>
-<div class="row"><div><label>Arrangement</label><select name="packstyle"><option value="0" %PKS0%>Classic - a cluster from the middle out</option><option value="1" %PKS1%>Grid - evenly spaced, grown to fit</option><option value="2" %PKS2%>Scattered - evenly spread, no rows</option><option value="3" %PKS3%>Hero - one bird large, the rest around it</option></select></div></div>
-<small>Classic packs the birds into the centre of the page at one size. Grid and Scattered start them evenly apart and let each grow into the room beside it, which fills a busy page harder and draws the birds at more than one size. Hero gives the middle of the page to the first bird the source ranked, sets its name larger to match, and rings the others around it.</small>
-<label><input type="checkbox" name="shuffle" value="1" %SHUFON% style="width:auto;margin-right:.4rem">Shuffle the birds' order</label><input type="hidden" name="shuffle" value="0">
-<small>The same birds, handed to the layout in a new random order every page, rather than the most seen (or rarest) first. The first bird takes the middle of the page, so this moves which bird gets it - with Hero, which bird is the hero.</small>
-<label><input type="checkbox" name="date" value="1" %DATEON% style="width:auto;margin-right:.4rem">Show today's date</label><input type="hidden" name="date" value="0">
-<div class="row"><div><label>Date style</label><select name="datestyle"><option value="0" %DST0%>26/09/26</option><option value="1" %DST1%>26/09/2026</option><option value="2" %DST2%>26 Sep 2026</option><option value="3" %DST3%>26 September 2026</option><option value="4" %DST4%>Saturday 26 September 2026</option></select></div>
-<div><label>Short date order</label><select name="dateorder"><option value="0" %DOR0%>Day first - UK, AU</option><option value="1" %DOR1%>Month first - US</option></select></div></div>
-<div class="row"><div><label>Date at the</label><select name="dateedge"><option value="0" %DED0%>Top</option><option value="1" %DED1%>Bottom</option></select></div>
-<div><label>Justified</label><select name="datealign"><option value="0" %DAL0%>Left</option><option value="1" %DAL1%>Centre</option><option value="2" %DAL2%>Right</option></select></div></div>
-<small>The date the page was drawn, in the name font at the name size. The order applies to the numeric styles; 09/26/2026 is month first. The birds are packed around it, never under it. Left off until the frame's clock has been set from the network.</small>
-<label><input type="checkbox" name="countref" value="1" %COUNTON% style="width:auto;margin-right:.4rem">Count refreshes (battery test)</label><input type="hidden" name="countref" value="0">
-<small>Counts every refresh of the glass and writes the running total small on the page, at the other end of the date's strip, and on the status page. Run a charged battery flat and the last number on the glass is how many refreshes it lasted; the count survives the battery going flat. Reset it from the status box at the top.</small>
-<label>Cycle birds - no repeat for, hours</label><input name="cycle" id="cycle" type="number" min="0" max="8760" value="%CYCLE%">
-<small>0 draws the most seen (or rarest) every time. Above 0, each page is a random pick of the birds not drawn in that many hours (24 a day, 168 a week), so the frame works through everything seen nearby before repeating.</small>
-<div class="row"><div><label>Colour</label><select name="vivid"><option value="0" %VIV0%>0 - Least vivid</option><option value="1" %VIV1%>1</option><option value="2" %VIV2%>2</option><option value="3" %VIV3%>3</option><option value="4" %VIV4%>4 - Most vivid</option></select></div>
-<div><label>Detail</label><select name="sharpen"><option value="0" %SHP0%>0 - Softest</option><option value="1" %SHP1%>1</option><option value="2" %SHP2%>2</option><option value="3" %SHP3%>3</option><option value="4" %SHP4%>4 - Sharpest</option></select></div>
-<div><label>Edges</label><select name="edges"><option value="0" %EDG0%>0 - None</option><option value="1" %EDG1%>1</option><option value="2" %EDG2%>2</option><option value="3" %EDG3%>3</option><option value="4" %EDG4%>4 - Strongest</option></select></div></div>
-<label><input type="checkbox" name="webplates" value="1" %WEBON% style="width:auto;margin-right:.4rem">Full-size plates from the web</label><input type="hidden" name="webplates" value="0">
-<input name="weburl" value="%WEBURL%" maxlength="256" placeholder="https://c4kew4lk.github.io/bird_poster/plates/{region}" autocomplete="off">
-<small>For a bird drawn much larger than its plate in flash - a page of one or two birds - the frame fetches the same plate at full size from here (<code>&lt;address&gt;/Genus_species.bin</code>), and uses the one in flash if the site does not answer. A normal page never needs it. Put <code>{region}</code> in the address for a site with a folder a region. %WEBLAST%</small>
-<label>Paper</label><select name="cream"><option value="0" %CRM0%>White</option><option value="1" %CRM1%>1 - Faint cream</option><option value="2" %CRM2%>2</option><option value="3" %CRM3%>3</option><option value="4" %CRM4%>4 - Warmest cream</option></select>
-<small>The glass has six dull inks and the dither blurs fine lines. Colour pushes saturation, Detail sharpens what contrast there is, and Edges draws a line along every boundary it finds - faint ones included, which is what keeps a white bird off the page. Pick all three by eye. Paper prints the page on cream instead of white: the background and the plates' own pale paper take the same warm tone, so the birds sit into the page rather than on it. The glass has no cream ink, so it comes out as a fine stipple of yellow and white.</small>
-<div class="row"><div><label>Margin</label><select name="marginmode" id="marginmode" onchange="marginChanged()"><option value="0" %MGM0%>The same on every side</option><option value="1" %MGM1%>One a side</option></select></div>
-<div id="marginone"><label>All sides, px</label><input name="margin" type="number" min="0" max="300" value="%MARGIN%"></div></div>
-<div class="row" id="marginfour"><div><label>Top, px</label><input name="margintop" type="number" min="0" max="300" value="%MARGINT%"></div>
-<div><label>Right, px</label><input name="marginright" type="number" min="0" max="300" value="%MARGINR%"></div>
-<div><label>Bottom, px</label><input name="marginbottom" type="number" min="0" max="300" value="%MARGINB%"></div>
-<div><label>Left, px</label><input name="marginleft" type="number" min="0" max="300" value="%MARGINL%"></div></div>
-<small>A border the page draws nothing in, so a mount or a bezel over the glass does not cut the names off the edge. 0 is the glass itself: the birds bleed off it. The page is 1600 x 1200 pixels whichever way the frame hangs, and top is the top of the picture; the birds are packed into what is left, so a margin makes them smaller rather than leaving a gap. At most a quarter of the page a side.</small>
+<div class="row" style="align-items:flex-end"><div><label>Max birds on the page (limit: 40)</label><input name="birds" id="birds" type="number" min="1" max="40" value="%BIRDS%"></div>
+<div><label>Orientation</label><select name="rotation"><option value="1" %ROT1%>Landscape</option><option value="3" %ROT3%>Landscape, flipped</option><option value="0" %ROT0%>Portrait</option><option value="2" %ROT2%>Portrait, flipped</option></select></div></div>
+<div class="birdnet"><div class="check"><label><input type="checkbox" name="everybird" id="everybird" value="1" %EVERYON% onchange="srcChanged()">Every bird detected in the look-back window</label><details class="info"><summary title="More about this">i</summary><div>Instead of a set number, the page holds every species BirdNET-Go heard in the window, up to the number above (the most heard, if more). With the window set to "Since last update", each page is exactly what was heard since the one before; if nothing was, the last page stays up and the window keeps growing until something is.</div></details></div><input type="hidden" name="everybird" value="0"></div>
+<div class="lh"><label>Arrangement</label><details class="info"><summary title="More about this">i</summary><div>Classic packs the birds into the centre of the page at one size. Grid and Scattered start them evenly apart and let each grow into the room beside it, which fills a busy page harder and draws the birds at more than one size. Hero gives the middle of the page to the first bird the source ranked, sets its name larger to match, and rings the others around it.</div></details></div><select name="packstyle"><option value="0" %PKS0%>Classic - a cluster from the middle out</option><option value="1" %PKS1%>Grid - evenly spaced, grown to fit</option><option value="2" %PKS2%>Scattered - evenly spread, no rows</option><option value="3" %PKS3%>Hero - one bird large, the rest around it</option></select>
+<div class="lh"><label>Don't repeat a bird for</label><details class="info"><summary title="More about this">i</summary><div>0 is off: the page draws the most seen (or rarest) every time. Above 0, each page is a random pick of the birds not drawn in that long, so the frame works through everything seen nearby before repeating. A year at most.</div></details></div><div class="row"><select name="cycleunit" id="cycleunit"><option value="1" %CYU1%>hours</option><option value="24" %CYU24%>days</option><option value="168" %CYU168%>weeks</option></select><input name="cycle" id="cycle" type="number" min="0" max="8760" value="%CYCLE%"></div>
+<div class="check"><label><input type="checkbox" name="shuffle" value="1" %SHUFON%>Shuffle the birds' order</label><details class="info"><summary title="More about this">i</summary><div>The same birds, handed to the layout in a new random order every page, rather than the most seen (or rarest) first. The first bird takes the middle of the page, so this moves which bird gets it - with Hero, which bird is the hero.</div></details></div><input type="hidden" name="shuffle" value="0">
 
+<h3>Names</h3>
+<div class="row"><div><label>Show</label><select name="names"><option value="0" %NAMES0%>Both</option><option value="1" %NAMES1%>Just scientific</option><option value="2" %NAMES2%>Just common</option><option value="3" %NAMES3%>None</option></select></div>
+<div><label>Common name case</label><select name="namecase"><option value="1" %CASE1%>ALL CAPS</option><option value="0" %CASE0%>As given</option><option value="2" %CASE2%>lower case</option></select></div></div>
+<div class="row"><div><label>Size</label><select name="label"><option value="0" %LBL0%>Small</option><option value="1" %LBL1%>Medium</option><option value="2" %LBL2%>Large</option><option value="3" %LBL3%>Extra large</option></select></div>
+<div><label>Scientific name size</label><select name="scipct"><option value="100" %SCI100%>100% (same)</option><option value="90" %SCI90%>90%</option><option value="80" %SCI80%>80%</option><option value="70" %SCI70%>70%</option><option value="60" %SCI60%>60%</option><option value="50" %SCI50%>50% (half)</option></select></div></div>
+
+<div class="js" hidden><div class="nameprev" id="nameprev"><span class="npcap">Preview</span><div id="np1"></div><div id="np2"></div></div></div>
+<h3>Date</h3>
+<div class="check"><label><input type="checkbox" name="date" id="date" value="1" %DATEON% onchange="dateChanged()">Show today's date</label><details class="info"><summary title="More about this">i</summary><div>The date the page was drawn, in the name font at the name size. The order applies to the numeric styles; 09/26/2026 is month first. The birds are packed around it, never under it. Left off until the frame's clock has been set from the network.</div></details></div><input type="hidden" name="date" value="0">
+<div id="dateopts">
+<div class="row"><div><label>Style</label><select name="datestyle"><option value="0" %DST0%>26/09/26</option><option value="1" %DST1%>26/09/2026</option><option value="2" %DST2%>26 Sep 2026</option><option value="3" %DST3%>26 September 2026</option><option value="4" %DST4%>Saturday 26 September 2026</option></select></div>
+<div><label>Short date order</label><select name="dateorder"><option value="0" %DOR0%>Day first - UK, AU</option><option value="1" %DOR1%>Month first - US</option></select></div></div>
+<div class="row"><div><label>Position</label><select name="dateedge"><option value="0" %DED0%>Top</option><option value="1" %DED1%>Bottom</option></select></div>
+<div><label>Alignment</label><select name="datealign"><option value="0" %DAL0%>Left</option><option value="1" %DAL1%>Centre</option><option value="2" %DAL2%>Right</option></select></div></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Picture</h2>
+<div class="row"><div><div class="lh"><label>Colour</label><details class="info"><summary title="More about this">i</summary><div>The glass has six dull inks, so a plate comes out flatter than it was printed. Colour pushes the saturation back up: 0 leaves the plate as it is, 4 is the most vivid. Pick it by eye.</div></details></div><select name="vivid"><option value="0" %VIV0%>0 (dull)</option><option value="1" %VIV1%>1</option><option value="2" %VIV2%>2</option><option value="3" %VIV3%>3</option><option value="4" %VIV4%>4 (vivid)</option></select></div>
+<div><div class="lh"><label>Detail</label><details class="info"><summary title="More about this">i</summary><div>The dither blurs fine lines - an engraving's hatching most of all. Detail sharpens what contrast there is before the dither: 0 is off, 4 the sharpest.</div></details></div><select name="sharpen"><option value="0" %SHP0%>0 (soft)</option><option value="1" %SHP1%>1</option><option value="2" %SHP2%>2</option><option value="3" %SHP3%>3</option><option value="4" %SHP4%>4 (sharp)</option></select></div></div>
+<div class="row"><div><div class="lh"><label>Edges</label><details class="info"><summary title="More about this">i</summary><div>Draws a line along every boundary it finds, faint ones included, which is what keeps a white bird off a white page. 0 draws none, 4 the strongest.</div></details></div><select name="edges"><option value="0" %EDG0%>0 (none)</option><option value="1" %EDG1%>1</option><option value="2" %EDG2%>2</option><option value="3" %EDG3%>3</option><option value="4" %EDG4%>4 (strong)</option></select></div>
+<div><div class="lh"><label>Paper</label><details class="info"><summary title="More about this">i</summary><div>Prints the page on cream instead of white: the background and the plates' own pale paper take the same warm tone, so the birds sit into the page rather than on it. The glass has no cream ink, so it comes out as a fine stipple of yellow and white.</div></details></div><select name="cream"><option value="0" %CRM0%>White</option><option value="1" %CRM1%>1 (faint)</option><option value="2" %CRM2%>2</option><option value="3" %CRM3%>3</option><option value="4" %CRM4%>4 (warmest)</option></select></div></div>
+<div class="row"><div><div class="lh"><label>Margin</label><details class="info"><summary title="More about this">i</summary><div>A border the page draws nothing in, so a mount or a bezel over the glass does not cut the names off the edge. 0 is the glass itself: the birds bleed off it. The page is 1600 x 1200 pixels whichever way the frame hangs, and top is the top of the picture; the birds are packed into what is left, so a margin makes them smaller rather than leaving a gap. At most a quarter of the page a side.</div></details></div><select name="marginmode" id="marginmode" onchange="marginChanged()"><option value="0" %MGM0%>Same all round</option><option value="1" %MGM1%>Each side</option></select></div>
+<div id="marginone"><label>All sides (px)</label><input name="margin" type="number" min="0" max="300" value="%MARGIN%"></div></div>
+<div class="row" id="marginfour"><div><label>Top</label><input name="margintop" type="number" min="0" max="300" value="%MARGINT%"></div>
+<div><label>Right</label><input name="marginright" type="number" min="0" max="300" value="%MARGINR%"></div>
+<div><label>Bottom</label><input name="marginbottom" type="number" min="0" max="300" value="%MARGINB%"></div>
+<div><label>Left</label><input name="marginleft" type="number" min="0" max="300" value="%MARGINL%"></div></div>
+<h3>Extras</h3>
+<div class="check"><label><input type="checkbox" name="webplates" id="webplates" value="1" %WEBON% onchange="webChanged()">Pull full-size plates from the web</label><details class="info"><summary title="More about this">i</summary><div>For a bird drawn much larger than its plate in flash - a page of one or two birds - the frame fetches the same plate at full size from here (<code>&lt;address&gt;/Genus_species.bin</code>), and uses the one in flash if the site does not answer. A normal page never needs it. Put <code>{region}</code> in the address for a site with a folder a region. %WEBLAST%</div></details></div><input type="hidden" name="webplates" value="0">
+<input name="weburl" id="weburl" value="%WEBURL%" maxlength="256" placeholder="https://c4kew4lk.github.io/bird_poster/plates/{region}" autocomplete="off" style="margin-top:.4rem">
+<div class="check"><label><input type="checkbox" name="countref" value="1" %COUNTON%>Count refreshes (battery test)</label><details class="info"><summary title="More about this">i</summary><div>Counts every refresh of the glass and writes the running total small on the page, at the other end of the date's strip, and on the status page. Run a charged battery flat and the last number on the glass is how many refreshes it lasted; the count survives the battery going flat. Reset it from the status box at the top.</div></details></div><input type="hidden" name="countref" value="0">
+</div>
+
+<div class="card">
 <h2>Schedule</h2>
-<div class="row"><div><label>Refresh every, minutes</label><input name="interval" id="interval" type="number" min="1" max="1440" value="%INTERVAL%" required></div>
-<div><label>Quiet from</label><input name="quietfrom" id="quietfrom" type="time" value="%QFROM%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="22:00"></div>
-<div><label>until</label><input name="quietto" id="quietto" type="time" value="%QTO%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="06:00"></div></div>
-<small id="quietnote">No new pages between these times, in the frame's timezone; the keys still work. The same time twice means never quiet.</small>
-<div class="js" hidden><label>Timezone</label><select id="tzsel" onchange="tzPick()">
+<label>Refresh every (minutes)</label><input name="interval" id="interval" type="number" min="1" max="1440" value="%INTERVAL%" required>
+<div class="row"><div><div class="lh"><label>Quiet from</label><details class="info"><summary title="More about this">i</summary><div>No new pages between these times, in the frame's timezone; the keys still work. The same time twice means never quiet.</div></details></div><input name="quietfrom" id="quietfrom" type="time" value="%QFROM%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="22:00"></div>
+<div><label>Until</label><input name="quietto" id="quietto" type="time" value="%QTO%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="06:00"></div></div>
+<small id="quietnote"></small>
+<div class="js" hidden><label>Timezone</label><div class="row"><select id="tzsel" onchange="tzPick()">
 <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Sydney, Canberra, Melbourne, Hobart</option>
 <option value="AEST-10">Brisbane</option>
 <option value="ACST-9:30ACDT,M10.1.0,M4.1.0/3">Adelaide</option>
@@ -170,21 +210,23 @@ button:disabled{opacity:.6;cursor:wait}
 <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific</option>
 <option value="UTC0">UTC</option>
 <option value="">Other - enter it manually</option>
-</select><div class="actions"><button type="button" id="tzmanual" onclick="tzToggle()">Manual entry</button></div></div>
-<div id="tzbox"><label>Timezone (POSIX)</label><input name="tz" id="tz" value="%TZ%" maxlength="64" placeholder="AEST-10AEDT,M10.1.0,M4.1.0/3">
-<small>e.g. AEST-10AEDT,M10.1.0,M4.1.0/3 for Sydney, NZST-12NZDT,M9.5.0,M4.1.0/3, CET-1CEST,M3.5.0,M10.5.0/3, EST5EDT,M3.2.0,M11.1.0</small></div>
-<div class="actions" style="margin-top:1rem"><button class="primary" type="submit">Save settings</button></div>
+</select><button type="button" id="tzmanual" onclick="tzToggle()" style="flex:0;white-space:nowrap">Manual entry</button></div></div>
+<div id="tzbox"><div class="lh"><label>Timezone (POSIX)</label><details class="info"><summary title="More about this">i</summary><div>e.g. AEST-10AEDT,M10.1.0,M4.1.0/3 for Sydney, NZST-12NZDT,M9.5.0,M4.1.0/3, CET-1CEST,M3.5.0,M10.5.0/3, EST5EDT,M3.2.0,M11.1.0</div></details></div><input name="tz" id="tz" value="%TZ%" maxlength="64" placeholder="AEST-10AEDT,M10.1.0,M4.1.0/3"></div>
+</div>
+<div class="savebar"><button class="primary" type="submit">Save settings</button></div>
 </form>
 
+<div class="card">
 <h2>Actions</h2>
-<div class="actions">
-<form method="post" action="/action" id="refresh"><button name="do" value="refresh">Fetch and draw a new page</button></form>
-<form method="post" action="/action"><button name="do" value="status">Show status on the glass</button></form>
+<div class="grid">
+<form method="post" action="/action" id="refresh" class="wide"><button name="do" value="refresh" class="primary">Fetch and draw a new page</button></form>
+<form method="post" action="/action"><button name="do" value="status">Show status</button></form>
 <form method="post" action="/action"><button name="do" value="pattern">Test pattern</button></form>
 <form method="post" action="/action"><button name="do" value="setup">Show setup page</button></form>
-<form method="post" action="/action"><button name="do" value="sleep">Done - back to sleep</button></form>
-<form method="post" action="/action"><button name="do" value="reboot">Reboot</button></form>
-<form method="post" action="/action" onsubmit="return confirm('Forget the WiFi network?')"><button name="do" value="forget">Forget WiFi</button></form>
+<form method="post" action="/action"><button name="do" value="sleep">Back to sleep</button></form>
+<form method="post" action="/action"><button name="do" value="reboot" class="danger">Reboot</button></form>
+<form method="post" action="/action" onsubmit="return confirm('Forget the WiFi network?')"><button name="do" value="forget" class="danger">Forget WiFi</button></form>
+</div>
 </div>
 <details class="credits"><summary>Credits and licences</summary>
 <p><b>Artwork.</b> Australian plates: John Gould, <i>The Birds of Australia</i> (1840&ndash;48), lithographed by Elizabeth Gould and H.&nbsp;C. Richter; scans digitally enhanced by <a href="https://www.rawpixel.com/" target="_blank">rawpixel</a>, CC&nbsp;BY-SA&nbsp;4.0, cut for this project under the same licence, with supplementary plates from other public-domain works via <a href="https://commons.wikimedia.org/" target="_blank">Wikimedia Commons</a>, each credited in the style's manifest. European plates: John Gould, <i>The Birds of Europe</i> (1832&ndash;37), and the von Wright brothers, <i>Svenska F&aring;glar</i>; rawpixel-enhanced scans CC&nbsp;BY-SA&nbsp;4.0 and Finnish National Gallery scans CC0; cut-outs by Arne Giacomo Munthe-Kaas for Fugleramme, CC&nbsp;BY-SA&nbsp;4.0. North American plates: John James Audubon, <i>The Birds of America</i> (1827&ndash;38), engraved by Robert Havell; rawpixel-enhanced scans CC&nbsp;BY-SA&nbsp;4.0, cut for this project under the same licence.</p>
@@ -192,14 +234,21 @@ button:disabled{opacity:.6;cursor:wait}
 <p><b>Sightings</b> come from BirdNET-Go, <a href="https://www.inaturalist.org/" target="_blank">iNaturalist</a>, <a href="https://ebird.org/" target="_blank">eBird</a> (Cornell Lab of Ornithology) or the <a href="https://www.ala.org.au/" target="_blank">Atlas of Living Australia</a>, as chosen above; species names follow the BirdNET label sets.</p>
 <p><b>Code.</b> The firmware is MIT, on <a href="https://github.com/C4KEW4LK/bird_poster" target="_blank">GitHub</a>. It carries ArduinoJson (Beno&icirc;t Blanchon, MIT), stb_truetype (Sean Barrett, public domain), the QR Code generator (Project Nayuki, MIT) and the Arduino core for the ESP32.</p>
 </details>
-<p><small>Keys on the frame: 1 keeps WiFi on for setup, 2 shows the status page, 3 fetches a new page. Drawing a page takes about 40 seconds; the glass flashes while it does.</small></p>
+<footer>Keys on the frame: 1 keeps WiFi on for setup, 2 shows the status page, 3 fetches a new page. Drawing a page takes about 40 seconds; the glass flashes while it does.</footer>
 <script>
 document.querySelectorAll('.js').forEach(function(e){if(!e.classList.contains('online')||%ONLINE%)e.hidden=false});
+// One (i) open at a time, and a click anywhere else closes it.
+document.addEventListener('click',function(e){document.querySelectorAll('details.info[open]').forEach(function(d){if(!d.contains(e.target))d.open=false})});
 function lbChanged(){document.getElementById('lookback').hidden=document.getElementById('lookbackunit').value=='3'}
 lbChanged();
 function marginChanged(){var four=document.getElementById('marginmode').value=='1';
 document.getElementById('marginone').hidden=four;document.getElementById('marginfour').hidden=!four}
 marginChanged();
+// Options that only matter with their box ticked fold away without it.
+function dateChanged(){document.getElementById('dateopts').hidden=!document.getElementById('date').checked}
+dateChanged();
+function webChanged(){document.getElementById('weburl').hidden=!document.getElementById('webplates').checked}
+webChanged();
 function srcChanged(){var v=document.getElementById('source').value;
 var show=function(c,on){document.querySelectorAll('.'+c).forEach(function(e){e.hidden=!on})};
 show('birdnet',v=='birdnet');show('list',v=='list');show('ebird',v=='ebird');
@@ -207,15 +256,25 @@ show('place',v=='inat'||v=='ebird'||v=='ala');show('inat',v=='inat');show('windo
 var m=document.getElementById('mode'),r=document.getElementById('rarest'),no=!(v=='inat'||v=='ebird');
 r.disabled=no;r.hidden=no;if(no&&m.value=='rarest')m.value='most';
 var every=v=='birdnet'&&document.getElementById('everybird').checked;
-document.getElementById('birdslabel').textContent=every?'Most birds on the page':'Birds on the page';document.getElementById('cycle').disabled=every;}
+document.getElementById('cycle').disabled=every;document.getElementById('cycleunit').disabled=every;}
 srcChanged();
+// The lookup runs from this browser, not the frame: it needs this phone or
+// computer to reach iNaturalist. A failure says so rather than hanging - a
+// network with no way out often never answers, so it gives up after 8 s.
 function findPlace(){var q=document.getElementById('place').value.trim(),out=document.getElementById('places');
-if(!q)return;out.textContent='looking\u2026';
-fetch('https://api.inaturalist.org/v1/places/autocomplete?per_page=6&q='+encodeURIComponent(q)).then(function(r){return r.json()}).then(function(j){
-out.textContent='';if(!j.results.length){out.textContent='nothing called that';return}
+if(!q)return;
+var fail=function(m){out.className='places lookerr';out.textContent=m};
+var offline='No connection to the location service - this phone or computer seems to have no internet. Type the latitude and longitude instead.';
+if(navigator.onLine===false){fail(offline);return}
+out.className='places';out.textContent='Looking…';
+var ac=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ac)ac.abort()},8000);
+fetch('https://api.inaturalist.org/v1/places/autocomplete?per_page=6&q='+encodeURIComponent(q),ac?{signal:ac.signal}:{}).then(function(r){
+if(!r.ok)throw{status:r.status};return r.json()}).then(function(j){clearTimeout(timer);
+out.textContent='';if(!j.results||!j.results.length){out.textContent='Nothing called that.';return}
 j.results.forEach(function(p){if(!p.location)return;var b=document.createElement('button');b.type='button';b.textContent=p.display_name;
-b.onclick=function(){var ll=p.location.split(',');document.getElementById('lat').value=(+ll[0]).toFixed(5);document.getElementById('lng').value=(+ll[1]).toFixed(5);out.textContent='set to '+p.display_name};
-out.appendChild(b)})}).catch(function(){out.textContent='lookup failed - is this device online?'})}
+b.onclick=function(){var ll=p.location.split(',');document.getElementById('lat').value=(+ll[0]).toFixed(5);document.getElementById('lng').value=(+ll[1]).toFixed(5);out.textContent='Set to '+p.display_name};
+out.appendChild(b)})}).catch(function(e){clearTimeout(timer);
+fail(e&&e.status?'The location service answered with an error (HTTP '+e.status+'). Try again later, or type the latitude and longitude.':offline)})}
 document.getElementById('place').addEventListener('keydown',function(e){if(e.key=='Enter'){e.preventDefault();findPlace()}});
 document.getElementById('settings').addEventListener('submit',function(e){var b=e.submitter;if(!b)return;
 if(b.id!='testbtn'){check();if(!this.reportValidity()){e.preventDefault();return}}
@@ -241,7 +300,7 @@ say(lat,place&&lat.value.trim()===''?'Enter the latitude, or use the place looku
 say(lng,place&&lng.value.trim()===''?'Enter the longitude, or use the place lookup.':'');
 if(place&&lat.value!==''&&lng.value!==''&&+lat.value==0&&+lng.value==0)say(lat,'0, 0 is the Gulf of Guinea - use the place lookup or type the frame\'s location.');
 else if(v=='ala'&&lat.validity.valid&&lng.validity.valid&&lat.value!==''&&lng.value!==''&&(+lat.value<-56||+lat.value>-8||+lng.value<104||+lng.value>170))say(lat,'The Atlas of Living Australia only covers Australia and its territories.');
-var key=g('ebirdkey'),k=key.value.trim();say(key,v!='ebird'?'':!k?'eBird needs an API key - free from ebird.org/api/keygen.':!/^[A-Za-z0-9]+$/.test(k)?'The key is only letters and digits - check it was copied whole.':'');
+var key=g('ebirdkey'),k=key.value.trim();say(key,v!='ebird'?'':!k&&key.dataset.saved!='1'?'eBird needs an API key - free from ebird.org/api/keygen.':!k?'':!/^[A-Za-z0-9]+$/.test(k)?'The key is only letters and digits - check it was copied whole.':'');
 var url=/^https?:\/\/\S+$/i;
 say(g('detector'),v=='birdnet'&&!url.test(g('detector').value.trim())?'Start the address with http:// or https://':'');
 say(g('listurl'),v=='list'&&!url.test(g('listurl').value.trim())?'Start the URL with http:// or https://':'');
@@ -253,6 +312,25 @@ if(a==b)note.textContent='Never quiet: a new page every '+(iv||'?')+' minutes, d
 else if(1440-q<Math.max(iv,60)){say(qt,'That leaves under '+hm(Math.max(iv,60))+' awake a day - the frame would hardly draw. Shorten the quiet time.');note.textContent=''}
 else note.textContent='Quiet for '+hm(q)+' a day, from '+qf.value+' to '+qt.value+(b<a?' the next morning':'')+'; a new page every '+(iv||'?')+' minutes the rest of the time.';}
 var tz=g('tz'),t=tz.value.trim();say(tz,t&&!(t.length<=64&&/^([A-Za-z]{3,}|<[^>]+>)[+-]?\d[A-Za-z0-9+\-,.:\/<>]*$/.test(t))?'Not a POSIX timezone - it needs an offset, e.g. AEST-10AEDT,M10.1.0,M4.1.0/3, not Australia/Sydney. Pick one from the list above.':'');}
+// What a bird's name will look like, from the settings above: the sizes as
+// renderBirdPage sets them (a share of the page's short side, 1200 px; the
+// scientific line a percentage of that; a gap of an eighth), drawn at half
+// size in the frame's own two faces. The common name's face is capitals only,
+// so a name not in capitals is set in the label face, as on the glass.
+function namePreview(){var f=document.getElementById('settings'),g=function(n){return f.elements[n].value};
+var px=1200*({0:.024,1:.032,2:.042,3:.055}[g('label')]||.032)*.5,how=g('names'),cs=g('namecase');
+var common='Crimson Rosella',sci='Platycercus elegans';
+common=cs=='1'?common.toUpperCase():cs=='2'?common.toLowerCase():common;
+var a=document.getElementById('np1'),b=document.getElementById('np2'),box=document.getElementById('nameprev');
+var first=how=='0'||how=='2'?common:how=='1'?sci:'',second=how=='0'?sci:'';
+a.textContent=first||'No names on the page';b.textContent=second;b.hidden=!second;
+a.style.fontSize=(first?px:13)+'px';a.style.color=first?'':'var(--muted)';
+var label=how=='1'||(first&&first!==first.toUpperCase());
+a.style.fontFamily=!first?'system-ui,sans-serif':label?'BPLabel,Georgia,serif':'';a.style.fontStyle=label?'italic':'';
+b.style.fontSize=Math.max(1,Math.round(px*(+g('scipct')/100)))+'px';b.style.marginTop=Math.round(px/8)+'px';
+var cream=+g('cream');box.style.background='rgb('+[255-3*cream,255-5*cream,255-9*cream]+')'}
+namePreview();
+document.getElementById('settings').addEventListener('change',namePreview);
 document.getElementById('settings').addEventListener('input',check);
 document.getElementById('settings').addEventListener('change',check);
 check();
@@ -478,9 +556,12 @@ SourceConfig sourceFromForm(App &app, std::string &problem) {
   SourceConfig cfg = app.sourceConfig();
   if (server.hasArg("source")) cfg.source = sourceFromArg(arg("source"), cfg.source);
   if (server.hasArg("detector")) cfg.detectorUrl = argTrim("detector");
-  if (server.hasArg("ebirdkey")) cfg.ebirdKey = argTrim("ebirdkey");
+  // The key is never sent back to the page, so a blank field means "keep the
+  // saved one", as with the WiFi password.
+  if (server.hasArg("ebirdkey") && !argTrim("ebirdkey").empty()) cfg.ebirdKey = argTrim("ebirdkey");
   if (server.hasArg("ebirdloc") && validEbirdLocale(arg("ebirdloc"))) cfg.ebirdLocale = arg("ebirdloc");
   if (server.hasArg("listurl")) cfg.listUrl = argTrim("listurl");
+  cfg.minConfidence = argInt("bnconf", 0, 100, cfg.minConfidence);
   cfg.radiusKm = argInt("radius", 1, 500, cfg.radiusKm);
   cfg.inatVersion = argInt("inatv", 1, 2, app.settings.inatVersion);
   cfg.since = app.windowStart(argInt("lookback", 1, 10000, app.settings.lookback),
@@ -553,7 +634,7 @@ String render(App &app, const std::string &error = "") {
   {
     String packs;
     if (app.packs.size() > 1) {
-      packs = "<label>Artwork</label><select name=\"pack\">";
+      packs = "<div class=\"lh\"><label>Artwork</label><details class=\"info\"><summary title=\"More about this\">i</summary><div>A frame holds every region's plates on this board; the page draws from one. Changing it takes effect on the next page. A pack copied to the SD card as <code>plates-au.bin</code>, <code>plates-eu.bin</code> or <code>plates-us.bin</code> is used over the one in flash: the card holds the plates at full size.</div></details></div><select name=\"pack\">";
       for (const std::string &key : app.packs) {
         const char *label = key == "au"   ? "Australia - Gould's plates"
                             : key == "eu" ? "Europe - Gould's and the von Wrights' plates"
@@ -564,7 +645,7 @@ String render(App &app, const std::string &error = "") {
         packs += "<option value=\"" + esc(key) + "\"" + (app.packKey == key ? " selected" : "") + ">" +
                  esc(label) + (onCard ? " (SD card, full size)" : "") + "</option>";
       }
-      packs += "</select><small>A frame holds every region's plates on this board; the page draws from one. Changing it takes effect on the next page. A pack copied to the SD card as <code>plates-au.bin</code>, <code>plates-eu.bin</code> or <code>plates-us.bin</code> is used over the one in flash: the card holds the plates at full size.</small>";
+      packs += "</select>";
     }
     page.replace("%PACKS%", packs);
   }
@@ -625,7 +706,9 @@ String render(App &app, const std::string &error = "") {
   page.replace("%SRC_EBIRD%", sel(s.source == Source::eBird));
   page.replace("%SRC_ALA%", sel(s.source == Source::Ala));
   page.replace("%SRC_LIST%", sel(s.source == Source::JsonList));
-  page.replace("%EBIRDKEY%", esc(s.ebirdKey));
+  // Never the key itself: only whether one is saved.
+  page.replace("%EBIRDHINT%", s.ebirdKey.empty() ? "from ebird.org/api/keygen" : "saved - type a new key to replace it");
+  page.replace("%EBIRDSAVED%", s.ebirdKey.empty() ? "0" : "1");
   page.replace("%EBL_AU%", sel(s.ebirdLocale == "en_AU"));
   page.replace("%EBL_EN%", sel(s.ebirdLocale == "en"));
   page.replace("%EBL_NZ%", sel(s.ebirdLocale == "en_NZ"));
@@ -644,7 +727,16 @@ String render(App &app, const std::string &error = "") {
   page.replace("%INATV1%", sel(s.inatVersion == 1));
   for (int v = 0; v < 4; ++v) page.replace("%LB" + String(v) + "%", sel(int(s.lookbackUnit) == v));
   page.replace("%BIRDS%", String(s.birds));
-  page.replace("%CYCLE%", String(s.cycleHours));
+  {
+    // Stored in hours; shown in the largest unit it is a whole number of.
+    const int unit = s.cycleHours > 0 && s.cycleHours % 168 == 0 ? 168
+                     : s.cycleHours > 0 && s.cycleHours % 24 == 0 ? 24
+                                                                  : 1;
+    page.replace("%CYCLE%", String(s.cycleHours / unit));
+    page.replace("%CYU1%", sel(unit == 1));
+    page.replace("%CYU24%", sel(unit == 24));
+    page.replace("%CYU168%", sel(unit == 168));
+  }
   for (int r = 0; r < 4; ++r) page.replace("%ROT" + String(r) + "%", sel(s.rotation == r));
   for (int v = 0; v < 4; ++v) page.replace("%NAMES" + String(v) + "%", sel(int(s.names) == v));
   for (int v = 0; v < 3; ++v) page.replace("%CASE" + String(v) + "%", sel(int(s.commonCase) == v));
@@ -656,6 +748,8 @@ String render(App &app, const std::string &error = "") {
   page.replace("%EVERYON%", s.everyBird ? "checked" : "");
   page.replace("%COUNTON%", s.countRefreshes ? "checked" : "");
   page.replace("%SHUFON%", s.shuffleBirds ? "checked" : "");
+  page.replace("%NEWON%", s.preferNew ? "checked" : "");
+  page.replace("%BNCONF%", String(s.minConfidence));
   page.replace("%WEBON%", s.webPlates ? "checked" : "");
   page.replace("%WEBURL%", esc(s.webPlatesUrl));
   page.replace("%WEBLAST%", app.lastWebPlates.empty() ? String("")
@@ -771,6 +865,20 @@ void WebUi::begin(bool captive) {
     warning_.clear();
     server.send(200, "text/html", render(app, note));
   });
+  // The frame's two faces, for the name preview on the settings page: the
+  // same files it draws with. Cached by the browser for a day.
+  for (const char *path : {kNameFontPath, kFontPath}) {
+    server.on(String("/font") + path, HTTP_GET, [path]() {
+      File f = LittleFS.open(path, "r");
+      if (!f) {
+        server.send(404, "text/plain", "no font");
+        return;
+      }
+      server.sendHeader("Cache-Control", "max-age=86400");
+      server.streamFile(f, "font/ttf");
+      f.close();
+    });
+  }
   server.on("/preview.bmp", HTTP_GET, [this]() {
     touched = true;
     servePreview(app_);
@@ -846,12 +954,6 @@ void WebUi::begin(bool captive) {
     const bool wifiChanged = newSsid != s.wifiSsid || newPass != s.wifiPass;
     s.wifiSsid = newSsid;
     s.wifiPass = newPass;
-    const std::string host = arg("host");
-    if (validHostname(host)) s.hostname = host;
-    else if (!host.empty()) note += " The hostname was not changed: lower-case letters, digits and hyphens only.";
-    const std::string ap = arg("appass");
-    if (ap.size() >= 8 && ap.size() <= 63) s.apPass = ap;
-    else if (!ap.empty()) note += " The setup network password was not changed: it must be 8 to 63 characters.";
     saveSettings(s);
     if (wifiChanged) {
       app.state.wifiFailures = 0;
@@ -872,6 +974,23 @@ void WebUi::begin(bool captive) {
       warning_ = note.empty() ? "WiFi settings saved." : "Saved, except:" + note;
       redirectHome();
     }
+  });
+  server.on("/frame", HTTP_POST, [this]() {
+    App &app = app_;
+    touched = true;
+    if (refuseIfBusy(app)) return;
+    Settings &s = app.settings;
+    std::string note;
+    const std::string host = arg("host");
+    if (validHostname(host)) s.hostname = host;
+    else if (!host.empty()) note += " The hostname was not changed: lower-case letters, digits and hyphens only.";
+    // Blank means "keep", as for the WiFi password: it is never echoed back.
+    const std::string ap = arg("appass");
+    if (ap.size() >= 8 && ap.size() <= 63) s.apPass = ap;
+    else if (!ap.empty()) note += " The setup network password was not changed: it must be 8 to 63 characters.";
+    saveSettings(s);
+    warning_ = note.empty() ? "Frame settings saved." : "Saved, except:" + note;
+    redirectHome();
   });
   server.on("/save", HTTP_POST, [this]() {
     App &app = app_;
@@ -910,6 +1029,8 @@ void WebUi::begin(bool captive) {
     // reads the first: "1" when ticked, the hidden "0" when not.
     s.showDate = argInt("date", 0, 1, int(s.showDate)) == 1;
     s.shuffleBirds = argInt("shuffle", 0, 1, int(s.shuffleBirds)) == 1;
+    s.preferNew = argInt("newfirst", 0, 1, int(s.preferNew)) == 1;
+    s.minConfidence = argInt("bnconf", 0, 100, s.minConfidence);
     const bool counting = argInt("countref", 0, 1, int(s.countRefreshes)) == 1;
     // Turning the counter on starts a fresh count: a test begins from 0.
     if (counting && !s.countRefreshes) app.resetRefreshCount();
@@ -936,7 +1057,14 @@ void WebUi::begin(bool captive) {
     s.marginRight = argInt("marginright", 0, 300, s.marginRight);
     s.marginBottom = argInt("marginbottom", 0, 300, s.marginBottom);
     s.marginLeft = argInt("marginleft", 0, 300, s.marginLeft);
-    s.cycleHours = argInt("cycle", 0, 8760, s.cycleHours);
+    {
+      // A count of hours, days or weeks; kept as hours, a year at most. A
+      // form without the unit (an old page still open) meant hours.
+      int unit = argInt("cycleunit", 1, 168, 1);
+      if (unit != 24 && unit != 168) unit = 1;
+      const int n = argInt("cycle", 0, 8760, -1);
+      if (n >= 0) s.cycleHours = std::min(n * unit, 8760);
+    }
     s.intervalMin = argInt("interval", 1, 1440, s.intervalMin);
     s.quietFrom = argTime("quietfrom", s.quietFrom);
     s.quietTo = argTime("quietto", s.quietTo);

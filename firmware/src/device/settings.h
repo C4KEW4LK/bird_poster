@@ -35,7 +35,7 @@ struct Settings {
   // since the last page was drawn.
   enum class Lookback : uint8_t { Minutes = 0, Hours = 1, Days = 2, SinceLast = 3 };
   int lookback = 30;
-  Lookback lookbackUnit = Lookback::Days;
+  Lookback lookbackUnit = Lookback::SinceLast;
   int inatVersion = 2;  // iNaturalist API: 2 lean but may change, 1 frozen but 8x the bytes
 
   int birds = 10;       // on the page; the packer copes with up to 40
@@ -50,6 +50,8 @@ struct Settings {
   int sciPercent = 70;  // scientific name under a common one, % of its size
   PackStyle packStyle = PackStyle::Classic;  // how the birds are arranged on the page
   bool shuffleBirds = false;  // the chosen birds in a random order, not the source's ranking
+  bool preferNew = false;  // BirdNET-Go: species it first heard today go on the page first
+  int minConfidence = 0;   // BirdNET-Go: detections less sure than this, in percent, are ignored
   bool showDate = false;  // today's date along one edge of the bird page
   bool countRefreshes = false;  // count every refresh of the glass, for a battery test
   // Full-size plates from the web, for a bird drawn much larger than its

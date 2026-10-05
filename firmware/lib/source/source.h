@@ -72,6 +72,10 @@ struct Sighting {
   // leaves it 0 - which is why `Rarest` is not offered for that source rather
   // than silently ranked on something else. See `supports`.
   long globalCount = 0;
+  // BirdNET-Go only: the day ("2026-09-06") the detector first ever heard the
+  // species, when a detection in the reply was that day's (its
+  // `isNewSpecies`); empty otherwise, and always for other sources.
+  std::string newOn;
 };
 
 struct SourceConfig {
@@ -81,6 +85,8 @@ struct SourceConfig {
   // v2 whatever BirdNET model it runs - the API version and the model version
   // are unrelated, and there is no v3 of either path.
   std::string detectorUrl = "http://birdnet-go.local:8080";
+  // BirdNET-Go: detections below this confidence, in percent, are ignored.
+  int minConfidence = 0;
 
   // iNaturalist: where to look.
   double lat = 0.0;
@@ -154,8 +160,10 @@ std::string requestUrl(const SourceConfig& config, std::time_t now, Mode mode = 
 // iNaturalist and ALA return species already counted. eBird returns one row
 // per species, its most recent report, so `localCount` is that report's
 // `howMany` and the order is recency. A JSON list is taken in the order given.
+// `minConfidence` (percent) drops BirdNET-Go detections less sure than that.
 bool parseResponse(Source source, const std::string& body, std::vector<Sighting>& out,
-                   std::string* why = nullptr, const std::string& sinceLocal = "");
+                   std::string* why = nullptr, const std::string& sinceLocal = "",
+                   int minConfidence = 0);
 
 // One line for a reply that was not a 200, in the source's own words where
 // it gave any. eBird answers a bad request with {"errors":[{"title":...}]}
@@ -190,5 +198,16 @@ std::vector<Sighting> choose(const std::vector<Sighting>& seen,
 std::vector<Sighting> cycle(const std::vector<Sighting>& ranked,
                             const std::function<std::time_t(const std::string&)>& lastShown,
                             std::time_t now, int windowHours, std::size_t limit, uint32_t seed);
+
+// New birds first. Every species in `ranked` that `isNew` says is new goes on
+// the page ahead of the rest, in rank order, whether or not `page` had chosen
+// it; then what `page` already held, in its order, up to `limit`. A new bird
+// the page left out takes the place of the last of the others, so the page
+// keeps its size, and the first spot - the middle, the hero - goes to the
+// highest-ranked new bird.
+std::vector<Sighting> preferNew(const std::vector<Sighting>& page,
+                                const std::vector<Sighting>& ranked,
+                                const std::function<bool(const std::string&)>& isNew,
+                                std::size_t limit);
 
 }  // namespace birdposter

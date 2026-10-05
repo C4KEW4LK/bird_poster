@@ -52,6 +52,8 @@ void loadSettings(Settings &s) {
   s.showDate = p.getBool("date", s.showDate);
   s.countRefreshes = p.getBool("countref", s.countRefreshes);
   s.shuffleBirds = p.getBool("shuffle", s.shuffleBirds);
+  s.preferNew = p.getBool("newfirst", s.preferNew);
+  s.minConfidence = p.getInt("bnconf", s.minConfidence);
   s.webPlates = p.getBool("webplates", s.webPlates);
   s.webPlatesUrl = getStr(p, "weburl", s.webPlatesUrl);
   s.dateStyle = DateStyle(std::min<int>(4, p.getUChar("datestyle", uint8_t(s.dateStyle))));
@@ -118,6 +120,8 @@ void saveSettings(const Settings &s) {
   p.putBool("date", s.showDate);
   p.putBool("countref", s.countRefreshes);
   p.putBool("shuffle", s.shuffleBirds);
+  p.putBool("newfirst", s.preferNew);
+  p.putInt("bnconf", s.minConfidence);
   p.putBool("webplates", s.webPlates);
   p.putString("weburl", s.webPlatesUrl.c_str());
   p.putUChar("datestyle", uint8_t(s.dateStyle));

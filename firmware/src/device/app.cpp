@@ -97,6 +97,7 @@ bool App::begin() {
     nameFont.setKeepHairlines(true);  // Gould's hairlines; see Font::setKeepHairlines
   }
   loadShown();
+  loadNewToday();
   return platesOk && fontOk;
 }
 
@@ -279,6 +280,52 @@ void App::recordShown(const std::vector<std::string> &names) {
   f.close();
 }
 
+void App::loadNewToday() {
+  newToday.clear();
+  File f = LittleFS.open(kNewTodayPath, "r");
+  if (!f) return;
+  while (f.available()) {
+    const String line = f.readStringUntil('\n');
+    const int a = line.indexOf('\t'), b = line.indexOf('\t', a + 1);
+    if (a <= 0 || b <= a) continue;
+    Sighting s;
+    s.newOn = line.substring(0, a).c_str();
+    s.scientific = line.substring(a + 1, b).c_str();
+    s.common = line.substring(b + 1).c_str();
+    newToday.push_back(s);
+  }
+  f.close();
+}
+
+void App::noteNewToday(const std::vector<Sighting> &seen) {
+  const std::time_t now = std::time(nullptr);
+  if (now < 100000) return;  // no clock, no "today"
+  const std::string today = localStamp(now).substr(0, 10);
+  bool changed = false;
+  for (auto it = newToday.begin(); it != newToday.end();) {
+    if (it->newOn == today) {
+      ++it;
+    } else {
+      it = newToday.erase(it);
+      changed = true;
+    }
+  }
+  for (const Sighting &s : seen) {
+    if (s.newOn != today) continue;
+    if (std::any_of(newToday.begin(), newToday.end(),
+                    [&s](const Sighting &k) { return k.scientific == s.scientific; }))
+      continue;
+    newToday.push_back(s);
+    changed = true;
+  }
+  if (!changed) return;
+  File f = LittleFS.open(kNewTodayPath, "w");
+  if (!f) return;
+  for (const Sighting &s : newToday)
+    f.printf("%s\t%s\t%s\n", s.newOn.c_str(), s.scientific.c_str(), s.common.c_str());
+  f.close();
+}
+
 bool App::fetch(const std::string &url, std::string &body, int &http, std::string &error,
                 const std::vector<std::pair<std::string, std::string>> &headers,
                 uint32_t timeoutMs) {
@@ -423,6 +470,7 @@ SourceConfig App::sourceConfig() const {
   cfg.since = windowStart(settings.lookback, settings.lookbackUnit);
   cfg.inatVersion = settings.inatVersion;
   cfg.ebirdKey = settings.ebirdKey;
+  cfg.minConfidence = settings.minConfidence;
   cfg.ebirdLocale = settings.ebirdLocale;
   cfg.listUrl = settings.listUrl;
   // Every bird in the window wants the whole window: the newest 200 calls can
@@ -453,7 +501,8 @@ bool App::querySource(const SourceConfig &cfg, Mode mode, std::vector<Sighting> 
   }
   progress("reading the species list, " + std::to_string(body.size() / 1024) + " KB");
   timing::Scope parse(timing::FetchParse);
-  if (!parseResponse(cfg.source, body, seen, &error, localStamp(cfg.since))) return false;
+  if (!parseResponse(cfg.source, body, seen, &error, localStamp(cfg.since), cfg.minConfidence))
+    return false;
   return true;
 }
 
@@ -483,6 +532,28 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
     };
     page = cycle(ranked, lastShown, std::time(nullptr), settings.cycleHours, want,
                  uint32_t(std::time(nullptr)) ^ uint32_t(state.layout));
+  }
+  // New birds first: BirdNET-Go's own word for it - a species it first heard
+  // today (Sighting::newOn) - and kept first for the rest of that day, as
+  // BirdNET-Go keeps its "new" badge, even once the window has moved past
+  // the detection. No other source says.
+  if (settings.source == Source::BirdNet) {
+    noteNewToday(seen);
+    // Only onto a page there is anyway: nothing heard keeps the last page up,
+    // and a remembered bird alone is not a reason to redraw it.
+    if (settings.preferNew && !newToday.empty() && !seen.empty()) {
+      std::vector<Sighting> pool = choose(seen, drawable, settings.mode, seen.size());
+      for (const Sighting &k : newToday) {
+        const bool there = std::any_of(pool.begin(), pool.end(),
+                                       [&k](const Sighting &s) { return s.scientific == k.scientific; });
+        if (!there && drawable(k.scientific)) pool.push_back(k);  // not heard again since
+      }
+      const auto isNew = [this](const std::string &name) {
+        return std::any_of(newToday.begin(), newToday.end(),
+                           [&name](const Sighting &k) { return k.scientific == name; });
+      };
+      page = preferNew(page, pool, isNew, want);
+    }
   }
   if (settings.shuffleBirds) {
     // Seeded by the layout, which every page moves on: a new order each page,
@@ -1075,7 +1146,7 @@ std::vector<std::string> App::statusLines() {
     case Settings::Lookback::Minutes: window = std::to_string(settings.lookback) + " min"; break;
     case Settings::Lookback::Hours: window = std::to_string(settings.lookback) + " h"; break;
     case Settings::Lookback::Days: window = std::to_string(settings.lookback) + " days"; break;
-    case Settings::Lookback::SinceLast: window = "since the last page"; break;
+    case Settings::Lookback::SinceLast: window = "since the last update"; break;
   }
   const std::string modeName =
       settings.mode == Mode::Rarest ? (settings.source == Source::eBird ? "notable" : "rarest")

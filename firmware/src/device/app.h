@@ -26,6 +26,10 @@ constexpr const char *kNameFontPath = "/name.ttf";  // the common name; optional
 // a line. On the plates filesystem rather than NVS because it can run to a few
 // hundred lines, and losing it to a re-flash of the plates costs nothing.
 constexpr const char *kShownPath = "/shown.txt";
+// BirdNET-Go's new species of the day, kept until the day is out so a bird
+// first heard this morning stays first all day, not just while its first
+// detection is inside the window: "date<TAB>scientific<TAB>common" a line.
+constexpr const char *kNewTodayPath = "/newtoday.txt";
 constexpr const char *kRegionPath = "/region.txt";  // which region a lone /plates.bin is
 extern const char *kFirmwareVersion;  // the commit the build came from
 
@@ -145,6 +149,11 @@ struct App {
   std::map<std::string, std::time_t> shown;
   void loadShown();
   void recordShown(const std::vector<std::string> &names);  // the page just drawn
+  // Today's new species (see kNewTodayPath): what was remembered, plus what
+  // `seen` marks new today, minus anything from an earlier day.
+  std::vector<Sighting> newToday;
+  void loadNewToday();
+  void noteNewToday(const std::vector<Sighting> &seen);
 
   // What the settings page's Test button reports: the same request the next
   // refresh would make, against settings that may not be saved yet, without

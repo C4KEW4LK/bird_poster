@@ -31,7 +31,7 @@ const char* kBirdNetBody = R"([
   {"id":2,"date":"2026-09-06","time":"07:02:11","scientificName":"Turdus merula",
    "commonName":"Eurasian Blackbird","confidence":0.77},
   {"id":1,"date":"2026-09-06","time":"06:58:40","scientificName":"Strix aluco",
-   "commonName":"Tawny Owl","confidence":0.64}
+   "commonName":"Tawny Owl","confidence":0.64,"isNewSpecies":true}
 ])";
 
 const char* kINatBody = R"({"total_results":3,"results":[
@@ -133,6 +133,33 @@ void test_birdnet_detections_before_the_window_are_dropped() {
   TEST_ASSERT_EQUAL_STRING("Turdus merula", seen[0].scientific.c_str());
   TEST_ASSERT_EQUAL_INT(2, seen[0].localCount);
   TEST_ASSERT_TRUE(parseResponse(Source::BirdNet, kBirdNetBody, seen, &why, "2026-09-06 07:10:00"));
+  TEST_ASSERT_EQUAL_INT(1, seen[0].localCount);
+}
+
+// A species BirdNET-Go first heard today is new; a detection the window
+// drops does not make it so.
+void test_birdnet_new_species_are_marked() {
+  std::vector<Sighting> seen;
+  std::string why;
+  TEST_ASSERT_TRUE(parseResponse(Source::BirdNet, kBirdNetBody, seen, &why));
+  TEST_ASSERT_EQUAL_size_t(2, seen.size());
+  for (const Sighting& s : seen)
+    TEST_ASSERT_EQUAL_STRING(s.scientific == "Strix aluco" ? "2026-09-06" : "", s.newOn.c_str());
+  TEST_ASSERT_TRUE(parseResponse(Source::BirdNet, kBirdNetBody, seen, &why, "2026-09-06 07:00:00"));
+  TEST_ASSERT_EQUAL_size_t(1, seen.size());
+  TEST_ASSERT_TRUE(seen[0].newOn.empty());
+}
+
+// Detections less sure than the minimum are not counted; a species with none
+// left is not there at all.
+void test_birdnet_minimum_confidence_drops_unsure_detections() {
+  std::vector<Sighting> seen;
+  std::string why;
+  TEST_ASSERT_TRUE(parseResponse(Source::BirdNet, kBirdNetBody, seen, &why, "", 70));
+  TEST_ASSERT_EQUAL_size_t(1, seen.size());  // the owl at 0.64 is out
+  TEST_ASSERT_EQUAL_STRING("Turdus merula", seen[0].scientific.c_str());
+  TEST_ASSERT_EQUAL_INT(2, seen[0].localCount);  // 0.91 and 0.77 both pass
+  TEST_ASSERT_TRUE(parseResponse(Source::BirdNet, kBirdNetBody, seen, &why, "", 80));
   TEST_ASSERT_EQUAL_INT(1, seen[0].localCount);
 }
 
@@ -291,6 +318,29 @@ void test_cycle_prefers_birds_not_shown_in_the_window() {
   // being "fresh" is: every bird fresh means a plain random `limit`.
   page = cycle(ranked, nullptr, now, 7 * 24, 6, 1);
   TEST_ASSERT_EQUAL_size_t(6, page.size());
+}
+
+// New birds go first, take the place of the last of the others when the
+// page left them out, and nothing changes when there are none.
+void test_new_birds_go_first_and_keep_the_page_its_size() {
+  std::vector<Sighting> ranked;
+  for (int i = 0; i < 6; ++i) ranked.push_back(Sighting{"bird" + std::to_string(i), "", 10 - i, 0});
+  const std::vector<Sighting> page(ranked.begin(), ranked.begin() + 3);  // bird0..bird2
+  // bird4 is new and was left off; bird1 is new and already on.
+  const auto isNew = [](const std::string& n) { return n == "bird4" || n == "bird1"; };
+  std::vector<Sighting> out = preferNew(page, ranked, isNew, 3);
+  TEST_ASSERT_EQUAL_size_t(3, out.size());
+  TEST_ASSERT_EQUAL_STRING("bird1", out[0].scientific.c_str());  // the higher-ranked new bird leads
+  TEST_ASSERT_EQUAL_STRING("bird4", out[1].scientific.c_str());
+  TEST_ASSERT_EQUAL_STRING("bird0", out[2].scientific.c_str());  // bird2, the last, made room
+  // More new birds than room: the best-ranked of them fill it.
+  out = preferNew(page, ranked, [](const std::string&) { return true; }, 2);
+  TEST_ASSERT_EQUAL_size_t(2, out.size());
+  TEST_ASSERT_EQUAL_STRING("bird0", out[0].scientific.c_str());
+  TEST_ASSERT_EQUAL_STRING("bird1", out[1].scientific.c_str());
+  // None new: the page as it was.
+  out = preferNew(page, ranked, [](const std::string&) { return false; }, 3);
+  for (size_t i = 0; i < 3; ++i) TEST_ASSERT_EQUAL_STRING(page[i].scientific.c_str(), out[i].scientific.c_str());
 }
 
 void test_rarest_is_not_offered_for_birdnet() {
@@ -507,6 +557,9 @@ int main() {
   RUN_TEST(test_artwork_filters_before_ranking_not_after);
   RUN_TEST(test_a_species_with_no_global_figure_sorts_last_in_rarest);
   RUN_TEST(test_cycle_prefers_birds_not_shown_in_the_window);
+  RUN_TEST(test_new_birds_go_first_and_keep_the_page_its_size);
+  RUN_TEST(test_birdnet_new_species_are_marked);
+  RUN_TEST(test_birdnet_minimum_confidence_drops_unsure_detections);
   RUN_TEST(test_rarest_is_not_offered_for_birdnet);
   RUN_TEST(test_ebird_url_takes_the_window_as_days_and_the_key_as_a_header);
   RUN_TEST(test_ebird_reports_are_one_per_species_with_the_flock_as_the_count);

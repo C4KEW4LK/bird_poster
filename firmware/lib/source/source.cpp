@@ -100,12 +100,14 @@ bool failed(DeserializationError err, std::string* why) {
 // flag counts - which is more than the board has left once WiFi and TLS are
 // up. Filtered it is 33 KB.
 bool parseBirdNet(const std::string& body, std::vector<Sighting>& out, std::string* why,
-                  const std::string& sinceLocal) {
+                  const std::string& sinceLocal, int minConfidence) {
   JsonDocument filter;
   filter[0]["scientificName"] = true;
   filter[0]["commonName"] = true;
   filter[0]["date"] = true;
   filter[0]["time"] = true;
+  filter[0]["isNewSpecies"] = true;
+  filter[0]["confidence"] = true;
   JsonDocument doc;
   if (failed(deserializeJson(doc, body, DeserializationOption::Filter(filter)), why)) return false;
   // GET /api/v2/detections/recent answers with a bare array, not an envelope.
@@ -123,7 +125,16 @@ bool parseBirdNet(const std::string& body, std::vector<Sighting>& out, std::stri
       const std::string when = std::string(row["date"] | "") + " " + (row["time"] | "");
       if (when < sinceLocal) continue;
     }
-    accumulate(parsed, row["scientificName"] | "", row["commonName"] | "", 1, 0);
+    // 0 to 1; a row without one is taken as sure.
+    if (minConfidence > 0 && (row["confidence"] | 1.0) * 100.0 < minConfidence) continue;
+    const std::string scientific = row["scientificName"] | "";
+    accumulate(parsed, scientific, row["commonName"] | "", 1, 0);
+    // True on a detection made the day the detector first heard the species,
+    // and left out otherwise (BirdNET-Go since July 2025; older ones never
+    // send it, so nothing is new).
+    if (row["isNewSpecies"] | false)
+      for (Sighting& s : parsed)
+        if (s.scientific == scientific) s.newOn = row["date"] | "";
   }
   out.swap(parsed);
   return true;
@@ -323,9 +334,9 @@ std::string requestUrl(const SourceConfig& config, std::time_t now, Mode mode) {
 }
 
 bool parseResponse(Source source, const std::string& body, std::vector<Sighting>& out,
-                   std::string* why, const std::string& sinceLocal) {
+                   std::string* why, const std::string& sinceLocal, int minConfidence) {
   switch (source) {
-    case Source::BirdNet: return parseBirdNet(body, out, why, sinceLocal);
+    case Source::BirdNet: return parseBirdNet(body, out, why, sinceLocal, minConfidence);
     case Source::iNaturalist: return parseINaturalist(body, out, why);
     case Source::eBird: return parseEBird(body, out, why);
     case Source::Ala: return parseAla(body, out, why);
@@ -481,6 +492,26 @@ std::vector<Sighting> cycle(const std::vector<Sighting>& ranked,
     }
   }
   return fresh;
+}
+
+std::vector<Sighting> preferNew(const std::vector<Sighting>& page,
+                                const std::vector<Sighting>& ranked,
+                                const std::function<bool(const std::string&)>& isNew,
+                                std::size_t limit) {
+  std::vector<Sighting> out;
+  const auto has = [&out](const std::string& name) {
+    return std::any_of(out.begin(), out.end(),
+                       [&name](const Sighting& s) { return s.scientific == name; });
+  };
+  for (const Sighting& bird : ranked) {
+    if (out.size() >= limit) break;
+    if (isNew && isNew(bird.scientific) && !has(bird.scientific)) out.push_back(bird);
+  }
+  for (const Sighting& bird : page) {
+    if (out.size() >= limit) break;
+    if (!has(bird.scientific)) out.push_back(bird);
+  }
+  return out;
 }
 
 }  // namespace birdposter
