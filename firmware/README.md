@@ -214,10 +214,9 @@ The page has a picker for the board - the XIAO in the EE02, or the reTerminal
 E1004 (`pio run -e e1004`: the same sources with its pin map, `BOARD_E1004`,
 and `partitions-plates-32mb.csv`) - and, for the XIAO, for the artwork:
 Australian, European or North American plates, one image each, a 16 MB
-frame holding one. The E1004's image carries all three as
-`/plates-<region>.bin` and the settings page chooses among them, or one
-region alone with the whole partition, about one and a half times the sprite
-size, chosen on the page instead; the E1004
+frame holding one. The E1004 is the same, one region an image, with the
+whole 32 MB partition giving it about one and a half times the sprite size;
+it
 also lists the same three packs at full size (1200 px, `firmware/packs/card/`)
 as downloads to copy to its microSD card, which the frame then reads in
 preference to the flash copy. It offers three installs: everything,

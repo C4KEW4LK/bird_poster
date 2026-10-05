@@ -634,7 +634,7 @@ String render(App &app, const std::string &error = "") {
   {
     String packs;
     if (app.packs.size() > 1) {
-      packs = "<div class=\"lh\"><label>Artwork</label><details class=\"info\"><summary title=\"More about this\">i</summary><div>A frame holds every region's plates on this board; the page draws from one. Changing it takes effect on the next page. A pack copied to the SD card as <code>plates-au.bin</code>, <code>plates-eu.bin</code> or <code>plates-us.bin</code> is used over the one in flash: the card holds the plates at full size.</div></details></div><select name=\"pack\">";
+      packs = "<div class=\"lh\"><label>Artwork</label><details class=\"info\"><summary title=\"More about this\">i</summary><div>The page draws from one region's plates. Changing it takes effect on the next page. A pack copied to the SD card as <code>plates-au.bin</code>, <code>plates-eu.bin</code> or <code>plates-us.bin</code> is used over the one in flash: the card holds the plates at full size.</div></details></div><select name=\"pack\">";
       for (const std::string &key : app.packs) {
         const char *label = key == "au"   ? "Australia - Gould's plates"
                             : key == "eu" ? "Europe - Gould's and the von Wrights' plates"

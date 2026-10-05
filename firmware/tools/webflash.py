@@ -15,8 +15,8 @@ Two boards carry the same panel:
   ee02   a XIAO ESP32-S3 Plus in Seeed's EE02 driver board, 16 MB of flash.
          Its plates partition holds one regional pack, so there is one plate
          image per region and the page has a toggle for which to flash.
-  e1004  Seeed's reTerminal E1004, 32 MB of flash. One plate image carries
-         every region, and the region is a setting on the device.
+  e1004  Seeed's reTerminal E1004, 32 MB of flash. The same: one region per
+         plate image, with the whole partition, so its birds are larger.
 
 Four images go to a board, each at its own offset: bootloader, partition table
 and app as `pio run -e <board>` leaves them, and the plates - the LittleFS image
@@ -29,9 +29,9 @@ table and the app, and a merged image writes 0xFF over the gaps.
 Each board gets three manifests - everything (a first install, with an erase),
 the app alone (an update that leaves the plates and settings in place) and the
 plates alone - and the page reads `builds.json`, written here, to know what to
-offer. Packs are baked per board because the budgets differ: the XIAO's one
-pack may have about 13.6 MiB, the E1004's three share 31 MB, and the E1004's SD
-card takes each region at full size (`firmware/packs/card/`). `--bake` bakes any
+offer. Packs are baked per board because the budgets differ: the XIAO's pack
+may have about 13.6 MiB, the E1004's 30 MB, and the E1004's SD card takes each
+region at full size (`firmware/packs/card/`). `--bake` bakes any
 pack that is missing (minutes each).
 
 Each plate image is staged in its own directory under .pio/webflash-data/ -
@@ -94,14 +94,12 @@ REGIONS = {
 }
 
 # board key -> how it is built and what its plates partition holds. `budget`
-# is the MB a single pack may take: the whole partition less the fonts on the
-# XIAO, a third of it on the E1004.
+# is the MB its one pack may take: the whole partition less the fonts.
 BOARDS: dict[str, dict[str, Any]] = {
     "ee02": {
         "label": "XIAO ESP32-S3 Plus in the EE02",
         "env": "xiao",
         "partitions": "partitions-plates-16mb.csv",
-        "packs_per_image": 1,
         # The partition is 13.94 MiB; mklittlefs fits a 13.80 MiB pack beside
         # the subset fonts (about 96 KB), and ~150 KB is left for the frame to
         # rewrite /shown.txt. The baker aims at 98% of this: ~13.6 MiB.
@@ -111,17 +109,11 @@ BOARDS: dict[str, dict[str, Any]] = {
         "label": "reTerminal E1004",
         "env": "e1004",
         "partitions": "partitions-plates-32mb.csv",
-        "packs_per_image": 3,
-        "budget": 10.2,
-        # And a second kind of image: one region with the whole partition to
-        # itself, which buys about 1.5x the sprite size (690-900 px against
-        # 380-510) at the cost of choosing the region at flash time. Baked as
-        # its own board key, since the budget is what a pack is baked to.
-        "alone": {"key": "e1004-one", "budget": 30.0},
+        # One region with the whole partition: 690-900 px birds.
+        "budget": 30.0,
         # The E1004 also reads a pack from its SD card, where the plates keep
-        # the full size they shipped at rather than the ~450 px that fits a
-        # third of the flash. Those packs are baked separately and offered as
-        # files to copy to the card, not flashed.
+        # the full size they shipped at. Those packs are baked separately and
+        # offered as files to copy to the card, not flashed.
         "card": True,
     },
 }
@@ -209,11 +201,7 @@ def pack_for(board: str, style: str, bake: bool) -> Path:
     if board == "card":
         args = ["--source", str(CARD_SOURCE)]
     else:
-        budgets = {k: v["budget"] for k, v in BOARDS.items()}
-        budgets.update(
-            {v["alone"]["key"]: v["alone"]["budget"] for v in BOARDS.values() if "alone" in v}
-        )
-        args = ["--fit", "--budget", str(budgets[board]), "--source", "1200"]
+        args = ["--fit", "--budget", str(BOARDS[board]["budget"]), "--source", "1200"]
     if not bake:
         raise SystemExit(
             f"no {path.relative_to(ROOT)} - bake it first (minutes), or pass --bake:\n"
@@ -256,26 +244,20 @@ def fonts_into(data: Path) -> None:
         )
 
 
-def filesystem_image(board: str, packs: dict[str, Path], out: Path, fonts: Path) -> None:
-    """A LittleFS image of the fonts and the given packs, built with the board's
-    partition table so it is exactly the partition's size. Packs go in as
-    /plates.bin when there is one - the name a 16 MB board mounts - and as
-    /plates-<region>.bin each when there are several. Staged in a directory of
-    its own, so nothing else can end up in the image."""
+def filesystem_image(board: str, region: str, pack: Path, out: Path, fonts: Path) -> None:
+    """A LittleFS image of the fonts and one region's pack, as /plates.bin,
+    built with the board's partition table so it is exactly the partition's
+    size. Staged in a directory of its own, so nothing else can end up in the
+    image."""
     stage = FIRMWARE / ".pio" / "webflash-data" / f"{board}-{out.stem}"
     shutil.rmtree(stage, ignore_errors=True)
     stage.mkdir(parents=True)
     for font in fonts.glob("*.ttf"):
         shutil.copy(font, stage / font.name)
-    if len(packs) == 1:
-        region, pack = next(iter(packs.items()))
-        shutil.copy(pack, stage / "plates.bin")
-        # A lone /plates.bin cannot say which region it is; the frame reads this
-        # to know where to ask the web for a plate's full-size version.
-        (stage / "region.txt").write_text(region + "\n")
-    else:
-        for region, pack in packs.items():
-            shutil.copy(pack, stage / f"plates-{region}.bin")
+    shutil.copy(pack, stage / "plates.bin")
+    # A lone /plates.bin cannot say which region it is; the frame reads this
+    # to know where to ask the web for a plate's full-size version.
+    (stage / "region.txt").write_text(region + "\n")
     pio(BOARDS[board]["env"], "-t", "buildfs", data_dir=stage)
     shutil.copy(FIRMWARE / ".pio" / "build" / BOARDS[board]["env"] / "littlefs.bin", out)
     shutil.rmtree(stage, ignore_errors=True)
@@ -364,29 +346,13 @@ def assemble(
             manifests[name] = m
             entry["debug"] = {"manifest": name, "size": size_of(debug_app)}
         if regions:
-            packs = {r: pack_for(board, REGIONS[r][1], bake) for r in regions}
-            # One image per region, or one image with them all - or, on a
-            # board that offers it, both: the shared image and each region
-            # alone at the larger size the whole partition allows.
-            groups: dict[str, dict[str, Path]] = (
-                {r: {r: p} for r, p in packs.items()}
-                if spec["packs_per_image"] == 1
-                else {"all": packs}
-            )
-            alone = spec.get("alone")
-            if alone:
-                for r in regions:
-                    groups[r] = {r: pack_for(alone["key"], REGIONS[r][1], bake)}
-            for key, group in groups.items():
+            # One plate image per region.
+            for key in regions:
+                pack = pack_for(board, REGIONS[key][1], bake)
                 image = f"plates-{key}.bin"
-                filesystem_image(board, group, out / image, fonts)
+                filesystem_image(board, key, pack, out / image, fonts)
                 part = [{"path": f"{board}/{image}", "offset": plates_offset(board)}]
-                if key == "all":
-                    label = "every region"
-                elif alone:
-                    label = REGIONS[key][0] + " alone, larger"
-                else:
-                    label = ", ".join(REGIONS[r][0] for r in group)
+                label = REGIONS[key][0]
                 manifests[f"manifest-{board}-{key}.json"] = manifest(
                     f"{spec['label']}, app and {label} plates", app + part
                 )
@@ -395,12 +361,12 @@ def assemble(
                 )
                 entry["images"][key] = {
                     "label": label,
-                    "regions": list(group),
+                    "regions": [key],
                     "full": f"manifest-{board}-{key}.json",
                     "plates": f"manifest-{board}-plates-{key}.json",
                     "size": size_of(part),
-                    "source": min(pack_source(p) for p in group.values()),
-                    "birds": len(set().union(*(pack_species(p) for p in group.values()))),
+                    "source": pack_source(pack),
+                    "birds": len(pack_species(pack)),
                 }
         if regions and board == boards[0]:
             # The full-size plates, one file a species, once for every board.

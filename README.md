@@ -1,29 +1,25 @@
 # Bird Poster (ESP32)
 
-A battery e-ink bird poster: it asks the network which birds have been seen
-nearby, draws them as public-domain illustrations packed onto one page, and goes
-back to sleep.
+A battery e-ink bird poster: makes requests to BirdNet-Go or a few other services over the network and with the returned bird list, it draws them as public-domain illustrations packed onto a single page, and goes
+back to sleep to conserve power.
 
 Inspired by the awesome Bird Frame project [Fugleramme](https://github.com/arnegiacomo/fugleramme).
 
 <p align="center">
-  <img src="images/output_example.png" alt="A page from the frame: five Australian birds from Gould's plates - Rufous Whistler, Latham's Snipe, Nankeen Kestrel, Little Eagle and Great Egret - each with its common and scientific name, and the date in the corner" width="480">
+  <img src="images/example_hardware.jpg" alt="Example of the e-ink display mounted in a picture frame." width="480">
 </p>
 
 *A page as the frame draws it: 1200 x 1600, dithered to the panel's six inks.*
 
 ## How it works
 
-WiFi → species list → plate pack in flash (or on the SD card) → silhouette
-packer → 6-colour dither → the glass.
-
-There is no microphone and no classifier on the device. It asks something else
-what has been heard or seen, and spends its power budget on the picture. The
+There is no detection or classifier on the device. It asks another service 
+what has been heard or seen, then builds an image from that info. The
 detection source is a setting on the frame's own web page:
 
-- **[BirdNET-Go](https://github.com/tphakala/birdnet-go)** on your LAN, if you
-  run one — it listens on a mic and identifies birds by sound, and the frame
-  reads its recent detections over HTTP.
+- **[BirdNET-Go](https://github.com/tphakala/birdnet-go)** 
+  it listens with a mic and identifies birds by sound, and the frame
+  reads its recent detections via api.
 - **[iNaturalist](https://www.inaturalist.org/)**, for a latitude, longitude and
   radius — what people have actually recorded near you. Its rarest-birds page
   ranks by how few times a species has been recorded worldwide.
@@ -46,28 +42,22 @@ Two boards carry the same 13.3" Spectra 6 panel:
 - Seeed's [**reTerminal E1004**](https://wiki.seeedstudio.com/getting_started_with_reterminal_e1004/)
   — the same glass in a case with a battery, 32 MB flash and a microSD slot.
 
-The firmware needs the 8 MB of PSRAM, since the packer's occupancy
-grid and the sprite masks do not fit in internal SRAM. Pin maps,
-the battery budget and the build order are in
-[`firmware/docs/IMPLEMENTATION.md`](firmware/docs/IMPLEMENTATION.md).
+The firmware needs the 8 MB of PSRAM to properly function.
 
 > **What has actually been tested on hardware:** the XIAO in the EE02 with
-> the Australian plates. The reTerminal E1004 build - its pin map, the shared
+> the Australian plates. Tested with a 2000mAh battery it 
+> lasted ~1200 updates meaning approx 20 updates per day for 2 months.
+
+> The reTerminal E1004 build - its pin map, the shared
 > SPI bus with the SD slot, the card packs - and the European and North
-> American packs compile and render on the desktop harness but have not yet
-> been run on a board. Treat them as beta and report what you find.
+> American packs compile and render on the desktop testing setup but have not yet
+> been run on a board.
 
 ## Art
 
-The birds are cut-outs from historic, public-domain natural-history plates,
+The birds are cut out from historic, public-domain natural-history plates,
 curated for this project. Each species is matched to its illustration by
-scientific name, background-removed, and packed onto a paper-toned page by its
-silhouette, every bird at one size. An empty window shows a status page.
-
-Artwork is **not** limited to what a classifier can name. Images are keyed on
-the scientific name, so a plate for a bird BirdNET has no label for is still
-reachable from iNaturalist or eBird — which matters, because 335 of the 871
-bird species recorded in Australia have no BirdNET v2.4 label at all.
+the modern scientific name, its background-removed, and packed at a consistent size. 
 
 | style | plates | species |
 | --- | ---: | ---: |
@@ -77,15 +67,12 @@ bird species recorded in Australia have no BirdNET v2.4 label at all.
 
 ### The plate pack
 
-Each region's artwork is baked into one **plate pack**, which is
-what the flash or SD card holds and what the flasher ships. Per species it
-holds the silhouette, a posterised sprite and every spelling a source might
-use for the name. Sprites are posterised to 15 grey levels a pixel and 16
-colours a bird (one per 2×2 block), then compressed without further loss by
-predicting each pixel from the ones already next to it. A bird comes to about
-19 KB in the EE02's Australian pack, roughly a third smaller than the
-general-purpose compression used in zip files and PNGs would make it. The
-device dithers each bird to the panel's six inks at the size it is drawn.
+Each region's artwork is baked into one **plate pack**. Per species it
+holds the bird's silhouette, a reduced-colour sprite and every spelling a
+source might use for its name. A bird comes to about 19 KB in the EE02's
+Australian pack, against about 160 KB for the same plate at the same size as a
+full-colour PNG, and 1.2 MB for the full-size original. The frame scales each bird to
+its place on the page, then dithers it with the panel's six inks.
 
 <p align="center">
   <img src="images/baking_comparison.png" alt="A Nankeen Kestrel plate, unbaked and as baked into the EE02 pack, each in colour, with close-ups of the two heads in colour and dithered to the panel's six inks" width="640">
@@ -101,83 +88,64 @@ colour and dithered as the panel shows it.*
 *The same for a colourful plate, the Eastern Rosella. Where the bake falls
 short is the large red areas: the breast's shading from scarlet to crimson is
 a change of hue more than of lightness, and with only 16 colours for the whole
-bird it is posterised into a few flatter bands of red. After dithering the difference is hidden, as seen in the close-ups.*
+bird it is posterised into a few flatter bands of red. After dithering the 
+difference is hidden, as seen in the close-ups.*
 
 ### How the packs are compressed
 
-Each sprite is two planes: a grey level for every pixel (one of 15, or
-"transparent"), and a colour for every 2×2 block (one of the bird's 16).
-Both are compressed without loss by a range coder driven by a context model.
+Each sprite is two planes: a grey level for every pixel (15 levels + transparent), and a colour for every 2×2 block (one of that bird's 16).
+Both are then losslesly compressed by a range coder driven by a context model.
 Before each value is stored, the coder estimates how likely every possible
 value is from what has already been decoded around it, then spends few bits on
 a likely value and more on a surprising one.
-
-- **Grey levels** are predicted from the pixel to the left, the pixel above,
-  and the slope of the row above, starting from odds learned across a few
-  hundred plates and built into the firmware.
-- **Colours** are predicted from the block to the left, the block above and
-  the block's own brightness. Blocks wholly outside the bird are not stored.
-
-When the 16 colours are fitted, each pixel counts in proportion to its
-brightness. Colour barely shows on a dark pixel, so this stops the black in a
-block pulling its colour towards grey, and thin coloured detail between dark
-markings - a rosella's yellow feather edges - keeps its colour.
 
 The format is covered in
 [`firmware/README.md`](firmware/README.md#how-a-page-is-drawn).
 
 The packs are committed in [`firmware/packs/`](firmware/packs/), each baked
-to fill its room (`--fit` shrinks the sprite size from 1200 px until the pack
-fits the budget, confirmed against the real bake):
+to fill the availbe rom space (`--fit` shrinks the sprite size from 1200 px until 
+the pack fits the budget, confirmed against the real bake):
 
 | pack | birds at | for |
 | --- | ---: | --- |
 | `ee02/<region>.bin` | 452–596 px | the XIAO in the EE02, ~13.6 MB, one region |
-| `e1004/<region>.bin` | 380–508 px | the E1004's 31 MB shared by all three regions |
-| `e1004-one/<region>.bin` | 692–896 px | the E1004's 31 MB given to one region |
-| `card/<region>.bin` | 1200 px | the E1004's microSD card, and the web plates, at full size |
+| `e1004/<region>.bin` | 692–896 px | the E1004's 31 MB, one region |
+| `card/<region>.bin` | 1200 px | the E1004's microSD card, and the web plates, at original size |
 
-The artwork PNGs themselves (2 GB) are not in the repository - only each
+The orignal artwork PNGs themselves (2 GB) are not in the repository - only each
 style's `manifest.json`, `ATTRIBUTION.md` and species lists, and the packs
-baked from them. Rebaking needs the cut-outs on the workstation.
+baked from them.
 
 ### Full-size plates from the web
 
-A pack in flash holds each bird at the size its partition allows (452-596 px for EE02). When a bird
-is drawn much larger than that - a page of one or two birds - the frame fetches
-the same plate at full size (1200 px) from the web and falls back to local if
+A pack in flash is restricted by the partition's size. When a bird
+is drawn much larger than that (i.e. a page of one or two birds) there is the option for the esp32 to
+fetch the same plate at full size (1200 px) from the web and falls back to local if
 the site does not answer. The flasher's build publishes them beside the page,
 one file a species, at `https://c4kew4lk.github.io/bird_poster/plates/<region>/`,
-which is the frame's default; any other copy (`firmware/tools/export_web_plates.py`)
-can be entered on its settings page.
+which is the frame's default url.
 
 ## Flash it
 
 No toolchain needed: **<https://c4kew4lk.github.io/bird_poster/>** flashes the
-latest build from Chrome or Edge over USB. Pick the frame, then the artwork:
+latest build from Chrome over USB. Pick the frame, then the artwork:
 
-- **XIAO in the EE02** — Australia, Europe or North America, one region's plates.
-- **reTerminal E1004** — every region at once (the region is then a setting on
-  the device), or one region alone at a larger size. Its **SD card** section
-  offers each region's plates at full size: copy the file to a FAT32 card as
+- **XIAO in the EE02** — Australia, Europe or North America plates.
+- **reTerminal E1004** — the same, with the larger flash
+  giving them more resolution. Its **SD card** section
+  offers each region's plates at full resolution: copy the file to the root of a FAT32 card as
   `plates-<region>.bin` and the frame draws from it in preference to flash.
 
-Three installs: everything (a first install), the app alone (an update that
-keeps the artwork and settings on the board), the plates alone (new artwork).
+Three install options: 
+ - everything (a first install)
+ - the app alone (an update that keeps the artwork and settings on the board)
+ - the plates alone (new artwork)
+
 The page is rebuilt by [`.github/workflows/flasher.yml`](.github/workflows/flasher.yml)
 on every push to `main`, from the same script that serves it locally, and
 carries the full-size web plates with it; a tag push attaches the same images
 to the [GitHub release](https://github.com/C4KEW4LK/bird_poster/releases) for
 flashing with `esptool`.
-
-On the frame's own settings page, besides the source: the arrangement
-(classic, grid, scattered or one hero bird), the birds' order shuffled or the
-source's ranking, how the names are set, colour, detail and edge strength for
-the dither, a cream paper tone, a no-draw margin (one figure, or one a side,
-for a frame with a mount over the glass), today's date on the page, the refresh interval
-(as short as a minute), and a refresh counter for measuring battery life. Every
-page is a new arrangement of the birds, so the same birds come out in new
-places each time.
 
 ## Build
 

@@ -1,9 +1,8 @@
 # Flash map for the reTerminal E1004, which has 32 MB where the XIAO Plus has
 # 16. The app slot is the same 2 MB, single, no OTA; the rest is the plates
-# filesystem, big enough for every regional pack at once - Australia, Europe
-# and North America together are about 32 MB at 448 px, so the bake fits them
-# to the room with --fit - and the region becomes a setting on the device
-# rather than a choice at flash time. See partitions-plates-16mb.csv for why
+# filesystem, given to one regional pack - baked with --fit to fill it, at
+# about one and a half times the XIAO's sprite size - with the region chosen
+# at flash time, as on the XIAO. See partitions-plates-16mb.csv for why
 # LittleFS and why one file per pack.
 #
 # name,     type, subtype,  offset,    size,      flags

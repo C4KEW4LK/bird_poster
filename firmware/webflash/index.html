@@ -77,7 +77,7 @@
 <div id="regions-block" hidden>
 <h2>Artwork</h2>
 <div class="seg" id="regions"></div>
-<p class="hint" id="regions-hint" hidden>The birds' size is the sprite the pack holds before it is scaled onto the page; larger keeps more of the plate's detail through the dither. Every region at once means the region is switched in the frame's settings; one region alone gives that region the whole partition and is switched by flashing another.</p>
+<p class="hint">The birds' size is the sprite the pack holds before it is scaled onto the page; larger keeps more of the plate's detail through the dither. To change region later, flash another region's plates.</p>
 </div>
 
 <h2>Install</h2>
@@ -122,7 +122,7 @@
 
 <section id="sd" hidden>
 <h2>SD card</h2>
-<p>This board also reads a pack from its microSD card, where the plates keep their full size &mdash; 1200&nbsp;px on the longest side, against the sizes the flash images above can hold &mdash; so every feather survives to the dither. Download a region, copy the file to the root of a FAT32 card as it is named here, and put the card in the slot: the frame uses it over the flash copy on its next page, whichever flash image is on the board. The flash plates stay as the fallback for a frame without a card.</p>
+<p>This board also reads a pack from its microSD card, where the plates keep their full size &mdash; 1200&nbsp;px on the longest side, against the sizes the flash images above can hold &mdash; so every feather survives to the dither. Download a region, copy the file to the root of a FAT32 card as it is named here, and put the card in the slot: the frame uses it over the flash copy on its next page. The flash plates stay as the fallback for a frame without a card.</p>
 <ul class="downloads" id="sd-files"></ul>
 </section>
 
@@ -131,8 +131,8 @@
   <li>Plug the frame in over USB-C.</li>
   <li>Press <b>Install</b>, pick the board's port in the browser's dialog, answer the erase question.</li>
   <li>No port listed? Hold <b>BOOT</b>, tap <b>RESET</b>, release <b>BOOT</b>, and try again.</li>
-  <li>When it restarts the glass shows a setup page with a QR code: scan it to join the frame's own network and the settings page opens. On a board with every region's plates, the artwork is chosen there.</li>
-  <li>On the reTerminal, <b>every region</b> holds all three regions and the region is a setting; <b>one region alone</b> gives that region the whole 31&nbsp;MB, about one and a half times the sprite size, and the region is chosen here instead. The SD card below beats both.</li>
+  <li>When it restarts the glass shows a setup page with a QR code: scan it to join the frame's own network and the settings page opens.</li>
+  <li>On the reTerminal, the region's plates get the whole 31&nbsp;MB. The SD card above holds them larger still.</li>
 </ol>
 
 <details class="credits">
@@ -193,11 +193,9 @@
     const images = spec.images;
     const keys = Object.keys(images);
     if (!keys.includes(image)) image = keys[0];
-    // A board with one image per region gets the artwork choice; a board
-    // that carries every region in one image has nothing to choose here.
+    // One image per region: the choice of artwork, when there is more than one.
     const choose = keys.length > 1;
     $("regions-block").hidden = !choose;
-    $("regions-hint").hidden = !(choose && "all" in images);
     if (choose) {
       segment($("regions"), "region", keys.map(k => [k, images[k].label, mb(images[k].size) + " of plates" + (images[k].source ? ` · ${birdsAt(images[k])}` : "")]), image, (k) => { image = k; localStorage.setItem("image", k); show(); });
     }
@@ -229,7 +227,7 @@
     localStorage.setItem("board", board);
   }
 
-  segment($("boards"), "board", boardKeys.map(k => [k, builds.boards[k].label, "all" in builds.boards[k].images ? "every region's plates, or one region larger" : "one region's plates at a time"]), board, (k) => { board = k; show(); });
+  segment($("boards"), "board", boardKeys.map(k => [k, builds.boards[k].label, "one region's plates at a time"]), board, (k) => { board = k; show(); });
   show();
 </script>
 </body>

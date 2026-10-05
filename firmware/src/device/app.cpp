@@ -161,13 +161,13 @@ void listPacks(fs::FS &fs, std::vector<std::string> &keys, bool *single) {
 }  // namespace
 
 bool App::openPack() {
-  // What is on offer: /plates.bin alone on a 16 MB board, or one
-  // /plates-<region>.bin per region on a 32 MB one, and on the E1004 the same
-  // names at the root of the SD card, where the pack is the full-size one the
-  // flasher page hands out for copying. The setting picks a region; the card
-  // wins for a region it holds; an unset or missing choice falls back to the
-  // first pack found, so a fresh board draws something before anyone opens
-  // the settings.
+  // What is on offer: /plates.bin, one region's, in flash - or, on an E1004
+  // flashed with the old every-region image, one /plates-<region>.bin per
+  // region - and on the E1004 /plates-<region>.bin at the root of the SD
+  // card, where the pack is the full-size one the flasher page hands out for
+  // copying. The setting picks a region; the card wins for a region it holds;
+  // an unset or missing choice falls back to the first pack found, so a fresh
+  // board draws something before anyone opens the settings.
   packs.clear();
   cardPacks.clear();
   bool single = false;

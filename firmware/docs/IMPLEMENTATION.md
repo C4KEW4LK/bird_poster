@@ -29,7 +29,7 @@ pair. `firmware/lib/panel/panel.h` holds both pin maps behind `BOARD_E1004`;
 | Panel power enable | 43 | 12 |
 | User keys 1 / 2 / 3 | 2 / 3 / 5 | 3 / 4 / 5 (KEY0-2, front panel) |
 | Battery sense | none | ADC on 1, enable on 21, 1:2 divider |
-| Flash | 16 MB, one regional pack | 32 MB: every regional pack at ~380-510 px, chosen in settings - or one region alone at ~690-900 px, chosen at flash time |
+| Flash | 16 MB, one regional pack | 32 MB, one regional pack at ~690-900 px |
 | SD slot | none | CS 14, MISO 8, detect 15 (LOW = card), power 16 (HIGH = on); CLK and MOSI shared with the panel |
 | Also on board | - | PCF8563 RTC, SHT4x on I2C 19/20, buzzer 45, LED 48 |
 
@@ -52,12 +52,11 @@ then push to the glass, so the two never contend within a page anyway.
 **Every `--fit` bake starts from 1200 px** and shrinks to its budget (a
 sample estimate, then the real bake confirmed and shrunk again if over), so
 a pack fills the room it has rather than stopping at a fixed 448: the XIAO's
-EU pack had sat at 10.2 of 13.4 MB. The E1004 gets two kinds of flash image
-from this - the three regions sharing the partition at 380-510 px, or one
-region with all 30 MB at 690-900 px (`firmware/packs/e1004-one/`), the
-region then chosen on the flasher page instead of in settings. The firmware
-tells them apart by what it finds: several `/plates-<region>.bin` and the
-settings page grows an artwork picker; one and it does not.
+EU pack had sat at 10.2 of 13.4 MB. The E1004's one region gets all 30 MB,
+690-900 px (`firmware/packs/e1004/`), chosen on the flasher page as on the
+XIAO. The firmware still reads several `/plates-<region>.bin` if it finds
+them - a frame flashed with the old every-region image, or the packs on an
+SD card - and the settings page then grows an artwork picker.
 
 **The card holds the full-size pack.** `firmware/packs/card/<region>.bin` is
 baked at 1200 px (`--source 1200`, no `--fit`) - the size the artwork ships
