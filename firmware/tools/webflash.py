@@ -61,7 +61,7 @@ import shutil
 import struct
 import subprocess
 import sys
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -281,7 +281,9 @@ def filesystem_image(board: str, packs: dict[str, Path], out: Path, fonts: Path)
     shutil.rmtree(stage, ignore_errors=True)
 
 
-def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool, debug: bool = False) -> None:
+def assemble(
+    dist: Path, boards: list[str], regions: list[str], bake: bool, debug: bool = False
+) -> None:
     # dist is entirely this function's output; nothing else may live in it,
     # or it gets served with the page.
     shutil.rmtree(dist, ignore_errors=True)
@@ -294,12 +296,17 @@ def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool, debu
         text=True,
         check=False,
     ).stdout.strip()
-    dirty = subprocess.run(
-        ["git", "diff", "--quiet", "HEAD", "--", "."], cwd=FIRMWARE, check=False
-    ).returncode != 0
+    dirty = (
+        subprocess.run(
+            ["git", "diff", "--quiet", "HEAD", "--", "."], cwd=FIRMWARE, check=False
+        ).returncode
+        != 0
+    )
     # One build time for every board, handed to platformio.ini's version
     # flag, so the page and each frame's status page name the same build.
-    stamp = os.environ.setdefault("BUILD_STAMP", datetime.now().strftime("%y%m%d%H%M"))
+    stamp = os.environ.setdefault(
+        "BUILD_STAMP", datetime.now(UTC).astimezone().strftime("%y%m%d%H%M")
+    )
     # A tag when the build is one, else the date and the version the firmware
     # carries: what the page shows above the buttons, and what the frame's
     # status page repeats.
