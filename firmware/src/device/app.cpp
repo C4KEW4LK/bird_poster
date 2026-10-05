@@ -1,4 +1,5 @@
 #include "app.h"
+#include "timing.h"
 
 #include <cctype>
 
@@ -16,6 +17,8 @@
 #endif
 
 #include <algorithm>
+#include <map>
+#include <new>
 #include <random>
 
 namespace birdposter {
@@ -23,7 +26,11 @@ namespace birdposter {
 #ifndef FIRMWARE_VERSION
 #define FIRMWARE_VERSION "dev"
 #endif
+#ifdef BIRDPOSTER_DEBUG
+const char *kFirmwareVersion = FIRMWARE_VERSION "-debug";
+#else
 const char *kFirmwareVersion = FIRMWARE_VERSION;
+#endif
 
 namespace {
 
@@ -47,8 +54,18 @@ void App::progress(const std::string &what) {
 }
 
 bool App::begin() {
-  loadSettings(settings);
-  loadState(state);
+  // Before anything else asks PSRAM for memory: see pageMemory.
+  if (!pageMemory) {
+    const size_t px = size_t(kPageLong) * kPackShort;
+    pageMemory = static_cast<uint16_t *>(heap_caps_malloc(px * 2, MALLOC_CAP_SPIRAM));
+    pageMemoryPx = pageMemory ? px : 0;
+    if (!pageMemory) Serial.println("page memory: could not reserve; pages will allocate");
+  }
+  {
+    timing::Scope t(timing::BeginSettings);
+    loadSettings(settings);
+    loadState(state);
+  }
   panel.onWait = [this] {
     if (onProgress) onProgress();
   };
@@ -56,12 +73,17 @@ bool App::begin() {
   // By label: the default is "spiffs", and ours is called `plates` in the
   // partition table. The subtype is what pio's uploadfs goes by; the label is
   // what the mount goes by, and only the second one is ours to get wrong.
+  uint32_t at = millis();
   if (!LittleFS.begin(false, "/littlefs", 10, "plates")) {
     platesError = "no filesystem - flash the plates image";
     return false;
   }
+  timing::add(timing::BeginMount, millis() - at);
+  at = millis();
   openPack();
+  timing::add(timing::BeginPack, millis() - at);
 
+  timing::Scope fonts(timing::BeginFonts);
   File f = LittleFS.open(kFontPath, "r");
   if (f) {
     std::vector<uint8_t> bytes(f.size());
@@ -420,12 +442,17 @@ bool App::querySource(const SourceConfig &cfg, Mode mode, std::vector<Sighting> 
   }
   const std::string url = requestUrl(cfg, std::time(nullptr), mode);
   std::string body;
-  if (!fetch(url, body, http, error, requestHeaders(cfg))) return false;
+  const uint32_t httpAt = millis();
+  const bool got = fetch(url, body, http, error, requestHeaders(cfg));
+  timing::add(timing::FetchHttp, millis() - httpAt);
+  timing::set(timing::FetchBytes, int32_t(body.size()));
+  if (!got) return false;
   if (http != 200) {
     error = explainStatus(cfg.source, http, body);
     return false;
   }
   progress("reading the species list, " + std::to_string(body.size() / 1024) + " KB");
+  timing::Scope parse(timing::FetchParse);
   if (!parseResponse(cfg.source, body, seen, &error, localStamp(cfg.since))) return false;
   return true;
 }
@@ -434,6 +461,8 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
   fetchError.clear();
   std::vector<Sighting> seen;
   int http = 0;
+  // The whole of it, choosing included; querySource times its own parts.
+  timing::Scope fetching(timing::Fetch);
   const bool got = querySource(sourceConfig(), settings.mode, seen, http, fetchError);
   state.lastHttp = http;
   if (!got) return false;
@@ -520,29 +549,92 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
   // web - and the flash plate on any failure. After the first failure the
   // rest of the page stays in flash, so a site that is down costs one
   // timeout, not one per bird.
-  int webFetched = 0, webFailed = 0;
+  int webFetched = 0, webFailed = 0, webSkipped = 0, webOom = 0;
+  uint32_t webMs = 0;
   std::string webError;
   const bool needsRegion = settings.webPlatesUrl.find("{region}") != std::string::npos;
+  // The plates' replies, fetched once the layout says which birds want one
+  // (afterLayout, below) and decoded as each is drawn - so the radio can go
+  // off for the render rather than staying up for a download mid-draw.
+  std::map<size_t, std::string> webBodies;
   if (settings.webPlates && !settings.webPlatesUrl.empty() && (!needsRegion || !packRegion.empty()) &&
       WiFi.status() == WL_CONNECTED) {
     ps.spriteOverride = [&, this](size_t index, SpriteImage &out) {
-      if (webFailed || index >= plateIndices.size()) return false;
-      const std::string url = webPlateUrl(plates.entry(size_t(plateIndices[index])).name);
-      std::string body, error;
-      int http = 0;
-      progress("fetching a full-size plate");
-      if (!fetch(url, body, http, error, {}, 8000) || http != 200 ||
-          !Plates::decodeSingle(body, out, &error)) {
+      const auto it = webBodies.find(index);
+      if (it == webBodies.end()) return false;  // not fetched: skipped, failed, or after a failure
+      const std::string body = std::move(it->second);
+      webBodies.erase(it);
+      // A full-size plate decodes to about 2 MB, its luma plane alone 1.4 MB
+      // in one piece, beside the canvas. PSRAM fragments - the WiFi and lwIP
+      // buffers live there too - so ask before decoding, and draw this bird
+      // from flash when there is not the room.
+      if (heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) < (1600u << 10) ||
+          heap_caps_get_free_size(MALLOC_CAP_SPIRAM) < (3072u << 10)) {
+        ++webSkipped;
+        return false;
+      }
+      std::string error;
+      bool got = false;
+      try {
+        got = Plates::decodeSingle(body, out, &error);
+      } catch (const std::bad_alloc &) {
+        // This bird from flash, and the rest of the page as it was: not the
+        // whole render thrown away and done again.
+        out = SpriteImage();
+        error = "out of memory decoding it";
+        ++webOom;
+      }
+      if (!got) {
         ++webFailed;
-        webError = http > 0 && http != 200 ? "HTTP " + std::to_string(http) : error;
-        Serial.printf("web plate: %s - %s; using flash\n", url.c_str(), webError.c_str());
+        webError = error;
+        Serial.printf("web plate: %s; using flash\n", error.c_str());
         return false;
       }
       ++webFetched;
-      Serial.printf("web plate: %s, %dx%d\n", url.c_str(), out.w, out.h);
+      Serial.printf("web plate: %dx%d\n", out.w, out.h);
       return true;
     };
   }
+  ps.afterLayout = [&, this](const std::vector<size_t> &larger) {
+    if (ps.spriteOverride) {
+      // The replies are ~100 KB each and held until their bird is drawn, so
+      // stop well short of crowding the decode.
+      size_t held = 0;
+      for (const size_t index : larger) {
+        if (webFailed || index >= plateIndices.size() || held > (1536u << 10)) break;
+        const std::string url = webPlateUrl(plates.entry(size_t(plateIndices[index])).name);
+        std::string body, error;
+        int http = 0;
+        progress("fetching a full-size plate");
+        const uint32_t webAt = millis();
+        bool got = false;
+        try {
+          got = fetch(url, body, http, error, {}, 8000) && http == 200;
+        } catch (const std::bad_alloc &) {
+          error = "out of memory fetching it";
+          ++webOom;
+        }
+        webMs += millis() - webAt;
+        if (!got) {
+          // After the first failure the rest of the page stays in flash, so a
+          // site that is down costs one timeout, not one per bird.
+          ++webFailed;
+          webError = http > 0 && http != 200 ? "HTTP " + std::to_string(http) : error;
+          Serial.printf("web plate: %s - %s; using flash\n", url.c_str(), webError.c_str());
+          break;
+        }
+        held += body.size();
+        webBodies[index] = std::move(body);
+      }
+    }
+    // Nothing else in the render wants the network: radio off, when this
+    // wake was going to turn it off for the refresh anyway.
+    if (beforeRender) {
+      const std::function<void()> hook = std::move(beforeRender);
+      beforeRender = nullptr;
+      hook();
+    }
+  };
   // Only once the clock has been set: a page dated 1970 is worse than none.
   const std::time_t now = std::time(nullptr);
   if (settings.showDate && now > 100000) {
@@ -553,14 +645,130 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
     ps.dateAlign = settings.dateAlign;
   }
   ps.progress = [this](const char *what) { progress(what); };
+  // The page on the glass is not wanted to draw the next one, and it is
+  // 1.9 MB: kept through the render, a second page in one wake has the old
+  // frame, the canvas and a full-size web plate's decode all up at once, which
+  // is more than the PSRAM holds. Let it go now; the preview says "nothing
+  // composed yet" until the new page is done.
+  lastKind.clear();
+  last = Frame();
+  ps.pageMemory = pageMemory;
+  ps.pageMemoryPx = pageMemoryPx;
+  // Pack at half resolution: a quarter of the mask work and memory, and on
+  // the desktop no bird smaller nor any overlap worse (performance.md).
+  ps.packScale = 2;
+  // What the planes kept between the silhouette pass and the draw may have:
+  // the PSRAM free now, less what the render will want beside them at its
+  // peak - the canvas, the frame if this wake has not drawn one yet, the
+  // dither's colour table - and room for the sprite being drawn. A full-size
+  // plate from the web is the big one: at 1200 px its planes, its reply and
+  // its decode come to about 3.5 MB, against 1.5 MB for the flash's own.
+  {
+    const auto [w, h] = pageSize(ps.portrait);
+    // Both come out of pageMemory when it was reserved, not out of what is free.
+    const size_t canvas = pageMemory ? 0 : size_t(w) * h * 2;
+    const size_t frame = pageMemory ? 0 : size_t(w) * h;
+    const size_t sprite = ps.spriteOverride ? (3584u << 10) : (1536u << 10);
+    const size_t need = canvas + frame + 65536 * 3 + sprite;
+    const size_t free = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+    ps.keepLumaBytes = free > need ? free - need : 0;
+  }
   BirdPageReport report;
   const uint32_t t0 = millis();
-  if (!renderBirdPage(plates, plateIndices, ps, font, last, &report)) {
+  // Out of PSRAM is a page not drawn, not a reboot: everything the render
+  // had allocated unwinds with the exception, and the record says why.
+  bool rendered = false;
+  renderOutOfMemory = false;
+  // The largest piece of PSRAM before the render: the canvas wants 3.8 MB of
+  // it in one piece, and a figure well under the free total is fragmentation.
+  const bool webOn = bool(ps.spriteOverride);  // the retry below may turn it off
+  timing::PageRecord record;
+  record.psramLargestKb = int32_t(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024);
+  {
+    static const char *const kStyle[] = {"classic", "grid", "scatter", "hero"};
+    snprintf(record.layout, sizeof record.layout, "%s %u%s",
+             kStyle[std::min<size_t>(3, size_t(settings.packStyle))], unsigned(plateIndices.size()),
+             settings.names == NameStyle::None ? "" : " names");
+  }
+  timing::set(timing::PsramLargestKb, record.psramLargestKb);
+  const auto attempt = [&]() {
+    try {
+      rendered = renderBirdPage(plates, plateIndices, ps, font, last, &report);
+      return true;
+    } catch (const std::bad_alloc &) {
+      last = Frame();
+      Serial.printf("render: out of memory (%u KB PSRAM free, largest block %u KB, after unwinding)\n",
+                    unsigned(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
+                    unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024));
+      return false;
+    }
+  };
+  if (!attempt()) {
+    // The first try's time, less its web fetches, is thrown away: filed as
+    // render's "redo" rather than left in its "rest".
+    record.redoMs = millis() - t0 - webMs;
+    timing::add(timing::RenderRedo, record.redoMs);
+    // Out of memory is, so far, always a full-size web plate beside the
+    // canvas. The flash plates need a fraction of that: try once more
+    // without the web, so the page is drawn rather than skipped.
+    if (ps.spriteOverride) {
+      record.redone = true;
+      Serial.println("render: again, flash plates only");
+      ps.spriteOverride = nullptr;
+      webFailed = 1;
+      webError = "out of memory with a full-size plate";
+      report = BirdPageReport();
+      renderOutOfMemory = !attempt();
+    } else {
+      renderOutOfMemory = true;
+    }
+  }
+  timing::add(timing::WebPlate, webMs);
+  timing::add(timing::Render, millis() - t0 - webMs);
+  record.renderMs = millis() - t0 - webMs;
+  record.webFetched = webFetched;
+  record.webOom = webOom;
+  record.birds = report.placed;
+  record.drawn = rendered;
+  record.fellBack = report.fellBack;
+  timing::page(record);
+  if (!rendered) {
     lastKind.clear();
     return false;
   }
-  if (ps.spriteOverride)
+  timing::add(timing::RenderMasks, uint32_t(report.masksMs));
+  timing::add(timing::RenderLayout, uint32_t(report.layoutMs));
+  timing::add(timing::RenderGrow, uint32_t(report.growMs));
+  timing::add(timing::RenderDecode, uint32_t(report.decodeMs));
+  // spriteOverride's time: the web plates' fetching is done before the draw
+  // (webMs, outside the render), so what is left in the draw is their decode.
+  timing::add(timing::RenderWebDecode, uint32_t(report.overrideMs));
+  timing::add(timing::RenderResample, uint32_t(report.resampleMs));
+  timing::add(timing::RenderDither, uint32_t(report.ditherMs));
+  timing::add(timing::RenderText, uint32_t(report.textMs));
+  timing::set(timing::Birds, report.placed);
+  timing::set(timing::Attempts, report.attempts);
+  timing::set(timing::SpriteBuilds, report.pack.sprites);
+  timing::set(timing::SpriteBuildMs, int32_t(report.pack.spriteUs / 1000));
+  timing::set(timing::PlaceSearches, report.pack.searches);
+  timing::set(timing::PlaceSearchMs, int32_t(report.pack.searchUs / 1000));
+  timing::set(timing::FitChecks, report.pack.fits);
+  timing::set(timing::FitCheckMs, int32_t(report.pack.fitUs / 1000));
+  timing::set(timing::LumaKept, report.lumaKept);
+  timing::set(timing::SpriteScaleMs, int32_t(report.pack.scaleUs / 1000));
+  timing::set(timing::SpriteErodeMs, int32_t(report.pack.erodeUs / 1000));
+  timing::set(timing::SpriteLabelMs, int32_t(report.pack.labelUs / 1000));
+  timing::set(timing::DitherTableMs, int32_t(report.dither.tableUs / 1000));
+  timing::set(timing::DitherLoadMs, int32_t(report.dither.loadUs / 1000));
+  timing::set(timing::DitherPrepareMs, int32_t(report.dither.prepareUs / 1000));
+  timing::set(timing::DitherDiffuseMs, int32_t(report.dither.diffuseUs / 1000));
+  timing::set(timing::DitherWaitMs, int32_t(report.dither.waitUs / 1000));
+  timing::set(timing::FastKb, int32_t(report.fast.fastBytes / 1024));
+  timing::set(timing::FastFallbackKb, int32_t(report.fast.fallbackBytes / 1024));
+  if (webOn) timing::set(timing::WebPlates, webFetched);
+  if (webOn)
     lastWebPlates = webFailed ? "flash plates; the web failed: " + webError
+                  : webSkipped && !webFetched ? "flash plates; not enough free memory for a full-size one"
                   : webFetched ? std::to_string(webFetched) + " full-size from the web"
                                : "not needed - no bird drawn much larger than its flash plate";
   else
@@ -571,10 +779,61 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
                 report.placed, report.packMs, report.drawMs, report.ditherMs, report.labelPx,
                 (unsigned long)(millis() - t0));
   lastKind = "birds";
+  if (!presentPages) return true;
   return present();
 }
 
+#ifdef BIRDPOSTER_DEBUG
+void App::stressTest(int pages) {
+  const Settings saved = settings;
+  // The most birds the frame draws, so any smaller page is a prefix of it.
+  settings.birds = 40;
+  std::vector<int> all;
+  const bool got = fetchBirds(all);
+  settings = saved;
+  if (!got) {
+    Serial.printf("stress: no species list - %s\n", fetchError.c_str());
+    return;
+  }
+  const std::vector<std::string> allBirds = pageBirds, allCommon = pageCommon;
+  // Every combination of these, the bird count moving fastest so heavy and
+  // light pages alternate: few birds draw large and pull full-size web
+  // plates; forty fill the packer and the kept planes; scatter and grid run
+  // grow twenty rounds; hero draws one bird at the page's size.
+  static const int kBirds[] = {2, 3, 6, 12, 20, 40};
+  static const PackStyle kStyles[] = {PackStyle::Classic, PackStyle::Grid, PackStyle::Scatter,
+                                      PackStyle::Hero};
+  constexpr int nBirds = sizeof kBirds / sizeof kBirds[0];
+  constexpr int nStyles = sizeof kStyles / sizeof kStyles[0];
+  presentPages = false;
+  for (int i = 0; i < pages; ++i) {
+    settings.birds = kBirds[i % nBirds];
+    settings.packStyle = kStyles[(i / nBirds) % nStyles];
+    settings.names = (i / (nBirds * nStyles)) % 2 ? NameStyle::None : NameStyle::Both;
+    ++state.layout;
+    const size_t n = std::min(all.size(), size_t(settings.birds));
+    pageBirds.assign(allBirds.begin(), allBirds.begin() + long(n));
+    pageCommon.assign(allCommon.begin(), allCommon.begin() + long(n));
+    progress("stress test, page " + std::to_string(i + 1) + " of " + std::to_string(pages));
+    showBirds(std::vector<int>(all.begin(), all.begin() + long(n)));
+    Serial.printf("stress: page %d of %d done, %u KB PSRAM free, largest %u KB, heap %u KB\n", i + 1,
+                  pages, unsigned(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
+                  unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024),
+                  unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024));
+  }
+  presentPages = true;
+  settings = saved;
+  progress("");
+}
+#endif
+
+void App::pageIntoReserve() {
+  last = Frame();
+  if (pageMemory) last.px.adopt(reinterpret_cast<uint8_t *>(pageMemory), pageMemoryPx * 2);
+}
+
 bool App::showStatus() {
+  pageIntoReserve();
   renderStatusPage(settings.portrait(), font, "Bird poster", statusLines(), last);
   lastKind = "status";
   return present();
@@ -582,6 +841,7 @@ bool App::showStatus() {
 
 bool App::showSetup(const std::string &ssid, const std::string &pass, const std::string &url,
                     const std::string &note) {
+  pageIntoReserve();
   renderSetupPage(settings.portrait(), font, ssid, pass, url, last, note);
   lastKind = "setup";
   return present();
@@ -589,6 +849,7 @@ bool App::showSetup(const std::string &ssid, const std::string &pass, const std:
 
 bool App::showPattern() {
   const auto [w, h] = pageSize(settings.portrait());
+  pageIntoReserve();
   last.reset(w, h, kWhite);
   // Six bars, then a row of the dithered paper tone and a line of text, so
   // one look answers colour order, orientation and whether text is legible.
@@ -606,7 +867,11 @@ bool App::showPattern() {
 }
 
 bool App::present() {
-  if (!panel.ok() && !panel.begin()) {
+  timing::Scope whole(timing::Panel);
+  const uint32_t initAt = millis();
+  const bool ready = panel.ok() || panel.begin();
+  timing::add(timing::PanelInit, millis() - initAt);
+  if (!ready) {
     Serial.println("panel: BUSY never released - is the FPC seated?");
     return false;
   }
@@ -626,13 +891,20 @@ bool App::present() {
     return false;
   }
   const uint32_t t1 = millis();
+  timing::add(timing::PanelPush, t1 - t0);
   progress("refreshing the glass, about 30 s");
   const bool ok = panel.refresh();
+  timing::add(timing::PanelPowerOn, panel.lastRefresh.powerOn);
+  timing::add(timing::PanelUpdate, panel.lastRefresh.update);
+  timing::add(timing::PanelPowerOff, panel.lastRefresh.powerOff);
   lastPresented = std::time(nullptr);
   progress("");
   Serial.printf("panel: push %lu ms, refresh %lu ms%s\n", (unsigned long)(t1 - t0),
                 (unsigned long)(millis() - t1), ok ? "" : " (timed out)");
-  panel.sleep();
+  {
+    timing::Scope t(timing::PanelSleep);
+    panel.sleep();
+  }
   // Every refresh the panel was asked for drew on the battery, the timed-out
   // ones too, so they all count.
   if (settings.countRefreshes) {
@@ -640,6 +912,7 @@ bool App::present() {
     if (!state.refreshesSince && lastPresented > 100000) state.refreshesSince = uint32_t(lastPresented);
   }
   if (ok) state.glass = lastKind;
+  timing::outcome(ok ? lastKind.c_str() : "panel_fail");
   if (ok || settings.countRefreshes) saveState(state);
   return ok;
 }
@@ -760,6 +1033,19 @@ std::string App::apSsid() const {
   return buf;
 }
 
+int App::batteryMv() {
+  if (pins::kBatteryAdc < 0) return -1;
+  // Behind a 1:2 divider that only conducts while the enable pin is high,
+  // so the sense resistors do not drain the cell in sleep.
+  pinMode(pins::kBatteryEnable, OUTPUT);
+  digitalWrite(pins::kBatteryEnable, HIGH);
+  delay(10);
+  analogSetPinAttenuation(pins::kBatteryAdc, ADC_11db);
+  const int mv = analogReadMilliVolts(pins::kBatteryAdc) * 2;
+  digitalWrite(pins::kBatteryEnable, LOW);
+  return mv;
+}
+
 std::vector<std::string> App::statusLines() {
   std::vector<std::string> lines;
   const bool sta = WiFi.status() == WL_CONNECTED;
@@ -864,15 +1150,7 @@ std::vector<std::string> App::statusLines() {
   if (settings.countRefreshes)
     lines.push_back("Refreshes: " + std::to_string(state.refreshes + 1) + " including this one, since " +
                     (state.refreshesSince ? localTime(state.refreshesSince) : std::string("now")));
-  if (pins::kBatteryAdc >= 0) {
-    // Behind a 1:2 divider that only conducts while the enable pin is high,
-    // so the sense resistors do not drain the cell in sleep.
-    pinMode(pins::kBatteryEnable, OUTPUT);
-    digitalWrite(pins::kBatteryEnable, HIGH);
-    delay(10);
-    analogSetPinAttenuation(pins::kBatteryAdc, ADC_11db);
-    const int mv = analogReadMilliVolts(pins::kBatteryAdc) * 2;
-    digitalWrite(pins::kBatteryEnable, LOW);
+  if (const int mv = batteryMv(); mv >= 0) {
     char buf[48];
     snprintf(buf, sizeof buf, "Battery: %d.%02d V", mv / 1000, (mv % 1000) / 10);
     lines.push_back(buf);

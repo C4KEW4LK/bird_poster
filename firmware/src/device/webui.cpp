@@ -1,5 +1,8 @@
 #include "webui.h"
 
+#include "bench.h"
+#include "timing.h"
+
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -788,6 +791,36 @@ void WebUi::begin(bool captive) {
     }
     json += "]}";
     server.send(200, "application/json", json);
+  });
+  // Where the last few wakes spent their time, newest first; see timing.h.
+  server.on("/api/timing", HTTP_GET, [this]() {
+    touched = true;
+    server.send(200, "application/json", timing::json().c_str());
+  });
+#ifdef BIRDPOSTER_DEBUG
+  // The memory stress test (App::stressTest): answered at once, run from the
+  // portal's loop, watched through /api/timing's `pages` and /api/status's
+  // phase. The glass is left alone throughout.
+  server.on("/api/stress", HTTP_GET, [this]() {
+    App &app = app_;
+    touched = true;
+    if (refuseIfBusy(app)) return;
+    stressPages = std::clamp(atoi(arg("pages").c_str()), 1, 200);
+    if (arg("pages").empty()) stressPages = 48;
+    pending_ = Request::Stress;
+    server.send(200, "application/json",
+                ("{\"started\":" + std::to_string(stressPages) +
+                 ",\"watch\":\"/api/timing (pages) and /api/status (phase)\"}").c_str());
+  });
+#endif
+  // The chip's own speeds - memory, arithmetic, flash - measured on request;
+  // a few seconds at full clock, so never on an ordinary wake. See bench.h.
+  server.on("/api/bench", HTTP_GET, [this]() {
+    App &app = app_;
+    touched = true;
+    if (refuseIfBusy(app)) return;
+    const std::string json = bench::run(app.packOnCard ? std::string() : app.packPath);
+    server.send(200, "application/json", json.c_str());
   });
   server.on("/wifi", HTTP_POST, [this]() {
     App &app = app_;

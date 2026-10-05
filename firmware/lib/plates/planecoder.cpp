@@ -1,8 +1,10 @@
+#pragma GCC optimize("O2")  // the decoder is a hot loop on the frame; the build is -Os
 #include "planecoder.h"
 
 #include <algorithm>
 #include <cstring>
 
+#include "fastmem.h"
 #include "plane_prior.h"
 
 namespace birdposter {
@@ -37,7 +39,7 @@ struct Model {
   }
 };
 
-void startLuma(std::vector<Model> &models) {
+void startLuma(FastVector<Model> &models) {
   models.resize(kLumaContexts);
   for (int c = 0; c < kLumaContexts; ++c) {
     uint32_t t = 0;
@@ -46,7 +48,7 @@ void startLuma(std::vector<Model> &models) {
   }
 }
 
-void startChroma(std::vector<Model> &models) {
+void startChroma(FastVector<Model> &models) {
   models.resize(kChromaContexts);
   for (Model &m : models) {
     std::fill(std::begin(m.f), std::end(m.f), uint16_t(1));
@@ -133,26 +135,33 @@ class Encoder {
 };
 
 // Which blocks have anything painted in them, and each one's luma band: the
-// integer mean of its painted codes, over 15 in four.
+// integer mean of its painted codes, over 15 in four. A block row at a time:
+// the sums for the whole plane at once were two 32-bit counters a block, 2.9
+// MB for a 1200 px plate, and on the frame that was the difference between a
+// full-size web plate decoding and running out of PSRAM beside the canvas.
 void blockLuma(const uint8_t *luma, int w, int h, int block, std::vector<uint8_t> &painted,
                std::vector<uint8_t> &band) {
   const int bw = (w + block - 1) / block, bh = (h + block - 1) / block;
-  std::vector<uint32_t> sum(size_t(bw) * bh, 0), n(size_t(bw) * bh, 0);
-  for (int y = 0; y < h; ++y) {
-    const uint8_t *row = luma + size_t(y) * w;
-    const size_t brow = size_t(y / block) * bw;
-    for (int x = 0; x < w; ++x) {
-      if (row[x] == kOutside) continue;
-      sum[brow + x / block] += row[x];
-      ++n[brow + x / block];
+  painted.assign(size_t(bw) * bh, 0);
+  band.assign(size_t(bw) * bh, 0);
+  std::vector<uint32_t> sum(static_cast<size_t>(bw)), n(static_cast<size_t>(bw));
+  for (int by = 0; by < bh; ++by) {
+    std::fill(sum.begin(), sum.end(), 0);
+    std::fill(n.begin(), n.end(), 0);
+    for (int y = by * block; y < std::min(h, (by + 1) * block); ++y) {
+      const uint8_t *row = luma + size_t(y) * w;
+      for (int x = 0; x < w; ++x) {
+        if (row[x] == kOutside) continue;
+        sum[size_t(x / block)] += row[x];
+        ++n[size_t(x / block)];
+      }
     }
-  }
-  painted.assign(sum.size(), 0);
-  band.assign(sum.size(), 0);
-  for (size_t i = 0; i < sum.size(); ++i) {
-    if (!n[i]) continue;
-    painted[i] = 1;
-    band[i] = uint8_t(std::min<uint32_t>(3, sum[i] / n[i] * 4 / 15));
+    const size_t brow = size_t(by) * bw;
+    for (int bx = 0; bx < bw; ++bx) {
+      if (!n[size_t(bx)]) continue;
+      painted[brow + bx] = 1;
+      band[brow + bx] = uint8_t(std::min<uint32_t>(3, sum[size_t(bx)] / n[size_t(bx)] * 4 / 15));
+    }
   }
 }
 
@@ -193,7 +202,7 @@ void walkChroma(const std::vector<uint8_t> &painted, const std::vector<uint8_t> 
 }  // namespace
 
 bool decodeLuma(const uint8_t *data, size_t len, int w, int h, uint8_t *out) {
-  std::vector<Model> models;
+  FastVector<Model> models;
   startLuma(models);
   Decoder dec(data, len);
   walkLuma(w, h, [&](int y, int x, int c) {
@@ -210,7 +219,7 @@ bool decodeChroma(const uint8_t *data, size_t len, const uint8_t *luma, int w, i
   std::vector<uint8_t> painted, band;
   blockLuma(luma, w, h, block, painted, band);
   std::memset(out, 0, size_t(bw) * bh);
-  std::vector<Model> models;
+  FastVector<Model> models;
   startChroma(models);
   Decoder dec(data, len);
   walkChroma(painted, band, bw, bh, [&](size_t i, int c) {
@@ -222,7 +231,7 @@ bool decodeChroma(const uint8_t *data, size_t len, const uint8_t *luma, int w, i
 }
 
 std::vector<uint8_t> encodeLuma(const uint8_t *codes, int w, int h) {
-  std::vector<Model> models;
+  FastVector<Model> models;
   startLuma(models);
   Encoder enc;
   walkLuma(w, h, [&](int y, int x, int c) {
@@ -238,7 +247,7 @@ std::vector<uint8_t> encodeChroma(const uint8_t *chroma, const uint8_t *luma, in
   const int bw = (w + block - 1) / block, bh = (h + block - 1) / block;
   std::vector<uint8_t> painted, band;
   blockLuma(luma, w, h, block, painted, band);
-  std::vector<Model> models;
+  FastVector<Model> models;
   startChroma(models);
   Encoder enc;
   walkChroma(painted, band, bw, bh, [&](size_t i, int c) {

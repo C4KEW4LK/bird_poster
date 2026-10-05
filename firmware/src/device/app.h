@@ -39,6 +39,7 @@ struct App {
   std::string packKey;                // its region key ("au"), or "" for a lone /plates.bin
   std::string packRegion;             // the region the plates are, for the web: packKey, or /region.txt
   std::string lastWebPlates;          // what the web supplement did on the last bird page
+  bool renderOutOfMemory = false;     // the last showBirds failed for want of PSRAM
   bool packOnCard = false;            // read from the SD card rather than the flash filesystem
   std::vector<std::string> packs;     // packs available, by region key, card and flash together
   std::vector<std::string> cardPacks; // the subset that is on the card
@@ -46,6 +47,8 @@ struct App {
   // A pack on the SD card wins over the same region in flash: the card holds
   // the plates at their full size, the flash a copy shrunk to fit.
   bool openPack();
+  // The cell's voltage, or -1 on a board that cannot read it.
+  int batteryMv();
   // The SD slot, on a board that has one. The card is powered only while the
   // frame is awake and is mounted on demand; a missing or unreadable card is
   // not an error, the flash pack is what it falls back to.
@@ -58,8 +61,17 @@ struct App {
   Font nameFont;  // for the common name; falls back to `font` when absent
   Panel panel;
 
-  // The page most recently composed, kept for the web UI's preview.
+  // The page most recently composed, kept for the web UI's preview. Its
+  // pixels are `pageMemory`'s when that was reserved.
   Frame last;
+  // One block for every page, reserved first thing in begin() - before the
+  // fonts, the pack's index and WiFi have touched PSRAM - and kept for the
+  // wake: a 1600 x 1200 RGB565 canvas, which the dither turns into the frame
+  // in place. Null if PSRAM could not give it, and pages allocate as they go.
+  uint16_t *pageMemory = nullptr;
+  size_t pageMemoryPx = 0;
+  // Point `last` at pageMemory, empty, so the next page is drawn there.
+  void pageIntoReserve();
   std::string lastKind;  // "birds", "status", "setup", "pattern" or ""
   std::time_t lastPresented = 0;  // when it went to the glass; the preview's cache key
 
@@ -85,6 +97,11 @@ struct App {
   // main.cpp sets it to turn the radio off when nothing after the refresh
   // needs the network, so WiFi is not up through the 30 s the glass takes.
   std::function<void()> beforeRefresh;
+  // Run once by the next bird page, after its layout and its web plates are
+  // fetched and before any drawing: the render needs no network from there,
+  // so a wake that turns the radio off for the refresh turns it off here
+  // instead. Cleared once run. Null leaves the radio as it is.
+  std::function<void()> beforeRender;
   void progress(const std::string &what);
 
   bool begin();  // filesystem, pack, font, settings, state
@@ -145,6 +162,17 @@ struct App {
 
   // Compose and show. Each returns false when the panel or the render failed.
   bool showBirds(const std::vector<int> &plateIndices);
+  // False: showBirds renders the page but does not send it to the glass -
+  // the stress test, which wants the render's memory and not 30 s of panel.
+  bool presentPages = true;
+#ifdef BIRDPOSTER_DEBUG
+  // The memory stress test: fetch the species list once, then render `pages`
+  // pages without the glass, cycling through layouts chosen for memory -
+  // 2 to 40 birds, every pack style, names on and off, a new layout each -
+  // with the frame's own web plates setting. Each page lands in /api/timing's
+  // `pages` with its layout. The settings are as they were afterwards.
+  void stressTest(int pages);
+#endif
   bool showStatus();
   bool showSetup(const std::string &ssid, const std::string &pass, const std::string &url,
                  const std::string &note = "");

@@ -1,3 +1,4 @@
+#pragma GCC optimize("O2")  // sprite expansion is on every bird drawn; the build is -Os
 #include "plates.h"
 
 #include <cstring>
@@ -127,20 +128,26 @@ int Plates::find(const std::string &scientific) const {
   return -1;
 }
 
-bool Plates::loadMask(size_t i, Mask &out) const {
+bool Plates::loadMask(size_t i, Mask &out, std::vector<uint8_t> *keep) const {
   const PlateEntry &e = entries_[i];
-  std::vector<uint8_t> stream, luma(size_t(e.w) * e.h);
+  const size_t px = size_t(e.w) * e.h;
+  std::vector<uint8_t> stream, luma(px);
   if (!readStream(reader_, payload_ + e.offset, e.lumaLen, stream)) return false;
   if (!planecoder::decodeLuma(stream.data(), stream.size(), e.w, e.h, luma.data())) return false;
   out = Mask(e.w, e.h);
   for (int y = 0; y < e.h; ++y)
     for (int x = 0; x < e.w; ++x)
       if (luma[size_t(y) * e.w + x] != kOutside) out.set(x, y);
+  if (keep) {
+    // Codes are four bits: two a byte, the first in the high nibble.
+    keep->assign((px + 1) / 2, 0);
+    for (size_t k = 0; k < px; ++k) (*keep)[k / 2] |= uint8_t(luma[k] << (k & 1 ? 0 : 4));
+  }
   return true;
 }
 
-bool Plates::loadSprite(size_t i, SpriteImage &out) const {
-  return decode(entries_[i], reader_, payload_ + entries_[i].offset, out);
+bool Plates::loadSprite(size_t i, SpriteImage &out, const std::vector<uint8_t> *kept) const {
+  return decode(entries_[i], reader_, payload_ + entries_[i].offset, out, kept);
 }
 
 bool Plates::decodeSingle(const std::string &file, SpriteImage &out, std::string *error) {
@@ -184,7 +191,8 @@ bool Plates::decodeSingle(const std::string &file, SpriteImage &out, std::string
   return true;
 }
 
-bool Plates::decode(const PlateEntry &e, const Reader &reader, uint32_t base, SpriteImage &out) {
+bool Plates::decode(const PlateEntry &e, const Reader &reader, uint32_t base, SpriteImage &out,
+                    const std::vector<uint8_t> *kept) {
   out.direct.clear();
   out.w = e.w;
   out.h = e.h;
@@ -199,9 +207,13 @@ bool Plates::decode(const PlateEntry &e, const Reader &reader, uint32_t base, Sp
   out.bw = bw;
   out.bh = bh;
   out.luma.assign(px, kOutside);
-  if (!readStream(reader, base, e.lumaLen, stream) ||
-      !planecoder::decodeLuma(stream.data(), stream.size(), e.w, e.h, out.luma.data()))
+  if (kept && kept->size() == (px + 1) / 2) {
+    const uint8_t *k = kept->data();
+    for (size_t j = 0; j < px; ++j) out.luma[j] = uint8_t(j & 1 ? k[j / 2] & 15 : k[j / 2] >> 4);
+  } else if (!readStream(reader, base, e.lumaLen, stream) ||
+             !planecoder::decodeLuma(stream.data(), stream.size(), e.w, e.h, out.luma.data())) {
     return false;
+  }
   if (!readStream(reader, base + e.lumaLen, e.chromaLen, stream) ||
       !planecoder::decodeChroma(stream.data(), stream.size(), out.luma.data(), e.w, e.h,
                                 kChromaBlock, chroma.data()))

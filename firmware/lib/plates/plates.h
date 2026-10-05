@@ -120,10 +120,14 @@ class Plates {
   const uint8_t *paper() const { return paper_; }  // rgb
   int source() const { return source_; }
 
-  // Decode the silhouette into a packer mask (w x h).
-  bool loadMask(size_t i, Mask &out) const;
-  // Decode the planes and expand them to codes and a colour table.
-  bool loadSprite(size_t i, SpriteImage &out) const;
+  // Decode the silhouette into a packer mask (w x h). The silhouette is the
+  // luma plane, so decoding it is most of decoding the sprite: with `keep`,
+  // the plane is kept there too, two codes a byte, for loadSprite to take up
+  // instead of decoding it again.
+  bool loadMask(size_t i, Mask &out, std::vector<uint8_t> *keep = nullptr) const;
+  // Decode the planes and expand them to codes and a colour table. `kept`,
+  // if given and not empty, is the luma plane loadMask kept for this sprite.
+  bool loadSprite(size_t i, SpriteImage &out, const std::vector<uint8_t> *kept = nullptr) const;
 
   // One sprite on its own, as `tools/export_web_plates.py` writes it for the
   // frame to fetch over the network: the same planes and tables as a pack
@@ -133,7 +137,8 @@ class Plates {
 
  private:
   // The planes of `e`, read through `reader` from `base`, expanded into `out`.
-  static bool decode(const PlateEntry &e, const Reader &reader, uint32_t base, SpriteImage &out);
+  static bool decode(const PlateEntry &e, const Reader &reader, uint32_t base, SpriteImage &out,
+                     const std::vector<uint8_t> *kept = nullptr);
 
   Reader reader_;
   std::vector<PlateEntry> entries_;

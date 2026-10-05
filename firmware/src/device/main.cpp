@@ -19,10 +19,14 @@
 #include <algorithm>
 #include <cstring>
 #include <WiFi.h>
+#include <driver/gpio.h>
 #include <driver/rtc_io.h>
 #include <esp_sleep.h>
 
 #include "app.h"
+#include "corehelper.h"
+#include "fastmem.h"
+#include "timing.h"
 #include "webui.h"
 
 using namespace birdposter;
@@ -39,6 +43,7 @@ WebUi ui(app);
 
 constexpr uint32_t kJoinTimeoutMs = 20000;
 constexpr uint32_t kFastJoinMs = 4000;  // straight to the remembered access point, before a scan
+constexpr uint32_t kRetryJoinMs = 12000;  // the one more try, after starting WiFi over
 constexpr uint32_t kNtpTimeoutMs = 8000;
 constexpr uint32_t kPortalIdleMs = 30 * 60 * 1000;  // untouched this long: sleep
 constexpr int kFailuresBeforeAp = 3;  // joins in a row that fail before the AP comes up
@@ -94,8 +99,34 @@ bool waitJoined(uint32_t ms) {
   return WiFi.status() == WL_CONNECTED;
 }
 
+// Why the station last dropped or failed to join, as the WiFi driver says it
+// (wifi_err_reason_t: 201 no access point found, 15 / 204 handshake timeout,
+// 202 authentication failed...). 0 for none this wake.
+volatile uint8_t wifiReason = 0;
+
+// "no AP found (201)", or "" when the driver gave no reason.
+std::string wifiReasonText() {
+  if (!wifiReason) return "";
+  return std::string(WiFi.disconnectReasonName(wifi_err_reason_t(wifiReason))) + " (" +
+         std::to_string(wifiReason) + ")";
+}
+
 bool joinWifi() {
   if (!app.settings.configured()) return false;
+  static bool listening = false;
+  if (!listening) {
+    WiFi.onEvent(
+        [](arduino_event_id_t, arduino_event_info_t info) {
+          // "Left" is this code disconnecting on purpose, between tries: it
+          // would hide the reason the try before it failed.
+          if (info.wifi_sta_disconnected.reason != WIFI_REASON_ASSOC_LEAVE)
+            wifiReason = info.wifi_sta_disconnected.reason;
+        },
+        ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+    listening = true;
+  }
+  wifiReason = 0;
+  int attempts = 0;
   WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
   WiFi.setHostname(app.settings.hostname.c_str());
@@ -105,8 +136,10 @@ bool joinWifi() {
   bool joined = false;
   if (rtcChannel > 0 && rtcKey == key) {
     Serial.printf("wifi: joining %s on channel %d\n", ssid, int(rtcChannel));
+    ++attempts;
     WiFi.begin(ssid, pass, rtcChannel, rtcBssid);
     joined = waitJoined(kFastJoinMs);
+    timing::set(timing::FastJoin, joined ? 1 : 0);
     if (!joined) {
       // Moved channel, a different access point, or gone: forget it and scan.
       Serial.println("wifi: remembered access point did not answer, scanning");
@@ -117,13 +150,32 @@ bool joinWifi() {
   }
   if (!joined) {
     Serial.printf("wifi: joining %s\n", ssid);
+    ++attempts;
     WiFi.begin(ssid, pass);
     // What is left of the usual budget, but never under five seconds for the scan.
     const uint32_t spent = uint32_t(millis() - start);
     joined = waitJoined(kJoinTimeoutMs - std::min<uint32_t>(kJoinTimeoutMs - 5000, spent));
   }
   if (!joined) {
-    Serial.println("wifi: failed");
+    // Seen on the first boot after a flash or a reset, more than once: the
+    // join fails and the next wake's succeeds. Start the WiFi stack over -
+    // off, a moment, on - and try once more before giving the wake up.
+    Serial.printf("wifi: did not join%s%s; restarting WiFi for one more try\n",
+                  wifiReason ? ": " : "", wifiReasonText().c_str());
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    delay(500);
+    WiFi.mode(WIFI_STA);
+    WiFi.setHostname(app.settings.hostname.c_str());
+    ++attempts;
+    WiFi.begin(ssid, pass);
+    joined = waitJoined(kRetryJoinMs);
+  }
+  timing::set(timing::WifiAttempts, attempts);
+  if (wifiReason) timing::set(timing::WifiReason, wifiReason);
+  if (!joined) {
+    timing::add(timing::Wifi, millis() - start);
+    Serial.printf("wifi: failed%s%s\n", wifiReason ? ": " : "", wifiReasonText().c_str());
     return false;
   }
   memcpy(rtcBssid, WiFi.BSSID(), sizeof rtcBssid);
@@ -131,6 +183,8 @@ bool joinWifi() {
   rtcKey = key;
   Serial.printf("wifi: %s in %lu ms\n", WiFi.localIP().toString().c_str(),
                 (unsigned long)(millis() - start));
+  timing::add(timing::Wifi, millis() - start);
+  timing::set(timing::RssiDbm, WiFi.RSSI());
   MDNS.begin(app.settings.hostname.c_str());
   MDNS.addService("http", "tcp", 80);
   return true;
@@ -140,16 +194,19 @@ bool joinWifi() {
 // when the frame will sleep straight after it: nothing past that point
 // needs the network, and the refresh is the longest thing a wake does.
 void radioOff() {
+  if (WiFi.getMode() == WIFI_OFF) return;  // off already: for the render
+  timing::set(timing::RadioOffAtMs, int32_t(millis()));
   MDNS.end();
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
-  Serial.println("wifi: off for the refresh");
+  Serial.println("wifi: off");
 }
 
 void syncClock() {
   configTzTime(app.settings.tz.c_str(), "pool.ntp.org", "time.google.com");
   const uint32_t start = millis();
   while (std::time(nullptr) < 100000 && millis() - start < kNtpTimeoutMs) delay(100);
+  timing::add(timing::Clock, millis() - start);
   Serial.printf("clock: %s\n", app.localTime(std::time(nullptr)).c_str());
 }
 
@@ -159,6 +216,30 @@ void startAp() {
   WiFi.softAP(app.apSsid().c_str(), app.settings.apPass.c_str());
   delay(100);
   Serial.printf("ap: %s at %s\n", app.apSsid().c_str(), WiFi.softAPIP().toString().c_str());
+}
+
+// The switches the frame drives low to cut power: the panel's rails, the SD
+// slot's, the battery divider's. Driven low is not enough on its own - in
+// deep sleep a pad stops driving and floats, and a floating enable can half
+// switch its load on for the whole night - so they are held low through the
+// sleep, and released first thing on the next wake. The hold also keeps the
+// EE02's panel switch, on the UART's TX pad, from following the boot ROM's
+// log output high as the chip wakes.
+constexpr int kSleepLow[] = {pins::kPower, pins::kSdEnable, pins::kBatteryEnable};
+
+void holdLowForSleep() {
+  for (int pin : kSleepLow) {
+    if (pin < 0) continue;
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
+    gpio_hold_en(gpio_num_t(pin));
+  }
+  gpio_deep_sleep_hold_en();
+}
+
+void releaseSleepHolds() {
+  for (int pin : kSleepLow)
+    if (pin >= 0) gpio_hold_dis(gpio_num_t(pin));
 }
 
 void goToSleep() {
@@ -175,6 +256,9 @@ void goToSleep() {
     const uint64_t awake = millis() / 1000;
     seconds = seconds > awake ? seconds - awake : 1;
   }
+  if (const int mv = app.batteryMv(); mv >= 0) timing::set(timing::BatteryMv, mv);
+  timing::finish(seconds);
+  Serial.println(timing::summary().c_str());
   Serial.printf("sleep: %llu s\n", (unsigned long long)seconds);
   Serial.flush();
 
@@ -188,6 +272,7 @@ void goToSleep() {
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
   esp_sleep_enable_ext1_wakeup(mask, ESP_EXT1_WAKEUP_ANY_LOW);
   esp_sleep_enable_timer_wakeup(seconds * 1000000ULL);
+  holdLowForSleep();
   esp_deep_sleep_start();
 }
 
@@ -209,6 +294,7 @@ void drawNewPage(bool skipIfSame = false) {
     // Nothing on the glass yet is the one case a failure should show; a page
     // that is already up is better than an error over it.
     if (app.state.lastRender == 0 || app.state.showingStatus) app.showStatus();
+    else timing::outcome("no_fetch");
     app.progress("");
     return;
   }
@@ -216,6 +302,7 @@ void drawNewPage(bool skipIfSame = false) {
   if (skipIfSame && app.state.glass == "birds" && sig == app.state.pageSig) {
     app.state.lastResult = "unchanged - kept the page on the glass";
     Serial.println("page: unchanged, not redrawn");
+    timing::outcome("unchanged");
     app.progress("");
     return;
   }
@@ -231,7 +318,8 @@ void drawNewPage(bool skipIfSame = false) {
     app.state.pageSig = sig;
     app.state.showingStatus = false;
   } else {
-    app.state.lastResult = "render failed";
+    app.state.lastResult = app.renderOutOfMemory ? "render ran out of memory" : "render failed";
+    timing::outcome(app.renderOutOfMemory ? "oom" : "failed");
   }
   app.progress("");
 }
@@ -242,6 +330,16 @@ void drawNewPage(bool skipIfSame = false) {
 // there is nothing else for it to do, and sleeping would only hide it -
 // and returns as soon as it does. Returns when the portal should close.
 void servePortal(bool captive, bool untilSetUp = false) {
+  // Wall time here, less what it set off that is timed on its own - a page
+  // drawn from the web UI is render and panel time, not portal time.
+  const uint32_t portalAt = millis(), accountedAt = timing::accounted();
+  struct Filed {
+    uint32_t at, before;
+    ~Filed() {
+      const uint32_t spent = millis() - at, inner = timing::accounted() - before;
+      timing::add(timing::Portal, spent > inner ? spent - inner : 0);
+    }
+  } filed{portalAt, accountedAt};
   ui.begin(captive);
   app.portalForSetup = untilSetUp;
   uint32_t lastTouch = 0;
@@ -274,6 +372,12 @@ void servePortal(bool captive, bool untilSetUp = false) {
         } else {
           app.fetchError = "not joined to a network";
         }
+        touch();
+        break;
+      case WebUi::Request::Stress:
+#ifdef BIRDPOSTER_DEBUG
+        if (WiFi.status() == WL_CONNECTED) app.stressTest(ui.stressPages);
+#endif
         touch();
         break;
       case WebUi::Request::None:
@@ -323,14 +427,35 @@ void setupMode(const std::string &why) {
 
 }  // namespace
 
+// The hot loops' working sets in internal SRAM (fastmem.h), as long as the
+// WiFi stack and a TLS session keep the room they need; past that, PSRAM.
+static constexpr size_t kInternalReserve = 64 * 1024;
+
+static void *internalAlloc(size_t bytes) {
+  if (heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT) < bytes ||
+      heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT) < bytes + kInternalReserve)
+    return nullptr;
+  return heap_caps_malloc(bytes, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+}
+
 void setup() {
+  // Before anything drives the power switches again: see holdLowForSleep.
+  releaseSleepHolds();
+  setFastAlloc(internalAlloc);
+  startCoreHelper();
   Serial.begin(115200);
+  timing::start(esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER  ? "timer"
+                : esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1 ? "key"
+                                                                        : "power");
   pinMode(pins::kKey1, INPUT_PULLUP);
   pinMode(pins::kKey2, INPUT_PULLUP);
   pinMode(pins::kKey3, INPUT_PULLUP);
   const Key woke = keyFromWake();
-  delay(woke == Key::None && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED ? 1500
-                                                                                        : 100);
+  {
+    timing::Scope t(timing::Settle);
+    delay(woke == Key::None && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED ? 1500
+                                                                                          : 100);
+  }
   Serial.printf("\nbird poster %s, woke by %s\n", kFirmwareVersion,
                 woke == Key::None ? (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER
                                          ? "timer"
@@ -338,7 +463,10 @@ void setup() {
                                   : "a key");
   if (!psramFound()) Serial.println("WARNING: no PSRAM - this build cannot render a page");
 
-  if (!app.begin()) {
+  const uint32_t beginAt = millis();
+  const bool begun = app.begin();
+  timing::add(timing::Begin, millis() - beginAt);
+  if (!begun) {
     Serial.printf("app: %s%s\n", app.platesError.c_str(), app.fontOk ? "" : " (and no font)");
   }
   // Keep answering the settings page through the long blocking stages.
@@ -349,6 +477,9 @@ void setup() {
 
   if (key == Key::One) app.state.portalOn = true;
   if (key == Key::Two) app.state.showingStatus = !app.state.showingStatus;
+  // Key 3 is "new page now": a bird page, whatever the mode. Status mode is
+  // left for key 2 to put back, rather than swallowing the press.
+  if (key == Key::Three) app.state.showingStatus = false;
   saveState(app.state);
 
   if (!app.settings.configured()) {
@@ -360,7 +491,8 @@ void setup() {
   if (!joined) {
     ++app.state.wifiFailures;
     app.state.fetchOk = false;
-    app.state.lastResult = "could not join " + app.settings.wifiSsid;
+    app.state.lastResult = "could not join " + app.settings.wifiSsid +
+                           (wifiReason ? " - " + wifiReasonText() : std::string());
     if (app.state.portalOn || app.state.wifiFailures >= kFailuresBeforeAp) {
       app.state.portalOn = false;
       setupMode(app.state.lastResult);
@@ -370,6 +502,11 @@ void setup() {
     goToSleep();
   }
   app.state.wifiFailures = 0;
+  // A failed join is the last result until something else happens, and a
+  // wake that only serves the settings fetches nothing to replace it - so the
+  // page would go on saying it could not join while being served over it.
+  if (app.state.lastResult.rfind("could not join", 0) == 0)
+    app.state.lastResult = "joined " + app.settings.wifiSsid + "; no fetch since";
 
   if (app.state.portalOn && app.settings.sourceConfigured()) {
     syncClock();
@@ -391,7 +528,7 @@ void setup() {
     servePortal(false, true);
     app.state.showingStatus = false;
     // Still serving the settings after this page if WiFi was switched on.
-    if (!app.state.portalOn) app.beforeRefresh = radioOff;
+    if (!app.state.portalOn) app.beforeRefresh = app.beforeRender = radioOff;
     drawNewPage();
     // Just joined from the setup network: stay reachable a while after the
     // first page, since whoever set it up is likely still at the settings.
@@ -411,10 +548,15 @@ void setup() {
   }
 
   if (woke != Key::None || !app.inQuietHours()) {
-    app.beforeRefresh = radioOff;
+    // Off as soon as the page's layout and web plates are in, not just for
+    // the refresh: the render runs twenty-odd seconds without the network.
+    app.beforeRefresh = app.beforeRender = radioOff;
     drawNewPage(woke == Key::None);  // a key asked for a page: draw it regardless
   }
-  else Serial.println("quiet hours: not drawing");
+  else {
+    Serial.println("quiet hours: not drawing");
+    timing::outcome("quiet");
+  }
   goToSleep();
 }
 

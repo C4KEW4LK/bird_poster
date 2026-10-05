@@ -58,6 +58,33 @@ void test_each_ink_dithers_to_itself() {
   }
 }
 
+void test_dithering_in_place_matches_a_separate_frame() {
+  // The frame written over the canvas it reads (render.h): byte for byte
+  // the frame a separate buffer gets, with every option on, so a row read
+  // after its memory was written would show.
+  constexpr int w = 97, h = 61;
+  Canvas c;
+  c.reset(w, h, paperColour());
+  for (int y = 0; y < h; ++y)
+    for (int x = 0; x < w; ++x)
+      c.row(y)[x] = uint16_t((x * 2654435761u) ^ (y * 40503u) ^ (x * y * 97u));
+  Frame apart;
+  dither(c, apart, 2, 2, 2, 24);
+
+  std::vector<uint16_t> block(size_t(w) * h);
+  Canvas shared;
+  shared.px.adopt(block.data(), block.size());
+  shared.reset(w, h, 0);
+  std::copy(c.px.begin(), c.px.end(), shared.px.begin());
+  Frame inPlace;
+  inPlace.w = w;
+  inPlace.h = h;
+  inPlace.px.adopt(reinterpret_cast<uint8_t *>(block.data()), block.size() * 2, size_t(w) * h);
+  dither(shared, inPlace, 2, 2, 2, 24);
+  TEST_ASSERT_EQUAL_PTR(block.data(), inPlace.px.data());
+  TEST_ASSERT_EQUAL_UINT8_ARRAY(apart.px.data(), inPlace.px.data(), size_t(w) * h);
+}
+
 void test_paper_dithers_to_white_not_speckle() {
   // Paper is brighter than the panel's white, and a dither that let that error
   // pile up would eventually flip a pixel to yellow. It must not.
@@ -509,6 +536,7 @@ int main() {
   UNITY_BEGIN();
   RUN_TEST(test_each_ink_dithers_to_itself);
   RUN_TEST(test_paper_dithers_to_white_not_speckle);
+  RUN_TEST(test_dithering_in_place_matches_a_separate_frame);
   RUN_TEST(test_a_sprites_clear_pixels_do_not_paint);
   RUN_TEST(test_a_grown_sprite_blends_between_its_pixels);
   RUN_TEST(test_wifi_qr_payload_escapes_what_the_format_reserves);

@@ -105,6 +105,13 @@ class Panel {
   // BUSY timeout.
   bool refresh();
 
+  // Where the last refresh() spent its time, in ms: the controllers' power
+  // rails coming up, the update itself, and the rails going down.
+  struct RefreshTimes {
+    uint32_t powerOn = 0, update = 0, powerOff = 0;
+  };
+  RefreshTimes lastRefresh;
+
   // Deep-sleep the controllers and cut the panel's power. The image stays.
   void sleep();
 

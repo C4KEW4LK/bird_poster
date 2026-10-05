@@ -1,10 +1,13 @@
+#pragma GCC optimize("O2")  // the dither and resampler are hot loops on the frame; the build is -Os
 #include "render.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 
+#include "fastmem.h"
 #include "qrcodegen.h"
 
 // stb_truetype is a single header with the implementation in this one file.
@@ -123,21 +126,50 @@ void drawSprite(Canvas &canvas, const SpriteImage &sprite, int x, int y, int dst
     };
     const std::vector<Tap> cols = taps(dstW, sprite.w, flip);
     const std::vector<Tap> rows = taps(dstH, sprite.h, false);
+    // Each plate pixel is read by up to sixteen destination pixels, and
+    // colouring one from the planes is a chroma blend and a divide; so a
+    // plate row is coloured once and the taps read the result. Only the rows
+    // in reach are kept - a destination row reads four neighbouring plate
+    // rows, and the next one the same or the ones after - in a ring of eight
+    // tagged with the row they hold. A whole coloured plate would do the same
+    // work, but a full-size web plate coloured whole is 3 MB of PSRAM beside
+    // the canvas, and the frame does not have it.
+    constexpr int kRing = 8;
+    std::vector<uint16_t> ring;
+    int ringRow[kRing];
+    std::fill(std::begin(ringRow), std::end(ringRow), -1);
+    if (sprite.direct.empty()) ring.resize(size_t(kRing) * sprite.w);
+    const auto rowOf = [&](int sy) -> const uint16_t * {
+      if (!sprite.direct.empty()) return sprite.direct.data() + size_t(sy) * sprite.w;
+      uint16_t *r = ring.data() + size_t(sy % kRing) * sprite.w;
+      if (ringRow[sy % kRing] != sy) {
+        for (int sx = 0; sx < sprite.w; ++sx) r[sx] = sprite.at(sx, sy);
+        ringRow[sy % kRing] = sy;
+      }
+      return r;
+    };
     for (int dy = 0; dy < dstH; ++dy) {
       const int cy = y + dy;
       if (cy < 0 || cy >= canvas.h) continue;
       const Tap &ty = rows[dy];
       uint16_t *out = canvas.row(cy) + x;
+      // The plate rows this destination row reads, coloured as it needs them.
+      const uint16_t *src[4];
+      for (int j = 0; j < 4; ++j) src[j] = ty.w[j] ? rowOf(ty.at[j]) : nullptr;
+      const uint16_t *nearestRow = rowOf(ty.nearest);
       for (int dx = dx0; dx < dx1; ++dx) {
         const Tap &tx = cols[dx];
         if (!sprite.painted(tx.nearest, ty.nearest)) continue;
-        int64_t r = 0, g = 0, b = 0, sum = 0;
+        // 32 bits is room enough: the weights are 1024ths, so a tap is under
+        // 2^20 and the sixteen of them, a cubic's overshoot included, sum to
+        // under 2^21 - times a channel of at most 63.
+        int32_t r = 0, g = 0, b = 0, sum = 0;
         for (int j = 0; j < 4; ++j) {
           if (!ty.w[j]) continue;
           for (int i = 0; i < 4; ++i) {
             if (!tx.w[i] || !sprite.painted(tx.at[i], ty.at[j])) continue;
-            const int64_t w = int64_t(tx.w[i]) * ty.w[j];
-            const uint16_t c = sprite.at(tx.at[i], ty.at[j]);
+            const int32_t w = tx.w[i] * ty.w[j];
+            const uint16_t c = src[j][tx.at[i]];
             r += w * ((c >> 11) & 31);
             g += w * ((c >> 5) & 63);
             b += w * (c & 31);
@@ -147,12 +179,12 @@ void drawSprite(Canvas &canvas, const SpriteImage &sprite, int x, int y, int dst
         // A cubic's weights go negative; with most of the neighbourhood
         // unpainted, what is left can sum to almost nothing. The nearest
         // pixel is the honest answer there.
-        if (sum < (int64_t(1) << 20) / 4) {
-          out[dx] = sprite.at(tx.nearest, ty.nearest);
+        if (sum < (int32_t(1) << 20) / 4) {
+          out[dx] = nearestRow[tx.nearest];
           continue;
         }
-        const auto ch = [sum](int64_t v, int hi) {
-          return int(std::clamp<int64_t>((v + sum / 2) / sum, 0, hi));
+        const auto ch = [sum](int32_t v, int hi) {
+          return int(std::clamp<int32_t>((v + sum / 2) / sum, 0, hi));
         };
         out[dx] = uint16_t(ch(r, 31) << 11 | ch(g, 63) << 5 | ch(b, 31));
       }
@@ -192,6 +224,13 @@ void drawSprite(Canvas &canvas, const SpriteImage &sprite, int x, int y, int dst
     }
   }
 }
+
+namespace {
+Helper *gHelper = nullptr;
+}  // namespace
+
+void setHelper(Helper *h) { gHelper = h; }
+Helper *helper() { return gHelper; }
 
 namespace {
 
@@ -256,17 +295,22 @@ void boostTable(int level, std::vector<uint8_t> &out) {
   const Vivid v = kVivid[level < 0 ? 0 : (level >= kVividLevels ? kVividLevels - 1 : level)];
   float norm[3];
   for (int k = 0; k < 3; ++k) norm[k] = kContrastPivot / float(kPaperRgb[k]);
+  float inv[3];
+  for (int k = 0; k < 3; ++k) inv[k] = 1.0f / norm[k];
+  // rgb888's divides, once a level rather than three an entry.
+  uint8_t five[32], six[64];
+  for (int i = 0; i < 32; ++i) five[i] = uint8_t(i * 255 / 31);
+  for (int i = 0; i < 64; ++i) six[i] = uint8_t(i * 255 / 63);
   out.resize(65536 * 3);
   for (int i = 0; i < 65536; ++i) {
-    int rgb[3];
-    rgb888(uint16_t(i), rgb[0], rgb[1], rgb[2]);
+    const int rgb[3] = {five[(i >> 11) & 31], six[(i >> 5) & 63], five[i & 31]};
     float c[3];
     for (int k = 0; k < 3; ++k) c[k] = float(rgb[k]) * norm[k];
     const float luma = 0.299f * c[0] + 0.587f * c[1] + 0.114f * c[2];
     for (int k = 0; k < 3; ++k) {
       const float saturated = luma + (c[k] - luma) * v.saturation;
       const float stretched = kContrastPivot + (saturated - kContrastPivot) * v.contrast;
-      out[size_t(i) * 3 + k] = uint8_t(clamp255(int(stretched / norm[k] + 0.5f)));
+      out[size_t(i) * 3 + k] = uint8_t(clamp255(int(stretched * inv[k] + 0.5f)));
     }
   }
 }
@@ -283,20 +327,39 @@ constexpr int kEdgeGain64[kEdgeLevels] = {0, 24, 40, 56, 72};
 
 // One canvas row as boosted RGB, its horizontal 3-sum and its luma, all
 // padded a pixel each side by edge replication so the vertical pass needs no
-// tests.
+// tests. The dither comes back to three of these and two rows of error on
+// every pixel, so they are kept small - a byte where a byte holds it - and in
+// fast memory (fastmem.h): together they are bigger than the frame's cache.
 struct RgbRow {
-  std::vector<int16_t> rgb, hsum, luma;
+  FastVector<uint8_t> rgb, luma;
+  FastVector<int16_t> hsum;
+  FastVector<uint16_t> raw;  // the canvas row itself, padded the same way: for spotting flat paper
   void init(int w) {
     rgb.assign(size_t(w + 2) * 3, 0);
     hsum.assign(size_t(w + 2) * 3, 0);
     luma.assign(size_t(w + 2), 0);
+    raw.assign(size_t(w + 2), 0);
   }
   void load(const uint16_t *src, int w, const uint8_t *table) {
+    std::copy(src, src + w, raw.begin() + 1);
+    raw[0] = raw[1];
+    raw[size_t(w + 1)] = raw[size_t(w)];
+    // Most of a page is paper, one value over and over: the table is 192 KB,
+    // and a lookup only when the pixel changes keeps it out of the cache's way.
+    uint16_t last = 0;
+    uint8_t c[3] = {0, 0, 0}, l = 0;
+    bool have = false;
     for (int x = 0; x < w; ++x) {
-      const uint8_t *c = table + size_t(src[x]) * 3;
-      int16_t *d = &rgb[size_t(x + 1) * 3];
+      if (!have || src[x] != last) {
+        last = src[x];
+        have = true;
+        const uint8_t *t = table + size_t(last) * 3;
+        c[0] = t[0], c[1] = t[1], c[2] = t[2];
+        l = uint8_t((77 * c[0] + 151 * c[1] + 28 * c[2]) >> 8);
+      }
+      uint8_t *d = &rgb[size_t(x + 1) * 3];
       d[0] = c[0]; d[1] = c[1]; d[2] = c[2];
-      luma[size_t(x + 1)] = int16_t((77 * c[0] + 151 * c[1] + 28 * c[2]) >> 8);
+      luma[size_t(x + 1)] = l;
     }
     for (int k = 0; k < 3; ++k) {
       rgb[k] = rgb[3 + k];
@@ -322,47 +385,66 @@ const EdgeCurve kEdgeCurve;
 
 }  // namespace
 
-void dither(const Canvas &canvas, Frame &out, int vivid, int sharpen, int edges, int jitter) {
-  out.reset(canvas.w, canvas.h, kWhite);
+void dither(const Canvas &canvas, Frame &out, int vivid, int sharpen, int edges, int jitter,
+            DitherCounters *counters) {
+  using Clock = std::chrono::steady_clock;
+  const auto since = [](Clock::time_point t) {
+    return std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - t).count();
+  };
+  // In place (see render.h): every pixel is written below, so the frame is
+  // not filled first - that would be writing over the canvas it reads.
+  const bool inPlace = static_cast<const void *>(out.px.data()) ==
+                           static_cast<const void *>(canvas.px.data()) &&
+                       out.w == canvas.w && out.h == canvas.h &&
+                       out.px.size() == size_t(canvas.w) * canvas.h;
+  if (!inPlace) out.reset(canvas.w, canvas.h, kWhite);
   const int w = canvas.w, h = canvas.h;
+  auto t = Clock::now();
   std::vector<uint8_t> boostedTable;
   boostTable(vivid, boostedTable);
   const uint8_t *boosted = boostedTable.data();
+  if (counters) counters->tableUs += since(t);
   const int a16 = kSharpen16[sharpen < 0 ? 0 : (sharpen >= kSharpenLevels ? kSharpenLevels - 1 : sharpen)];
   const int g64 = kEdgeGain64[edges < 0 ? 0 : (edges >= kEdgeLevels ? kEdgeLevels - 1 : edges)];
+
   // Three canvas rows as RGB - above, this, below - rolling down the page.
+  // Row -1 replicates row 0. Only the preparing side (below) touches them.
   RgbRow rows[3];
   for (RgbRow &r : rows) r.init(w);
-  rows[0].load(canvas.row(0), w, boosted);  // row -1 replicates row 0
-  rows[1].load(canvas.row(0), w, boosted);
   int above = 0, here = 1, below = 2;
-  // Two rows of error, three channels, with a pixel of slack each side so the
-  // x-1 / x+1 taps need no bounds test.
-  std::vector<int16_t> errA((w + 2) * 3, 0), errB((w + 2) * 3, 0);
-  int16_t *cur = errA.data(), *next = errB.data();
-  // Error diffusion starts with no error in hand, and on a flat light tone
-  // it takes a hundred rows to settle: the top of the page comes out blank
-  // for a band, then in regular lines of dots. So the first row is dithered
-  // this many times over before the page proper and the result thrown away,
-  // and the page starts with the error it would have carried anyway.
-  constexpr int kWarmRows = 64;
-  std::vector<uint8_t> scratch(static_cast<size_t>(w));
-  for (int y = -kWarmRows; y < h; ++y) {
-    rows[below].load(canvas.row(std::clamp(y + 1, 0, h - 1)), w, boosted);
-    std::fill(next, next + (w + 2) * 3, 0);
-    uint8_t *dst = y < 0 ? scratch.data() : out.row(y);
-    const int16_t *p = rows[here].rgb.data();
+  // The row as the diffusion sees it before its error: boosted, sharpened and
+  // edged. None of that depends on the error, so it is done a whole row at a
+  // time, apart from the diffusion - and, where there is a second core, on
+  // it, a row ahead, while this one diffuses the row before (see Helper).
+  // Two of them, so one can be written while the other is read.
+  FastVector<int16_t> preBuf[2] = {FastVector<int16_t>(size_t(w) * 3),
+                                   FastVector<int16_t>(size_t(w) * 3)};
+  FastVector<int16_t> warmPre(size_t(w) * 3);
+  int64_t loadUs = 0, prepareUs = 0;  // the preparing side's, added in at the end
+  const auto prepare = [&](int16_t *o) {
+    const auto t0 = Clock::now();
+    const uint8_t *p = rows[here].rgb.data();
     const int16_t *sa = rows[above].hsum.data(), *sh = rows[here].hsum.data(),
                   *sb = rows[below].hsum.data();
-    const int16_t *la = rows[above].luma.data(), *lh = rows[here].luma.data(),
+    const uint8_t *la = rows[above].luma.data(), *lh = rows[here].luma.data(),
                   *lb = rows[below].luma.data();
-    // Serpentine: alternate rows run right to left, so the error's forward
-    // bias flips each row and the diagonal worms plain Floyd-Steinberg draws
-    // through flat colour cancel instead of compounding.
-    const bool rtl = y & 1;
-    const int step = rtl ? -1 : 1;
-    for (int x = rtl ? w - 1 : 0; x >= 0 && x < w; x += step) {
+    const uint16_t *ra = rows[above].raw.data(), *rh = rows[here].raw.data(),
+                   *rb = rows[below].raw.data();
+    for (int x = 0; x < w; ++x, o += 3) {
       const size_t i = size_t(x + 1) * 3;
+      // Flat paper - the pixel and its eight neighbours one value, which is
+      // most of a page - is left as it is by both the sharpening (p minus
+      // the mean of nine equal values is nothing) and the edges (no gradient,
+      // and the curve is zero at zero): its prepared value is the boosted
+      // colour, exactly, without the arithmetic.
+      const uint16_t v0 = rh[x + 1];
+      if (rh[x] == v0 && rh[x + 2] == v0 && ra[x] == v0 && ra[x + 1] == v0 && ra[x + 2] == v0 &&
+          rb[x] == v0 && rb[x + 1] == v0 && rb[x + 2] == v0) {
+        o[0] = p[i];
+        o[1] = p[i + 1];
+        o[2] = p[i + 2];
+        continue;
+      }
       int rgb[3];
       for (int k = 0; k < 3; ++k) {
         const int v = p[i + k];
@@ -383,14 +465,97 @@ void dither(const Canvas &canvas, Frame &out, int vivid, int sharpen, int edges,
         // cooler than the warm paper, and its error would land as blue dots
         // rather than a black line.
         const int dark = (g64 * kEdgeCurve.v[mag] * lh[c]) / (64 * 255);
-        for (int k = 0; k < 3; ++k) rgb[k] = rgb[k] * (255 - dark) / 255;
+        if (dark)
+          for (int k = 0; k < 3; ++k) rgb[k] = rgb[k] * (255 - dark) / 255;
       }
+      o[0] = int16_t(rgb[0]);
+      o[1] = int16_t(rgb[1]);
+      o[2] = int16_t(rgb[2]);
+    }
+    prepareUs += since(t0);
+  };
+  // Roll the window down a row: the row above is spent, and canvas row `y`
+  // comes in below.
+  const auto advance = [&](int y) {
+    const auto t0 = Clock::now();
+    const int spent = above;
+    above = here;
+    here = below;
+    below = spent;
+    rows[below].load(canvas.row(std::min(y, h - 1)), w, boosted);
+    loadUs += since(t0);
+  };
+
+  // Error diffusion starts with no error in hand, and on a flat light tone
+  // it takes a hundred rows to settle: the top of the page comes out blank
+  // for a band, then in regular lines of dots. So the first row is dithered
+  // this many times over before the page proper and the result thrown away,
+  // and the page starts with the error it would have carried anyway. Every
+  // one of those rows is row 0 with row 0 above and below it, so it is
+  // prepared once.
+  constexpr int kWarmRows = 64;
+  {
+    const auto t0 = Clock::now();
+    for (RgbRow &r : rows) r.load(canvas.row(0), w, boosted);
+    loadUs += since(t0);
+  }
+  prepare(warmPre.data());
+  // Row 0's window is row 0 (for -1), row 0 and row 1.
+  {
+    const auto t0 = Clock::now();
+    rows[below].load(canvas.row(std::min(1, h - 1)), w, boosted);
+    loadUs += since(t0);
+  }
+  prepare(preBuf[0].data());
+
+  // The preparing side's job for the row after `y`: roll the window on to
+  // y+1 and prepare it. Passed to the helper as a plain function.
+  struct Ahead {
+    decltype(advance) *advanceFn;
+    decltype(prepare) *prepareFn;
+    FastVector<int16_t> *bufs;
+    int y;
+    static void run(void *self) {
+      Ahead &a = *static_cast<Ahead *>(self);
+      (*a.advanceFn)(a.y + 2);
+      (*a.prepareFn)(a.bufs[(a.y + 1) & 1].data());
+    }
+  } ahead{&advance, &prepare, preBuf, 0};
+  Helper *const other = helper();
+
+  // Two rows of error, three channels, with a pixel of slack each side so the
+  // x-1 / x+1 taps need no bounds test.
+  FastVector<int16_t> errA((w + 2) * 3, 0), errB((w + 2) * 3, 0);
+  int16_t *cur = errA.data(), *next = errB.data();
+  std::vector<uint8_t> scratch(static_cast<size_t>(w));
+  int64_t diffuseUs = 0, waitUs = 0;
+  for (int y = -kWarmRows; y < h; ++y) {
+    // The next row's preparing starts now, beside this row's diffusion - on
+    // the other core if there is one, else here, before it.
+    const bool more = y >= 0 && y + 1 < h;
+    if (more) {
+      ahead.y = y;
+      if (other)
+        other->start(&Ahead::run, &ahead);
+      else
+        Ahead::run(&ahead);
+    }
+    t = Clock::now();
+    std::fill(next, next + (w + 2) * 3, 0);
+    uint8_t *dst = y < 0 ? scratch.data() : out.row(y);
+    // Serpentine: alternate rows run right to left, so the error's forward
+    // bias flips each row and the diagonal worms plain Floyd-Steinberg draws
+    // through flat colour cancel instead of compounding.
+    const bool rtl = y & 1;
+    const int step = rtl ? -1 : 1;
+    const int16_t *pr = y < 0 ? warmPre.data() : preBuf[y & 1].data();
+    for (int x = rtl ? w - 1 : 0; x >= 0 && x < w; x += step) {
+      const int16_t *v = pr + size_t(x) * 3;
       int16_t *e = cur + (x + 1) * 3;
       // Clamp before choosing, and take the error from the clamped value, so a
       // page of paper - brighter than the panel's white - does not accumulate
       // an unbounded debt that flips a pixel a hundred rows later.
-      const int r = clamp255(rgb[0] + e[0]), g = clamp255(rgb[1] + e[1]),
-                b = clamp255(rgb[2] + e[2]);
+      const int r = clamp255(v[0] + e[0]), g = clamp255(v[1] + e[1]), b = clamp255(v[2] + e[2]);
       uint8_t ink;
       if (jitter) {
         // One nudge for all three channels - lighter or darker, not a colour
@@ -408,12 +573,12 @@ void dither(const Canvas &canvas, Frame &out, int vivid, int sharpen, int edges,
                 eb = b - kInkTarget[ink][2];
       // "Ahead" and "behind" follow the walk; the row below gets the same
       // three taps mirrored.
-      int16_t *ahead = cur + (x + 1 + step) * 3;
+      int16_t *aheadE = cur + (x + 1 + step) * 3;
       int16_t *dBehind = next + (x + 1 - step) * 3, *d = next + (x + 1) * 3,
               *dAhead = next + (x + 1 + step) * 3;
-      ahead[0] += er * 7 / 16;
-      ahead[1] += eg * 7 / 16;
-      ahead[2] += eb * 7 / 16;
+      aheadE[0] += er * 7 / 16;
+      aheadE[1] += eg * 7 / 16;
+      aheadE[2] += eb * 7 / 16;
       dBehind[0] += er * 3 / 16;
       dBehind[1] += eg * 3 / 16;
       dBehind[2] += eb * 3 / 16;
@@ -425,10 +590,18 @@ void dither(const Canvas &canvas, Frame &out, int vivid, int sharpen, int edges,
       dAhead[2] += eb / 16;
     }
     std::swap(cur, next);
-    const int spent = above;
-    above = here;
-    here = below;
-    below = spent;
+    diffuseUs += since(t);
+    if (more && other) {
+      t = Clock::now();
+      other->wait();
+      waitUs += since(t);
+    }
+  }
+  if (counters) {
+    counters->loadUs += loadUs;
+    counters->prepareUs += prepareUs;
+    counters->diffuseUs += diffuseUs;
+    counters->waitUs += waitUs;
   }
 }
 

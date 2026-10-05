@@ -14,8 +14,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <new>
+#include <type_traits>
 #include <utility>
 #include <vector>
+
+#include "fastmem.h"
 
 namespace birdposter {
 
@@ -64,10 +69,34 @@ inline std::pair<int, int> pageSize(bool portrait) {
 // A 1-bit bitmap. Rows are padded to whole 64-bit words plus one guard word, so
 // an unaligned read or write at the right-hand edge can always touch words[i+1]
 // without a bounds test in the inner loop.
+// Storage for a Mask's bits: the ordinary heap, or - for the short-lived
+// masks a sprite is built through - fast memory (fastmem.h). A copy is always
+// ordinary, so a fast mask that is kept becomes an ordinary one.
+template <class T>
+struct MaskAllocator {
+  using value_type = T;
+  using propagate_on_container_move_assignment = std::true_type;
+  using propagate_on_container_copy_assignment = std::false_type;
+  using propagate_on_container_swap = std::true_type;
+  bool fast = false;
+  MaskAllocator() = default;
+  explicit MaskAllocator(bool f) : fast(f) {}
+  template <class U>
+  MaskAllocator(const MaskAllocator<U> &o) : fast(o.fast) {}
+  T *allocate(size_t n);
+  void deallocate(T *p, size_t) { std::free(p); }
+  MaskAllocator select_on_container_copy_construction() const { return MaskAllocator(); }
+  template <class U>
+  bool operator==(const MaskAllocator<U> &o) const { return fast == o.fast; }
+  template <class U>
+  bool operator!=(const MaskAllocator<U> &o) const { return fast != o.fast; }
+};
+
 class Mask {
  public:
   Mask() = default;
-  Mask(int w, int h);
+  // `fast`: in fast memory, for a mask that lives only while a sprite is built.
+  Mask(int w, int h, bool fast = false);
 
   int width() const { return w_; }
   int height() const { return h_; }
@@ -84,6 +113,11 @@ class Mask {
   // water on the plates that were drawn with terrain under the bird.
   Mask scaled(int dim, bool flip) const;
 
+  // `s` x `s` blocks to a pixel, set where any pixel of the block is: a
+  // silhouette at 1/s resolution that is never smaller than the full one, so
+  // the packer working on it can only leave birds further apart, not overlap.
+  Mask reduced(int s) const;
+
   // 5x5 minimum filter at radius 2 - PIL's MinFilter(2*r+1), which is what
   // _footprint applies. Erodes the silhouette so birds nestle into each other's
   // invisible paper halos while their bodies still never overlap.
@@ -94,8 +128,15 @@ class Mask {
  private:
   int w_ = 0, h_ = 0;
   size_t stride_ = 0;
-  std::vector<uint64_t> bits_;
+  std::vector<uint64_t, MaskAllocator<uint64_t>> bits_;
 };
+
+template <class T>
+T *MaskAllocator<T>::allocate(size_t n) {
+  void *p = fast ? fastAlloc(n * sizeof(T)) : std::malloc(n * sizeof(T));
+  if (!p) throw std::bad_alloc();
+  return static_cast<T *>(p);
+}
 
 // A label's box, measured at kLabelRefPx when the sprite was baked. Text width
 // is taken as linear in the font size, which is the same approximation the
@@ -149,7 +190,13 @@ struct Placement {
 // the silhouette's column centroid - under the body, not out along the tail -
 // and raised until it clears the outline, so it tucks into the gap beside a leg
 // rather than floating below the whole bounding box.
-Sprite withLabel(int index, int dim, const Mask &art, const LabelBox &label, int gap);
+// `closeGap`: also make solid, in each column the name spans, everything
+// from the name up to the first of the bird above it - the pocket under an
+// overhang that the name was lifted past. Then nothing can be placed between
+// the bird and its name. The hero's (its name is large, and a small bird in
+// that pocket reads as the hero's caption sitting on someone else).
+Sprite withLabel(int index, int dim, const Mask &art, const LabelBox &label, int gap,
+                 bool closeGap = false);
 
 // True if `sprite` placed with its top-left at (x, y) overlaps anything already
 // set in `grid`. Both are bitsets; the sprite is compared against an unaligned
@@ -311,6 +358,31 @@ struct PackPlan {
 // The plan a style means. One place to read what each of the three does.
 PackPlan planFor(PackStyle style);
 
+// Where the packer's time goes, for the frame's timing record: building a
+// bird's mask at a size (scale, erode, add its name), searching the page for
+// a place for one, and grow's checks of whether a bigger one still fits.
+// Counts and microseconds, added to as layout() and grow() run; clear it
+// before a page to measure that page.
+// The resolution the packer works at, as a divisor of the page's: 1 is full,
+// 2 half, 4 quarter. layout() and grow() take everything in that resolution -
+// sources (Mask::reduced), page and box sizes, dims - except name sizes
+// (`namePx`, a placement's `labelPx`), which stay in page pixels so the
+// smallest readable name means the same at any scale; the fixed pixel
+// distances (the spiral's step, the smallest bird, the nestling erosion, a
+// name's box and gap, grow's nudge) are scaled to match. Set around a layout,
+// and back to 1 after.
+void setPackScale(int s);
+int packScale();
+
+struct PackCounters {
+  int sprites = 0, searches = 0, fits = 0;
+  int64_t spriteUs = 0, searchUs = 0, fitUs = 0;
+  // A mask build's three steps: scaling the silhouette, eroding it, adding
+  // the name's box.
+  int64_t scaleUs = 0, erodeUs = 0, labelUs = 0;
+};
+extern PackCounters packCounters;
+
 // Where on the ellipse a layout starts its sweep. The spiral tries candidates in
 // angle order, so the first bird placed at each radius lands wherever the sweep
 // begins; moving that start rearranges the whole cluster at no cost to packing
@@ -340,11 +412,13 @@ bool flipFor(bool baked, const char *name, int layout);
 // actually landed at comes back in `usedPx`.
 // Every bird is drawn at the same size - one scale for the set, found by the
 // search - and the first in `sources` is placed first, so the order given is
-// the order of precedence for the middle of the page.
+// the order of precedence for the middle of the page. `attempts`, if given,
+// counts the scales tried - each one a whole packing of the set, which is
+// what the layout's time is made of.
 bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
             const std::vector<LabelBox> &labels, int namePx, int pageW, int pageH, int boxW,
             int boxH, std::vector<Placement> &out, int *usedPx, int variant = 0,
-            const PackOptions &opt = PackOptions());
+            const PackOptions &opt = PackOptions(), int *attempts = nullptr);
 
 // After a layout fits, let each bird grow where it stands. The scale search
 // stops the whole set at the size the *tightest* bird runs out of room, so
@@ -367,6 +441,8 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
 void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
           const std::vector<LabelBox> &labels, int namePx, int boxW, int boxH,
           std::vector<Placement> &placed, float maxFactor = 1.5f, int nudge = 0,
-          int rounds = 1, float roundStep = 0.0f);
+          int rounds = 1, float roundStep = 0.0f, int heroIndex = -1);
+// `heroIndex`: the source index of the hero, whose name keeps nothing
+// between it and its bird (withLabel's closeGap), or -1 for none.
 
 }  // namespace birdposter

@@ -211,15 +211,27 @@ bool Panel::push(const Frame &frame, int rotation) {
 bool Panel::refresh() {
   static const uint8_t drf = 0x01;
   static const uint8_t pof = 0x00;
+  lastRefresh = RefreshTimes{};
+  uint32_t at = millis();
+  const auto lap = [&at](uint32_t &into) {
+    const uint32_t t = millis();
+    into = t - at;
+    at = t;
+  };
   command(Chip::Both, 0x04);  // power on
-  if (!waitReady(kBusyTimeoutMs)) return false;
+  const bool on = waitReady(kBusyTimeoutMs);
   delay(30);
+  lap(lastRefresh.powerOn);
+  if (!on) return false;
   command(Chip::Both, 0x12, &drf, 1);  // display refresh
-  if (!waitReady(kBusyTimeoutMs)) return false;
+  const bool drawn = waitReady(kBusyTimeoutMs);
   delay(30);
+  lap(lastRefresh.update);
+  if (!drawn) return false;
   command(Chip::Both, 0x02, &pof, 1);  // power off
   const bool ok = waitReady(kBusyTimeoutMs);
   delay(30);
+  lap(lastRefresh.powerOff);
   return ok;
 }
 

@@ -82,6 +82,7 @@ int pageMain(int argc, char **argv) {
   std::string nameFontPath = "../assets/fonts/gould/GouldCondensed-Regular.ttf";
   std::string labelsPath = "../assets/birdnet_labels_v2.4.txt";
   BirdPageSettings settings;
+  settings.packScale = 2;  // as the frame packs; --pack-scale overrides
   int count = 10;
   bool setup = false, status = false;
   DateOrder dateOrder = DateOrder::DayFirst;
@@ -103,6 +104,7 @@ int pageMain(int argc, char **argv) {
       settings.names = NameStyle(std::atoi(argv[++i]) & 3);  // 0 both, 1 scientific, 2 common, 3 none
     if (!std::strcmp(argv[i], "--no-common")) labelsPath.clear();
     if (!std::strcmp(argv[i], "--no-grow")) settings.grow = false;
+    if (!std::strcmp(argv[i], "--pack-scale") && i + 1 < argc) settings.packScale = std::atoi(argv[++i]);
     if (!std::strcmp(argv[i], "--resample") && i + 1 < argc) {
       const char *v = argv[++i];
       settings.resample = !std::strcmp(v, "bilinear")   ? Resample::Bilinear
@@ -246,6 +248,10 @@ int pageMain(int argc, char **argv) {
     };
   }
   settings.commonFont = &nameFont;
+  // As the frame does: one block for the page, dithered in place.
+  std::vector<uint16_t> pageMemory(size_t(kPageLong) * kPackShort);
+  settings.pageMemory = pageMemory.data();
+  settings.pageMemoryPx = pageMemory.size();
 
   Frame frame;
   if (setup) {
@@ -306,10 +312,37 @@ int pageMain(int argc, char **argv) {
       std::fprintf(stderr, "no layout fits\n");
       return 2;
     }
-    std::printf("%d birds: pack %d ms, draw %d ms, dither %d ms; labels %d px, median bird %d px\n",
+    std::printf("%d birds: pack %d ms, draw %d ms, dither %d ms; labels %d px, median bird %d px%s\n",
                 report.placed, report.packMs, report.drawMs, report.ditherMs, report.labelPx,
-                report.medianDim);
+                report.medianDim, report.fellBack ? " (fell back to classic)" : "");
     for (int idx : indices) std::printf("  %s\n", plates.entry(size_t(idx)).name.c_str());
+    // How much the birds' own silhouettes overlap on the page, at full
+    // resolution and before the packer's erosion: what a coarser packer could
+    // get wrong. Each silhouette at its drawn size and mirroring, stamped onto
+    // a page grid, counting the pixels already taken.
+    {
+      Mask page(frame.w, frame.h);
+      long overlap = 0, painted = 0;
+      for (const Placement &p : report.placements) {
+        const int idx = indices[size_t(p.index)];
+        const PlateEntry &e = plates.entry(size_t(idx));
+        Mask m;
+        if (!plates.loadMask(size_t(idx), m)) continue;
+        const Mask drawn = m.scaled(p.dim, flipFor(e.flip, e.name.c_str(), settings.variant));
+        const int ox = settings.marginLeft + p.x, oy = settings.marginTop + p.y;
+        for (int y = 0; y < drawn.height(); ++y)
+          for (int x = 0; x < drawn.width(); ++x) {
+            if (!drawn.get(x, y)) continue;
+            const int px = ox + x, py = oy + y;
+            if (px < 0 || py < 0 || px >= frame.w || py >= frame.h) continue;
+            ++painted;
+            if (page.get(px, py)) ++overlap;
+            else page.set(px, py);
+          }
+      }
+      std::printf("overlap: %ld of %ld bird pixels (%.3f%%)\n", overlap, painted,
+                  painted ? 100.0 * overlap / painted : 0.0);
+    }
   }
   if (!writePpm(out, frame)) {
     std::fprintf(stderr, "cannot write %s\n", out);

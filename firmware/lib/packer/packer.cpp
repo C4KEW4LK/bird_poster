@@ -1,9 +1,41 @@
+#pragma GCC optimize("O2")  // the collision tests and mask scaling are hot loops on the frame; the build is -Os
 #include "packer.h"
+
+#include <chrono>
 
 #include <algorithm>
 #include <cmath>
 
 namespace birdposter {
+
+PackCounters packCounters;
+
+namespace {
+int gPackScale = 1;
+// A distance given in page pixels, in the packer's: at least one.
+int scaled(int px) { return std::max(1, (px + gPackScale / 2) / gPackScale); }
+}  // namespace
+
+void setPackScale(int s) { gPackScale = std::max(1, s); }
+int packScale() { return gPackScale; }
+
+namespace {
+// Adds the scope's microseconds and one call to a pair of PackCounters fields.
+class Tally {
+ public:
+  Tally(int &calls, int64_t &us) : calls_(calls), us_(us), at_(std::chrono::steady_clock::now()) {}
+  ~Tally() {
+    ++calls_;
+    us_ += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - at_)
+               .count();
+  }
+
+ private:
+  int &calls_;
+  int64_t &us_;
+  std::chrono::steady_clock::time_point at_;
+};
+}  // namespace
 namespace {
 
 constexpr int kBits = 64;
@@ -34,6 +66,56 @@ constexpr ByteStats makeByteStats() {
 }
 
 constexpr ByteStats kByteStats = makeByteStats();
+
+// Bits [from, to) of a row set, a word at a time.
+void fillBits(uint64_t *r, int from, int to) {
+  if (from >= to) return;
+  const size_t first = size_t(from) >> 6, last = size_t(to - 1) >> 6;
+  for (size_t i = first; i <= last; ++i) {
+    uint64_t word = ~0ULL;
+    if (i == first) word &= ~0ULL << (from & 63);
+    if (i == last) {
+      const unsigned hi = unsigned((to - 1) & 63);
+      if (hi < 63) word &= (1ULL << (hi + 1)) - 1;
+    }
+    r[i] |= word;
+  }
+}
+
+// The first column at or after `from` whose bit is `set`, or `end`. In 32-bit
+// halves: the frame's core is 32 bits wide, and a count of trailing zeros on
+// a 32-bit word is an instruction or two there.
+int nextBit(const uint64_t *r, int from, int end, bool set) {
+  while (from < end) {
+    const int i = from >> 5;
+    const uint64_t word = r[i >> 1];
+    uint32_t v = uint32_t(i & 1 ? word >> 32 : word);
+    if (!set) v = ~v;
+    v &= ~0u << (from & 31);
+    if (v) return std::min(end, (i << 5) + __builtin_ctz(v));
+    from = (i + 1) << 5;
+  }
+  return end;
+}
+
+// Columns [from, to) of a row: 0 when none is set, 1 when all are, 2 mixed.
+int spanState(const uint64_t *r, int from, int to) {
+  const size_t first = size_t(from) >> 6, last = size_t(to - 1) >> 6;
+  bool any = false, all = true;
+  for (size_t i = first; i <= last; ++i) {
+    uint64_t want = ~0ULL;
+    if (i == first) want &= ~0ULL << (from & 63);
+    if (i == last) {
+      const unsigned hi = unsigned((to - 1) & 63);
+      if (hi < 63) want &= (1ULL << (hi + 1)) - 1;
+    }
+    const uint64_t got = r[i] & want;
+    any = any || got;
+    all = all && got == want;
+    if (any && !all) return 2;
+  }
+  return all ? 1 : 0;
+}
 
 // Any opaque pixel in columns [from, to) of one row. Both ends are masked off
 // inside their own word, so a range costs a handful of word tests rather than
@@ -72,7 +154,7 @@ void fillRange(Mask &m, int y, int from, int to) {
 
 }  // namespace
 
-Mask::Mask(int w, int h) : w_(w), h_(h) {
+Mask::Mask(int w, int h, bool fast) : w_(w), h_(h), bits_(MaskAllocator<uint64_t>(fast)) {
   if (w <= 0 || h <= 0) {
     w_ = h_ = 0;
     return;
@@ -107,37 +189,61 @@ int Mask::rowPopcount(int y) const {
 Mask Mask::scaled(int dim, bool flip) const {
   if (empty() || dim <= 0) return Mask();
   const int longest = std::max(w_, h_);
-  const double s = double(dim) / double(longest);
-  const int nw = std::max(1, int(std::lround(w_ * s)));
-  const int nh = std::max(1, int(std::lround(h_ * s)));
-  Mask out(nw, nh);
+  // All in integers: a size is w * dim / longest rounded, and a destination
+  // pixel samples the source at (x + 0.5) * longest / dim. They were doubles,
+  // which the frame does in software - a divide is ~2.7 us there, and this
+  // was one for every column and row of every mask the packer builds. 32 bits
+  // hold it - a plate side and a page side, a few million at most - and a
+  // 32-bit divide is the hardware's, where a 64-bit one is not.
+  const int num = longest, den = dim;
+  const int nw = std::max(1, (w_ * 2 * den + num) / (2 * num));
+  const int nh = std::max(1, (h_ * 2 * den + num) / (2 * num));
+  const auto source = [num, den](int d) { return ((2 * d + 1) * num) / (2 * den); };
+  // Short-lived: the packer erodes it and copies it into the sprite.
+  Mask out(nw, nh, true);
   // Nearest neighbour, sampling the source pixel at the destination centre.
   // The Python resamples the alpha with LANCZOS and re-thresholds; on a
   // silhouette that is already binary the two differ only along the outline,
   // and the erosion below eats that difference.
   //
-  // Every row samples the same source columns, so they are resolved once into a
-  // table and the mirroring folded in. A divide per pixel was the whole cost of
-  // this loop, and on a chip whose doubles are emulated in software it is not a
-  // close call. The destination is then built a word at a time, so a row costs
-  // one store per 64 columns instead of a read-modify-write per opaque pixel.
-  std::vector<int> cols(size_t(nw), 0);
-  for (int x = 0; x < nw; ++x) {
-    const int sx = std::min(w_ - 1, int((x + 0.5) / s));
-    cols[size_t(x)] = flip ? w_ - 1 - sx : sx;
-  }
+  // By runs, not by pixels. The column a destination pixel samples never
+  // goes down as x goes up, so a run of set source columns [a, b) is a run of
+  // destination columns, [first x sampling a or later, first x sampling b or
+  // later), and that is filled a word at a time. A silhouette row is a handful
+  // of runs; a pixel at a time was ~20 cycles each on the frame, ~6 ms a mask.
+  // Mirrored, column c is sampled where the unmirrored sampler reads w-1-c,
+  // so [a, b) is the destination run [first x at w-b, first x at w-a).
+  std::vector<int> firstAt(size_t(w_) + 1, nw);  // first x sampling column >= v
+  for (int x = nw - 1; x >= 0; --x) firstAt[size_t(std::min(w_ - 1, source(x)))] = x;
+  for (int v = w_ - 1; v >= 0; --v) firstAt[size_t(v)] = std::min(firstAt[size_t(v)], firstAt[size_t(v) + 1]);
   for (int y = 0; y < nh; ++y) {
-    const int sy = std::min(h_ - 1, int((y + 0.5) / s));
-    const uint64_t *src = row(sy);
+    const uint64_t *src = row(std::min(h_ - 1, source(y)));
     uint64_t *dst = out.row(y);
-    for (int x0 = 0; x0 < nw; x0 += kBits) {
-      const int end = std::min(nw, x0 + kBits);
-      uint64_t word = 0;
-      for (int x = x0; x < end; ++x) {
-        const int sx = cols[size_t(x)];
-        if ((src[sx >> 6] >> (sx & 63)) & 1ULL) word |= 1ULL << (x - x0);
+    for (int a = nextBit(src, 0, w_, true); a < w_;) {
+      const int b = nextBit(src, a, w_, false);
+      if (flip)
+        fillBits(dst, firstAt[size_t(w_ - b)], firstAt[size_t(w_ - a)]);
+      else
+        fillBits(dst, firstAt[size_t(a)], firstAt[size_t(b)]);
+      a = nextBit(src, b, w_, true);
+    }
+  }
+  return out;
+}
+
+Mask Mask::reduced(int s) const {
+  if (empty() || s <= 1) return *this;
+  const int nw = (w_ + s - 1) / s, nh = (h_ + s - 1) / s;
+  Mask out(nw, nh);
+  for (int y = 0; y < nh; ++y) {
+    uint64_t *dst = out.row(y);
+    for (int sy = y * s; sy < std::min(h_, (y + 1) * s); ++sy) {
+      const uint64_t *src = row(sy);
+      for (int a = nextBit(src, 0, w_, true); a < w_;) {
+        const int b = nextBit(src, a, w_, false);
+        fillBits(dst, a / s, (b - 1) / s + 1);
+        a = nextBit(src, b, w_, true);
       }
-      dst[size_t(x0) >> 6] = word;
     }
   }
   return out;
@@ -156,11 +262,15 @@ Mask Mask::eroded(int radius) const {
   // as PIL, which pads the border rather than wrapping it. Nothing extra is
   // needed for that: bits past `width` are never set, the guard word is zero,
   // and a shift brings in zeros at either end.
+  //
+  // The horizontal pass is kept for the last 2r+1 rows only, in a ring, not
+  // as a whole second mask: on the frame a mask lives in PSRAM, which writes
+  // at ~35 MB/s, and a whole intermediate was half of this function's time.
   const size_t sw = stride_;
-  Mask horiz(w_, h_);
-  for (int y = 0; y < h_; ++y) {
+  const int span = 2 * radius + 1;
+  std::vector<uint64_t> ring(size_t(span) * sw);
+  const auto horizontal = [&](int y, uint64_t *dst) {
     const uint64_t *src = row(y);
-    uint64_t *dst = horiz.row(y);
     for (size_t i = 0; i < sw; ++i) dst[i] = src[i];
     for (int d = 1; d <= radius; ++d) {
       const size_t off = size_t(d) >> 6;
@@ -179,17 +289,21 @@ Mask Mask::eroded(int radius) const {
         dst[i] &= lower & upper;
       }
     }
-  }
-  Mask out(w_, h_);
+  };
+  const auto slot = [&](int y) { return ring.data() + size_t(y % span) * sw; };
+  // Short-lived: the packer copies it into the sprite.
+  Mask out(w_, h_, true);
   // Rows within `radius` of either edge have a neighbour off the mask, so they
   // erode away entirely and are left as the zeros they were allocated with.
+  for (int y = 0; y < std::min(h_, span - 1); ++y) horizontal(y, slot(y));
   for (int y = radius; y + radius < h_; ++y) {
-    const uint64_t *base = horiz.row(y);
+    horizontal(y + radius, slot(y + radius));
     uint64_t *dst = out.row(y);
+    const uint64_t *base = slot(y);
     for (size_t i = 0; i < sw; ++i) dst[i] = base[i];
     for (int d = 1; d <= radius; ++d) {
-      const uint64_t *lo = horiz.row(y - d);
-      const uint64_t *hi = horiz.row(y + d);
+      const uint64_t *lo = slot(y - d);
+      const uint64_t *hi = slot(y + d);
       for (size_t i = 0; i < sw; ++i) dst[i] &= lo[i] & hi[i];
     }
   }
@@ -321,7 +435,8 @@ bool collidesOrdered(const Mask &grid, const Mask &sprite, const std::vector<int
 
 }  // namespace
 
-Sprite withLabel(int index, int dim, const Mask &art, const LabelBox &label, int gap) {
+Sprite withLabel(int index, int dim, const Mask &art, const LabelBox &label, int gap,
+                 bool closeGap) {
   Sprite s;
   s.index = index;
   s.dim = dim;
@@ -377,6 +492,19 @@ Sprite withLabel(int index, int dim, const Mask &art, const LabelBox &label, int
   stamp(s.mask, art, ax, 0);
   // The reserved box is solid in the collision mask - that is the whole point.
   for (int y = top; y < top + label.h; ++y) fillRange(s.mask, y, lx, lx + label.w);
+  if (closeGap) {
+    // Up from the name, in each of its columns, to the first of the bird it
+    // meets: that is the pocket between them, and it goes solid so no other
+    // bird fits there. A column that meets no bird is not under the bird, and
+    // is left as it was - filling it would stand a wall up the sprite's side.
+    for (int x = std::max(lx, ax); x < std::min(lx + label.w, ax + aw); ++x) {
+      const int ac = x - ax;
+      int y = std::min(top, ah) - 1;
+      while (y >= 0 && !art.get(ac, y)) --y;
+      if (y < 0) continue;
+      for (int f = y + 1; f < top; ++f) s.mask.set(x, f);
+    }
+  }
 
   s.artX = ax;
   s.artY = 0;
@@ -396,6 +524,7 @@ namespace {
 bool spiralPlace(const Mask &occ, const Sprite &sprite, int width, int height, float turn,
                  std::vector<int> &counts, std::vector<int> &probes, std::vector<int> &order,
                  int &fx, int &fy) {
+  const Tally tally(packCounters.searches, packCounters.searchUs);
   const double maxR = std::hypot(double(width), double(height));
   const double cx = width / 2.0, cy = height / 2.0;
   const int w = sprite.mask.width(), h = sprite.mask.height();
@@ -416,7 +545,7 @@ bool spiralPlace(const Mask &occ, const Sprite &sprite, int width, int height, f
   // sprite hangs off an edge. The +1 is the truncation in `int(px - w/2.0)`,
   // which still yields 0 for a value just above -1.
   const double limX = (width - w) / 2.0 + 1.0, limY = (height - h) / 2.0 + 1.0;
-  for (double r = 0.0; r <= maxR; r += kStep) {
+  for (double r = 0.0; r <= maxR; r += scaled(kStep)) {
     // Once the sweep's ellipse has cleared that box on both axes at once,
     // no angle is left that lands on the page and the walk is finished. The
     // radius ran to the page's diagonal before, which on a sprite too big to
@@ -429,16 +558,25 @@ bool spiralPlace(const Mask &occ, const Sprite &sprite, int width, int height, f
       if (u <= 1.0 && v <= 1.0 && u * u + v * v <= 1.0) break;
     }
     const int count =
-        (r == 0.0) ? 1 : std::max(8, int(2 * M_PI * r * std::max(ax, ay) / kStep));
+        (r == 0.0) ? 1 : std::max(8, int(2 * M_PI * r * std::max(ax, ay) / scaled(kStep)));
+    // The angle steps evenly round the ring, so the candidate's direction is
+    // the last one turned by a fixed step: a multiply-add each instead of a
+    // cos and a sin, which on a chip without a double unit were most of the
+    // walk. In float, the drift over the longest ring is a tenth of a pixel,
+    // and the collision test is exact whatever the candidate - it only picks
+    // where to look.
+    const float da = float(2 * M_PI) / float(count);
+    const float cd = std::cos(da), sd = std::sin(da);
+    float ca = std::cos(turn), sa = std::sin(turn);
+    const float rx = float(r * ax), ry = float(r * ay);
+    const float ox = float(cx - w / 2.0), oy = float(cy - h / 2.0);
     for (int i = 0; i < count; ++i) {
-      const double a = double(turn) + 2 * M_PI * i / count;
-      // One axis at a time: most of the sweep leaves the page on x alone, and
-      // a candidate rejected there should not pay for a second transcendental.
-      const double px = (r == 0.0) ? cx : cx + r * ax * std::cos(a);
-      const int x = int(px - w / 2.0);
+      const float c = ca, sn = sa;
+      ca = c * cd - sn * sd;
+      sa = sn * cd + c * sd;
+      const int x = int(ox + rx * c);
       if (x < 0 || x + w > width) continue;
-      const double py = (r == 0.0) ? cy : cy + r * ay * std::sin(a);
-      const int y = int(py - h / 2.0);
+      const int y = int(oy + ry * sn);
       if (y < 0 || y + h > height) continue;
 
       bool hit = false;
@@ -461,7 +599,7 @@ bool spiralPlace(const Mask &occ, const Sprite &sprite, int width, int height, f
 
 bool pack(const std::vector<Sprite> &sprites, int width, int height,
           std::vector<Placement> &out, float turn) {
-  Mask occ(width, height);
+  Mask occ(width, height, true);  // the page grid: in fast memory if it fits (60 KB at half scale)
   out.clear();
   out.reserve(sprites.size());
   std::vector<int> counts, probes, order;
@@ -685,7 +823,7 @@ bool packGrid(const std::vector<Sprite> &sprites, int width, int height,
   std::vector<int> perRow(size_t(rows), n / rows);
   for (int r = 0; r < n % rows; ++r) perRow[size_t(r)] += 1;
 
-  Mask occ(width, height);
+  Mask occ(width, height, true);  // the page grid: in fast memory if it fits (60 KB at half scale)
   int i = 0;
   for (int r = 0; r < rows; ++r) {
     const int cnt = perRow[size_t(r)];
@@ -736,7 +874,7 @@ bool packHero(const std::vector<Sprite> &sprites, int width, int height,
   out.reserve(size_t(n));
   if (n == 0) return false;
 
-  Mask occ(width, height);
+  Mask occ(width, height, true);  // the page grid: in fast memory if it fits (60 KB at half scale)
   const double cx = width / 2.0, cy = height / 2.0;
 
   // The hero, dead centre. It was sized against the page, so this is where it
@@ -777,9 +915,12 @@ bool packHero(const std::vector<Sprite> &sprites, int width, int height,
     for (int nudgeTurn = 0; nudgeTurn < 5 && !found; ++nudgeTurn) {
       const double lean = (nudgeTurn + 1) / 2 * (nudgeTurn & 1 ? 1.0 : -1.0) * (M_PI / ring);
       const double a = 2 * M_PI * double(k - 1) / ring + lean;
-      for (double r = 0.0; r <= maxR && !found; r += kStep) {
-        const int x = int(std::lround(cx + r * ax * std::cos(a) - w / 2.0));
-        const int y = int(std::lround(cy + r * ay * std::sin(a) - h / 2.0));
+      // The ray's direction is fixed; only the distance along it walks.
+      const float dx = float(ax * std::cos(a)), dy = float(ay * std::sin(a));
+      const float ox = float(cx - w / 2.0), oy = float(cy - h / 2.0);
+      for (double r = 0.0; r <= maxR && !found; r += scaled(kStep)) {
+        const int x = int(std::lround(ox + float(r) * dx));
+        const int y = int(std::lround(oy + float(r) * dy));
         if (x < 0 || y < 0 || x + w > width || y + h > height) continue;
         if (collides(occ, m, x, y)) continue;
         fx = x, fy = y, found = true;
@@ -835,13 +976,17 @@ void voronoiSeeds(int n, int width, int height, const PackOptions &opt, std::vec
   for (int pass = 0; pass < std::max(1, opt.lloyd); ++pass) {
     std::vector<double> ax(size_t(n), 0.0), ay(size_t(n), 0.0);
     cells.assign(size_t(n), 0);
+    // The nearest-seed search is every sample against every seed, so it runs
+    // in float, which the chip has in hardware; a page is far too small for
+    // its precision to pick the wrong seed other than on an exact tie.
+    const std::vector<float> fx(seedX.begin(), seedX.end()), fy(seedY.begin(), seedY.end());
     for (int y = step / 2; y < height; y += step)
       for (int x = step / 2; x < width; x += step) {
         int best = 0;
-        double bestD = 1e30;
+        float bestD = 1e30f;
         for (int k = 0; k < n; ++k) {
-          const double dx = x - seedX[size_t(k)], dy = y - seedY[size_t(k)];
-          const double d = dx * dx + dy * dy;
+          const float dx = float(x) - fx[size_t(k)], dy = float(y) - fy[size_t(k)];
+          const float d = dx * dx + dy * dy;
           if (d < bestD) bestD = d, best = k;
         }
         ax[size_t(best)] += x, ay[size_t(best)] += y, cells[size_t(best)] += 1;
@@ -904,7 +1049,7 @@ bool packVoronoi(const std::vector<Sprite> &sprites, int width, int height,
   std::vector<double> seedX, seedY, weight;
   voronoiSeeds(n, width, height, opt, seedX, seedY, weight);
 
-  Mask occ(width, height);
+  Mask occ(width, height, true);  // the page grid: in fast memory if it fits (60 KB at half scale)
   for (int k = 0; k < n; ++k) {
     const Sprite &sprite = sprites[size_t(k)];
     const Mask &m = sprite.mask;
@@ -1129,7 +1274,7 @@ void compact(const std::vector<Sprite> &sprites, std::vector<Placement> &placed,
 
     bool moved = false;
     for (size_t k = 0; k < n; ++k) {
-      Mask occ(boxW, boxH);
+      Mask occ(boxW, boxH, true);
       for (size_t j = 0; j < n; ++j) {
         if (j == k) continue;
         stamp(occ, sprites[j].mask, placed[j].x - sprites[j].artX, placed[j].y - sprites[j].artY);
@@ -1235,8 +1380,20 @@ namespace {
 // larger than the rest - and a gap measured against someone else's size would
 // crowd the big name and cast the small ones adrift.
 Sprite spriteAt(const std::vector<Mask> &sources, const std::vector<bool> &flips,
-                const std::vector<LabelBox> &labels, int i, int dim, int px) {
-  const Mask art = sources[i].scaled(dim, flips[i]).eroded(kOverlapPx);
+                const std::vector<LabelBox> &labels, int i, int dim, int px, bool hero = false) {
+  const Tally tally(packCounters.sprites, packCounters.spriteUs);
+  Mask scaledMask;
+  {
+    int calls = 0;
+    const Tally part(calls, packCounters.scaleUs);
+    scaledMask = sources[i].scaled(dim, flips[i]);
+  }
+  Mask art;
+  {
+    int calls = 0;
+    const Tally part(calls, packCounters.erodeUs);
+    art = scaledMask.eroded(kOverlapPx / gPackScale);
+  }
   if (labels.empty()) {
     Sprite s;
     s.index = i;
@@ -1245,9 +1402,14 @@ Sprite spriteAt(const std::vector<Mask> &sources, const std::vector<bool> &flips
     return s;
   }
   // Baked at kLabelRefPx, so scale the box to the size this name landed at.
-  const LabelBox box{int(std::lround(double(labels[i].w) * px / kLabelRefPx)),
-                     int(std::lround(double(labels[i].h) * px / kLabelRefPx))};
-  Sprite s = withLabel(i, dim, art, box, int(std::lround(px * kLabelGap)));
+  // In page pixels, then in the packer's - rounded up, so a name's box is
+  // never smaller than the name.
+  const int bw = int(std::lround(double(labels[i].w) * px / kLabelRefPx));
+  const int bh = int(std::lround(double(labels[i].h) * px / kLabelRefPx));
+  const LabelBox box{(bw + gPackScale - 1) / gPackScale, (bh + gPackScale - 1) / gPackScale};
+  int calls = 0;
+  const Tally part(calls, packCounters.labelUs);
+  Sprite s = withLabel(i, dim, art, box, scaled(int(std::lround(px * kLabelGap))), hero);
   s.labelPx = px;
   return s;
 }
@@ -1272,6 +1434,7 @@ void unstamp(Mask &grid, const Mask &sprite, int x, int y) {
 }
 
 bool fitsAt(const Mask &occ, const Mask &m, int x, int y, int boxW, int boxH) {
+  const Tally tally(packCounters.fits, packCounters.fitUs);
   if (x < 0 || y < 0 || x + m.width() > boxW || y + m.height() > boxH) return false;
   for (int r = 0; r < m.height(); ++r)
     if (rowCollides(occ, m, r, x, y)) return false;
@@ -1283,7 +1446,7 @@ bool fitsAt(const Mask &occ, const Mask &m, int x, int y, int boxW, int boxH) {
 bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
             const std::vector<LabelBox> &labels, int namePx, int pageW, int pageH, int boxW,
             int boxH, std::vector<Placement> &out, int *usedPx, int variant,
-            const PackOptions &opt) {
+            const PackOptions &opt, int *attempts) {
   const size_t n = sources.size();
   if (n == 0) return false;
 
@@ -1319,7 +1482,9 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
 
   // One packing attempt at a given scale. Returns false if any bird did not fit.
   std::vector<Sprite> sprites;
+  if (attempts) *attempts = 0;
   auto attemptAt = [&](double shrink, std::vector<Placement> &result, int &px) -> bool {
+    if (attempts) ++*attempts;
     sprites.clear();
     sprites.reserve(n);
     // Names have to shrink too: a fixed-size name never yields, so a full page
@@ -1331,7 +1496,7 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
     const int heroPx = px == 0 ? 0 : std::max(px, int(std::lround(px * std::max(1.0f, opt.heroLabel))));
     const auto pxFor = [&](int i) { return heroOf && i == order[0] ? heroPx : px; };
     for (int i : order) {
-      int dim = std::max(kMinDim, int(base * shrink * weights[size_t(i)]));
+      int dim = std::max(scaled(kMinDim), int(base * shrink * weights[size_t(i)]));
       // The hero is grown to the page's edges instead: the short side, so it
       // touches top and bottom of a landscape page or both sides of a portrait
       // one. Its sprite is the silhouette plus its name, and only the whole
@@ -1346,17 +1511,17 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
         // placer refuses the hero before the other birds are ever tried.
         const double fill = std::max(0.05, double(opt.heroFill));
         for (int it = 0; it < 5; ++it) {
-          const Sprite trial = spriteAt(sources, flips, labels, i, dim, heroPx);
+          const Sprite trial = spriteAt(sources, flips, labels, i, dim, heroPx, true);
           const int tw = trial.mask.width(), th = trial.mask.height();
           if (tw <= 0 || th <= 0) break;
           const double room = std::min(boxW * fill / tw, boxH * fill / th);
-          const int next = std::max(kMinDim, int(std::floor(dim * room)));
+          const int next = std::max(scaled(kMinDim), int(std::floor(dim * room)));
           const bool inside = tw <= boxW && th <= boxH;
           if (inside && next == dim) break;
           dim = next == dim ? dim - 1 : next;  // never stall on a sprite still over the edge
         }
       }
-      sprites.push_back(spriteAt(sources, flips, labels, i, dim, pxFor(i)));
+      sprites.push_back(spriteAt(sources, flips, labels, i, dim, pxFor(i), heroOf && i == order[0]));
     }
     // Each try differs only in how ties are broken, so a scale fits if any of
     // them can place the set. The layout picks which run of tries: layout 0
@@ -1411,11 +1576,12 @@ bool layout(const std::vector<Mask> &sources, const std::vector<bool> &flips,
 void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
           const std::vector<LabelBox> &labels, int namePx, int boxW, int boxH,
           std::vector<Placement> &placed, float maxFactor, int nudge, int rounds,
-          float roundStep) {
+          float roundStep, int heroIndex) {
   if (placed.empty() || maxFactor <= 1.0f) return;
   // Offsets to try beyond the five anchors, nearest first, so a bird that is
   // stopped on one side steps away from it by as little as will do.
   std::vector<std::pair<int, int>> shifts;
+  if (nudge > 0) nudge = scaled(nudge);
   if (nudge > 0) {
     const int step = std::max(1, nudge / 3);
     for (int dy = -nudge; dy <= nudge; dy += step)
@@ -1440,9 +1606,10 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
   // from every other bird.
   const size_t n = placed.size();
   std::vector<Sprite> sprites(n);
-  Mask occ(boxW, boxH);
+  Mask occ(boxW, boxH, true);  // the page grid: in fast memory if it fits
   for (size_t k = 0; k < n; ++k) {
-    sprites[k] = spriteAt(sources, flips, labels, placed[k].index, placed[k].dim, pxFor(k));
+    sprites[k] = spriteAt(sources, flips, labels, placed[k].index, placed[k].dim, pxFor(k),
+                          placed[k].index == heroIndex);
     stamp(occ, sprites[k].mask, placed[k].x - sprites[k].artX, placed[k].y - sprites[k].artY);
   }
 
@@ -1482,7 +1649,8 @@ void grow(const std::vector<Mask> &sources, const std::vector<bool> &flips,
     // A candidate is tried with its centre where the bird's is, then holding
     // each edge, since the room is often to one side, then shifted.
     auto tryAt = [&](int dim, Sprite &out, int &ox, int &oy) -> bool {
-      Sprite cand = spriteAt(sources, flips, labels, placed[k].index, dim, pxFor(k));
+      Sprite cand = spriteAt(sources, flips, labels, placed[k].index, dim, pxFor(k),
+                             placed[k].index == heroIndex);
       const int cw = cand.mask.width(), ch = cand.mask.height();
       const int tries[5][2] = {
           {sx + (sw - cw) / 2, sy + (sh - ch) / 2},  // centre held

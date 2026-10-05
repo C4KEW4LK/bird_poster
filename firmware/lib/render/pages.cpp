@@ -10,13 +10,26 @@ namespace birdposter {
 
 namespace {
 
-// Multiply the canvas by a cream tone, per channel. At `level` 4 the paper
-// comes out near a light buff; below that, proportionally less. Red holds,
-// green falls a little and blue most, which is what makes it warm.
+// Multiply the canvas by a cream tone, per channel: old parchment's hue,
+// #F1E9D2, with extra yellow because the glass reads cool. Against the page's
+// paper (242, 237, 226) parchment is red x0.996, green x0.983, blue x0.929;
+// level 2 is that with blue down a further 4%, level 3 and 4 the same hue
+// stronger. Parchment drops green below red, and on the glass that costs a
+// few red dots among the yellow - about one to five, which reads as warm.
+//
+// Level 1 drops green by less than one step, which is none. The canvas is
+// RGB565, so green moves in steps of ~1.6%: at the faint end one step of
+// green tips the paper to red before the blue has made any yellow, and the
+// faintest cream came out pink.
+// The figures are what fall from each channel, measured on flat paper
+// through the real dither (vivid, detail and edges at 2):
+//   level 1: 3.3% yellow, no red; 2: 15.7 / 2.8; 3: 26.8 / 5.8; 4: 34.9 / 6.5.
 void creamPaper(Canvas &canvas, int level) {
-  const float t = std::clamp(level, 0, 4) / 4.0f;
-  const int mul[3] = {int(256 * (1 - 0.01f * t)), int(256 * (1 - 0.05f * t)),
-                      int(256 * (1 - 0.17f * t))};
+  constexpr float kDrop[5][3] = {
+      {0, 0, 0}, {0.002f, 0.004f, 0.056f}, {0.004f, 0.017f, 0.111f},
+      {0.006f, 0.026f, 0.167f}, {0.008f, 0.034f, 0.222f}};
+  const float *d = kDrop[std::clamp(level, 0, 4)];
+  const int mul[3] = {int(256 * (1 - d[0])), int(256 * (1 - d[1])), int(256 * (1 - d[2]))};
   for (uint16_t &c : canvas.px) {
     int r, g, b;
     rgb888(c, r, g, b);
@@ -219,12 +232,22 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
   std::vector<Mask> sources;
   std::vector<bool> flips;
   std::vector<LabelBox> labels;
+  // The luma planes the silhouette pass decoded, for the draw to take up;
+  // empty for a bird past the budget.
+  std::vector<std::vector<uint8_t>> kept(plateIndices.size());
+  size_t keptBytes = 0;
+  int lumaKept = 0;
   progress("loading silhouettes");
+  fastStats = FastStats{};
+  const int tMasks = nowMs();
   for (size_t i = 0; i < plateIndices.size(); ++i) {
     const int idx = plateIndices[i];
     const PlateEntry &e = plates.entry(size_t(idx));
     Mask m;
-    if (!plates.loadMask(size_t(idx), m)) return false;
+    const size_t keepBytes = (size_t(e.w) * e.h + 1) / 2;
+    const bool keep = keptBytes + keepBytes <= settings.keepLumaBytes;
+    if (!plates.loadMask(size_t(idx), m, keep ? &kept[i] : nullptr)) return false;
+    if (keep) keptBytes += keepBytes, ++lumaKept;
     sources.push_back(std::move(m));
     flips.push_back(flipFor(e.flip, e.name.c_str(), settings.variant));
     if (names) {
@@ -275,53 +298,129 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
 
   std::vector<Placement> placed;
   int usedPx = 0;
-  const PackPlan plan = planFor(settings.packStyle);
+  PackPlan plan = planFor(settings.packStyle);
   progress("packing the page");
   const int t0 = nowMs();
-  if (!layout(sources, flips, labels, namePx, width, height, boxW, packH, placed, &usedPx,
-              settings.variant, plan.pack))
-    return false;
+  int attempts = 0;
+  packCounters = PackCounters{};
+  // At a reduced resolution (packScale), the packer works on silhouettes and
+  // a page 1/s the size, and its placements are scaled back up after. Names
+  // stay in page pixels throughout (see setPackScale).
+  const int ps = std::clamp(settings.packScale, 1, 8);
+  if (ps > 1)
+    for (Mask &m : sources) m = m.reduced(ps);
+  setPackScale(ps);
+  struct ScaleBack {
+    ~ScaleBack() { setPackScale(1); }
+  } scaleBack;
+  bool fellBack = false;
+  if (!layout(sources, flips, labels, namePx, width / ps, height / ps, boxW / ps, packH / ps, placed,
+              &usedPx, settings.variant, plan.pack, &attempts)) {
+    // Grid, scatter and hero give every bird a place of a size the page
+    // decides; a set whose names cannot shrink under kMinLabelPx can be
+    // wider than any of those places at every scale, and then no page is
+    // drawn at all. The spiral fits names around birds instead: lay the page
+    // out that way rather than leave the glass as it was.
+    if (settings.packStyle == PackStyle::Classic) return false;
+    plan = planFor(PackStyle::Classic);
+    fellBack = true;
+    int more = 0;
+    if (!layout(sources, flips, labels, namePx, width / ps, height / ps, boxW / ps, packH / ps,
+                placed, &usedPx, settings.variant, plan.pack, &more))
+      return false;
+    attempts += more;
+  }
+  const int tGrow = nowMs();
   // Then let each bird take the room beside it.
   if (settings.grow) {
     progress("growing into the gaps");
-    grow(sources, flips, labels, usedPx, boxW, packH, placed, plan.growMax, plan.growNudge,
-         plan.growRounds, plan.growStep);
+    // The hero is the first bird given, and keeps the pocket under its name
+    // closed while it grows, as the layout did.
+    grow(sources, flips, labels, usedPx, boxW / ps, packH / ps, placed, plan.growMax,
+         plan.growNudge, plan.growRounds, plan.growStep, plan.pack.hero ? 0 : -1);
   }
+  setPackScale(1);
+  if (ps > 1)
+    for (Placement &p : placed) {
+      p.dim *= ps;
+      p.x *= ps;
+      p.y *= ps;
+      p.labelX *= ps;
+      p.labelY *= ps;
+      p.labelW *= ps;
+      p.labelH *= ps;
+    }
   const int t1 = nowMs();
 
   // The silhouettes are done with; the canvas wants the memory more.
   sources.clear();
   sources.shrink_to_fit();
 
-  Canvas canvas;
-  const uint8_t *paper = plates.paper();
-  canvas.reset(width, height, rgb565(paper[0], paper[1], paper[2]));
-  progress("drawing the birds");
-  for (const Placement &p : placed) {
-    const int idx = plateIndices[size_t(p.index)];
-    const PlateEntry &e = plates.entry(size_t(idx));
+  // A bird's drawn size, and whether it is drawn well above its baked size -
+  // where spriteOverride is asked for a larger source.
+  struct Drawn {
+    int w, h;
+    bool larger;
+  };
+  const auto drawn = [&](const Placement &p) {
+    const PlateEntry &e = plates.entry(size_t(plateIndices[size_t(p.index)]));
     // dim is the silhouette's longest side at this size, and the sprite is
     // the silhouette, so it lands exactly where the packer put the mask.
     const float s = float(p.dim) / float(std::max(e.w, e.h));
     const int dw = std::max(1, int(std::lround(e.w * s)));
     const int dh = std::max(1, int(std::lround(e.h * s)));
+    return Drawn{dw, dh, dw * 4 > e.w * 5 || dh * 4 > e.h * 5};
+  };
+  if (settings.afterLayout) {
+    std::vector<size_t> larger;
+    for (const Placement &p : placed)
+      if (drawn(p).larger) larger.push_back(size_t(p.index));
+    settings.afterLayout(larger);
+  }
+
+  Canvas canvas;
+  const size_t pagePx = size_t(width) * height;
+  const bool reserved = settings.pageMemory && settings.pageMemoryPx >= pagePx;
+  if (reserved) canvas.px.adopt(settings.pageMemory, settings.pageMemoryPx);
+  const uint8_t *paper = plates.paper();
+  canvas.reset(width, height, rgb565(paper[0], paper[1], paper[2]));
+  progress("drawing the birds");
+  int decodeMs = 0, resampleMs = 0, overrideMs = 0;
+  for (const Placement &p : placed) {
+    const int idx = plateIndices[size_t(p.index)];
+    const Drawn d = drawn(p);
+    const int dw = d.w, dh = d.h;
     SpriteImage sprite;
-    const bool larger = dw * 4 > e.w * 5 || dh * 4 > e.h * 5;
+    const bool larger = d.larger;
+    const int tOverride = nowMs();
     const bool overridden =
         larger && settings.spriteOverride && settings.spriteOverride(size_t(p.index), sprite);
-    if (!overridden && !plates.loadSprite(size_t(idx), sprite)) return false;
+    const int tDecode = nowMs();
+    overrideMs += tDecode - tOverride;
+    if (!overridden && !plates.loadSprite(size_t(idx), sprite, &kept[size_t(p.index)])) return false;
+    kept[size_t(p.index)] = std::vector<uint8_t>();  // drawn: give its memory back
+    const int tResample = nowMs();
+    decodeMs += tResample - tDecode;
     const bool enlarged = dw * 2 > sprite.w * 3 || dh * 2 > sprite.h * 3;
     drawSprite(canvas, sprite, originX + p.x, originY + p.y, dw, dh, flips[size_t(p.index)],
                enlarged ? settings.resample : Resample::Bilinear);
+    resampleMs += nowMs() - tResample;
   }
   const int t2 = nowMs();
 
   if (settings.cream > 0) creamPaper(canvas, settings.cream);
   if (settings.beforeDither) settings.beforeDither(canvas);
   progress("dithering to six inks");
-  dither(canvas, out, settings.vivid, settings.sharpen, settings.edges, settings.jitter);
-  canvas.px.clear();
-  canvas.px.shrink_to_fit();
+  if (reserved) {
+    // The frame goes into the canvas's own memory, a byte a pixel over its two.
+    out.w = width;
+    out.h = height;
+    out.px.adopt(reinterpret_cast<uint8_t *>(settings.pageMemory), settings.pageMemoryPx * 2, pagePx);
+  }
+  DitherCounters ditherCounters;
+  dither(canvas, out, settings.vivid, settings.sharpen, settings.edges, settings.jitter,
+         &ditherCounters);
+  canvas.px.release();
   const int t3 = nowMs();
 
   if (names) {
@@ -362,6 +461,20 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
     report->packMs = t1 - t0;
     report->drawMs = t2 - t1;
     report->ditherMs = t3 - t2;
+    report->masksMs = t0 - tMasks;
+    report->layoutMs = tGrow - t0;
+    report->growMs = t1 - tGrow;
+    report->decodeMs = decodeMs;
+    report->resampleMs = resampleMs;
+    report->overrideMs = overrideMs;
+    report->textMs = nowMs() - t3;
+    report->attempts = attempts;
+    report->pack = packCounters;
+    report->placements = placed;
+    report->fellBack = fellBack;
+    report->lumaKept = lumaKept;
+    report->dither = ditherCounters;
+    report->fast = fastStats;
     std::vector<int> dims;
     for (const Placement &p : placed) dims.push_back(p.dim);
     std::sort(dims.begin(), dims.end());

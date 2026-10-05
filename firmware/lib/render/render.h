@@ -15,6 +15,7 @@
 // file, which is how this was checked.
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -57,9 +58,57 @@ inline void rgb888(uint16_t c, int &r, int &g, int &b) {
   b = (c & 31) * 255 / 31;
 }
 
+// A raster's pixels: a vector of its own, or a span of memory set aside
+// elsewhere that it uses but neither allocates nor frees (`adopt`). The frame
+// keeps one block for the page the whole wake - see BirdPageSettings::
+// pageMemory - because the PSRAM fragments around anything allocated later,
+// and a 3.8 MB canvas asked for mid-wake may find no piece that size.
+template <class T>
+class Pixels {
+ public:
+  T *data() { return ext_ ? ext_ : own_.data(); }
+  const T *data() const { return ext_ ? ext_ : own_.data(); }
+  size_t size() const { return ext_ ? n_ : own_.size(); }
+  bool empty() const { return size() == 0; }
+  T *begin() { return data(); }
+  T *end() { return data() + size(); }
+  const T *begin() const { return data(); }
+  const T *end() const { return data() + size(); }
+  T &operator[](size_t i) { return data()[i]; }
+  const T &operator[](size_t i) const { return data()[i]; }
+  // `n` of `v`: in the adopted span if it holds them, else a vector.
+  void assign(size_t n, T v) {
+    if (ext_ && n <= cap_) {
+      n_ = n;
+      std::fill(ext_, ext_ + n, v);
+      return;
+    }
+    ext_ = nullptr;
+    own_.assign(n, v);
+  }
+  // Use `cap` pixels at `p` from now on, as `n` of them, contents as they are.
+  void adopt(T *p, size_t cap, size_t n = 0) {
+    own_ = std::vector<T>();
+    ext_ = p;
+    cap_ = cap;
+    n_ = n;
+  }
+  // Let go of everything: a vector is freed, an adopted span only forgotten.
+  void release() {
+    own_ = std::vector<T>();
+    ext_ = nullptr;
+    cap_ = n_ = 0;
+  }
+
+ private:
+  std::vector<T> own_;
+  T *ext_ = nullptr;
+  size_t cap_ = 0, n_ = 0;
+};
+
 struct Canvas {
   int w = 0, h = 0;
-  std::vector<uint16_t> px;  // RGB565
+  Pixels<uint16_t> px;  // RGB565
   void reset(int width, int height, uint16_t fill);
   inline uint16_t *row(int y) { return px.data() + size_t(y) * w; }
   inline const uint16_t *row(int y) const { return px.data() + size_t(y) * w; }
@@ -67,7 +116,7 @@ struct Canvas {
 
 struct Frame {
   int w = 0, h = 0;
-  std::vector<uint8_t> px;  // Ink values
+  Pixels<uint8_t> px;  // Ink values
   void reset(int width, int height, Ink fill);
   inline uint8_t *row(int y) { return px.data() + size_t(y) * w; }
   inline const uint8_t *row(int y) const { return px.data() + size_t(y) * w; }
@@ -124,8 +173,39 @@ constexpr int kEdgeLevels = 5;
 // pixel's value by up to that much, repeatably, before the ink is chosen.
 // The error passed on is still taken from the true value, so the average
 // colour holds; only where the dots fall is randomised. 0 is off.
+//
+// In place, when `out` already holds the canvas's own memory at the canvas's
+// size (`out.px` adopted on `canvas.px.data()`): the frame is a byte a pixel
+// and the canvas two, so frame row y lies over canvas rows y/2 to (y+1)/2,
+// and by the time row y is written the dither has read every canvas row up
+// to y+1. A page then needs one 3.8 MB block, not that and 1.9 MB more.
+// Where the dither's time goes, in microseconds, when asked: building the
+// colour table, loading canvas rows through it, preparing each row (boost,
+// sharpen, edges) and diffusing the error.
+struct DitherCounters {
+  int64_t tableUs = 0, loadUs = 0, prepareUs = 0, diffuseUs = 0;
+  // With a Helper, loading and preparing run beside the diffusion, and this
+  // is how long the diffusion then waited for them: near zero means the
+  // dither takes as long as its diffusion alone.
+  int64_t waitUs = 0;
+};
+
+// Another core, for work that can run beside the caller's. `start` hands it
+// fn(arg) and returns at once; `wait` returns once that has finished. Only one
+// job is out at a time. The device backs it with a task on the S3's other core
+// (main.cpp); unset - the host, or a single core - the work runs inline, in
+// the same order, and the result is the same either way.
+class Helper {
+ public:
+  virtual ~Helper() = default;
+  virtual void start(void (*fn)(void *), void *arg) = 0;
+  virtual void wait() = 0;
+};
+void setHelper(Helper *h);
+Helper *helper();
+
 void dither(const Canvas &canvas, Frame &out, int vivid = 0, int sharpen = 0, int edges = 0,
-            int jitter = 0);
+            int jitter = 0, DitherCounters *counters = nullptr);
 
 // --- text -------------------------------------------------------------------
 

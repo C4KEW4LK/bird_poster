@@ -79,17 +79,18 @@ Mask erodedReference(const Mask& m, int radius) {
   return out;
 }
 
+// Sizes round w * dim / longest to nearest, and a destination pixel samples
+// the source at (x + 0.5) * longest / dim, rounded down - in exact integers.
 Mask scaledReference(const Mask& m, int dim, bool flip) {
   if (m.empty() || dim <= 0) return Mask();
-  const int longest = std::max(m.width(), m.height());
-  const double s = double(dim) / double(longest);
-  const int nw = std::max(1, int(std::lround(m.width() * s)));
-  const int nh = std::max(1, int(std::lround(m.height() * s)));
+  const long long L = std::max(m.width(), m.height()), D = dim;
+  const int nw = std::max(1, int((2 * m.width() * D + L) / (2 * L)));
+  const int nh = std::max(1, int((2 * m.height() * D + L) / (2 * L)));
   Mask out(nw, nh);
   for (int y = 0; y < nh; ++y) {
-    const int sy = std::min(m.height() - 1, int((y + 0.5) / s));
+    const int sy = std::min(m.height() - 1, int(((2 * y + 1) * L) / (2 * D)));
     for (int x = 0; x < nw; ++x) {
-      const int sx = std::min(m.width() - 1, int((x + 0.5) / s));
+      const int sx = std::min(m.width() - 1, int(((2 * x + 1) * L) / (2 * D)));
       if (m.get(flip ? m.width() - 1 - sx : sx, sy)) out.set(x, y);
     }
   }
@@ -181,11 +182,17 @@ void test_erosion_of_a_solid_block_eats_exactly_the_border() {
 }
 
 void test_rescale_matches_the_per_pixel_sampler() {
-  const Mask m = shape(137, 91, 0xabcdu);
-  for (int dim : {1, 12, 24, 90, 137, 200, 401}) {
-    for (bool flip : {false, true}) {
-      TEST_ASSERT_TRUE_MESSAGE(sameBits(m.scaled(dim, flip), scaledReference(m, dim, flip)),
-                               "scaled() disagrees with the per-pixel sampler");
+  // Widths either side of the word and half-word boundaries the run filler
+  // works in, shrinking and growing, both ways round.
+  const int sizes[][2] = {{1, 1}, {31, 7}, {32, 7}, {33, 40}, {63, 9}, {64, 64}, {65, 30},
+                          {137, 91}, {91, 137}, {452, 300}};
+  for (const auto& wh : sizes) {
+    const Mask m = shape(wh[0], wh[1], 0xabcdu + uint32_t(wh[0] * 7 + wh[1]));
+    for (int dim : {1, 12, 24, 63, 64, 65, 90, 137, 200, 401, 700}) {
+      for (bool flip : {false, true}) {
+        TEST_ASSERT_TRUE_MESSAGE(sameBits(m.scaled(dim, flip), scaledReference(m, dim, flip)),
+                                 "scaled() disagrees with the per-pixel sampler");
+      }
     }
   }
 }
@@ -209,6 +216,28 @@ void test_a_label_joins_its_birds_collision_mask() {
   TEST_ASSERT_TRUE(s.hasLabel);
   for (int y = s.labelY; y < s.labelY + s.labelH; ++y)
     for (int x = s.labelX; x < s.labelX + s.labelW; ++x) TEST_ASSERT_TRUE(s.mask.get(x, y));
+}
+
+void test_the_heros_name_keeps_nothing_between_it_and_its_bird() {
+  // A body on the left, a tall post on the right and nothing between: the
+  // name, set under the post's foot, leaves a pocket under the body that a
+  // small bird would fit. With closeGap the pocket is solid; the empty
+  // columns between body and post, which meet no bird going up, are not.
+  Mask art(40, 30);
+  for (int y = 0; y < 10; ++y)
+    for (int x = 0; x < 20; ++x) art.set(x, y);  // body
+  for (int y = 0; y < 30; ++y)
+    for (int x = 36; x < 40; ++x) art.set(x, y);  // post, the lowest point
+  const LabelBox name{40, 6};
+  const Sprite open = withLabel(0, 40, art, name, 3);
+  const Sprite closed = withLabel(0, 40, art, name, 3, true);
+  const int ax = closed.artX, below = 20;  // a row under the body, above the name
+  TEST_ASSERT_TRUE(below < closed.labelY);
+  TEST_ASSERT_FALSE(open.mask.get(open.artX + 10, below));  // the pocket, left open
+  TEST_ASSERT_TRUE(closed.mask.get(ax + 10, below));        // ... and closed
+  TEST_ASSERT_TRUE(closed.mask.get(ax + 10, closed.labelY - 1));
+  TEST_ASSERT_FALSE(closed.mask.get(ax + 28, below));       // no bird above: left alone
+  TEST_ASSERT_EQUAL_INT(open.labelY, closed.labelY);        // the name has not moved
 }
 
 void test_word_wise_collision_matches_the_per_pixel_overlap() {
@@ -396,6 +425,7 @@ int main() {
   RUN_TEST(test_erosion_of_a_solid_block_eats_exactly_the_border);
   RUN_TEST(test_rescale_matches_the_per_pixel_sampler);
   RUN_TEST(test_a_label_joins_its_birds_collision_mask);
+  RUN_TEST(test_the_heros_name_keeps_nothing_between_it_and_its_bird);
   RUN_TEST(test_word_wise_collision_matches_the_per_pixel_overlap);
   RUN_TEST(test_a_pack_leaves_no_overlap_and_nothing_off_the_page);
   RUN_TEST(test_a_sprite_that_cannot_fit_fails_instead_of_sweeping);

@@ -28,7 +28,8 @@ class WebUi {
 
   // Set by actions that the request handler cannot finish itself: a reboot,
   // or leaving the portal. main.cpp reads and acts on them.
-  enum class Request { None, Reboot, Sleep, Refresh };
+  enum class Request { None, Reboot, Sleep, Refresh, Stress };
+  int stressPages = 0;  // with Request::Stress: how many pages
   Request take();
 
  private:

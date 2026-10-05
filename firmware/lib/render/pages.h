@@ -10,6 +10,7 @@
 #pragma once
 
 #include <ctime>
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
@@ -108,12 +109,33 @@ struct BirdPageSettings {
   // bird drawn more than 1.25x its baked size, where a larger source shows;
   // drawn on the pack's own silhouette and layout, scaled to the same box.
   std::function<bool(size_t index, SpriteImage &out)> spriteOverride;
+  // Told, once the layout is settled and before anything is drawn, which page
+  // positions will be asked of spriteOverride - the birds drawn more than
+  // 1.25x their baked size. The frame fetches their full-size plates here and
+  // then turns its radio off, so the long render runs without it. May be empty.
+  std::function<void(const std::vector<size_t> &larger)> afterLayout;
   // Host harness only: shown the canvas as the dither is about to see it -
   // the birds drawn and scaled, the paper tinted - for looking at.
   std::function<void(const Canvas &)> beforeDither;
   // Told what the render is doing as it goes, for a progress display. May be
   // empty.
   std::function<void(const char *)> progress;
+  // Memory the render may spend keeping each bird's luma plane from the
+  // silhouette pass, so drawing it does not decode it a second time - half a
+  // byte a plate pixel, held from the packing until the bird is drawn, when
+  // the canvas is also up. Birds past the budget are decoded twice, as before.
+  size_t keepLumaBytes = SIZE_MAX;
+  // Memory set aside for the page, `pageMemoryPx` RGB565 pixels at
+  // `pageMemory`, or null to allocate as it goes. The canvas is drawn in it
+  // and the frame dithered into the same block in place (see `dither`), so
+  // `out` comes back holding this memory, not a copy - it is the page until
+  // the memory is next used. Needs width x height of the page.
+  uint16_t *pageMemory = nullptr;
+  size_t pageMemoryPx = 0;
+  // The resolution the packer works at, as a divisor of the page's: 1 full,
+  // 2 half, 4 quarter. Coarser is faster and packs a little looser; birds
+  // never overlap more than at full (see Mask::reduced, setPackScale).
+  int packScale = 1;
 };
 
 // The box for a name at `px`, in the same terms the pack measures a single
@@ -132,10 +154,26 @@ void drawName(Frame &frame, const Font &firstFont, const Font &secondFont,
 struct BirdPageReport {
   int placed = 0;
   int labelPx = 0;       // the size names actually landed at
-  int packMs = 0;
-  int drawMs = 0;
+  int packMs = 0;        // layoutMs + growMs
+  int drawMs = 0;        // decodeMs + resampleMs + overrideMs
   int ditherMs = 0;
   int medianDim = 0;
+  // The same time, finer. Each is wall time, so a slow filesystem shows in
+  // whichever stage was reading it.
+  int masksMs = 0;       // the silhouettes: read and decode the luma plane, measure the names
+  int layoutMs = 0;      // the scale search
+  int growMs = 0;        // each bird into the room beside it
+  int decodeMs = 0;      // the placed birds' planes, read and decoded again for their pixels
+  int resampleMs = 0;    // scaling them onto the canvas
+  int overrideMs = 0;    // in `spriteOverride`: the caller's own sprites (the web's)
+  int textMs = 0;        // names, date and note, after the dither
+  int attempts = 0;      // scales the layout tried, each a whole packing of the set
+  PackCounters pack;     // inside layout and grow: what their time went on
+  int lumaKept = 0;      // birds whose luma plane was kept, not decoded twice
+  DitherCounters dither; // inside ditherMs
+  FastStats fast;        // fast-memory requests in the render, granted or not
+  std::vector<Placement> placements;  // where each bird went, in page pixels
+  bool fellBack = false; // the pack style could not fit the set, and it was laid out as classic
 };
 
 // Draw `plateIndices` (into `plates`, page order - the caller has already

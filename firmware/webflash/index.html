@@ -100,6 +100,15 @@
       <span slot="not-allowed" class="warn">Web Serial needs <code>localhost</code> or HTTPS.</span>
     </esp-web-install-button>
   </div>
+  <div class="card" id="card-debug" hidden>
+    <h3>Debug app</h3>
+    <p>The same firmware with the memory stress test in: with the settings page up (key 1), open <code>/api/stress</code> on the frame and watch <code>/api/timing</code>. Its version ends <code>-debug</code>. Flash <b>App only</b> to go back. Keep <b>Erase device</b> unticked.</p>
+    <span class="size" data-size="debug"></span>
+    <esp-web-install-button id="btn-debug">
+      <span slot="unsupported" class="warn">This browser has no Web Serial.</span>
+      <span slot="not-allowed" class="warn">Web Serial needs <code>localhost</code> or HTTPS.</span>
+    </esp-web-install-button>
+  </div>
   <div class="card" id="card-plates">
     <h3>Plates only</h3>
     <p>New artwork under the app already on the board, or the other region's. For a frame that says <i>no filesystem</i>, <i>missing /plates.bin</i> or <i>not a v6 FGPL pack</i>. Keep <b>Erase device</b> unticked.</p>
@@ -149,6 +158,8 @@
   });
 
   const mb = (n) => `${(n / 1048576).toFixed(1)} MB`;
+  // "550 birds at 690 px"; a builds.json from before the count says the size alone.
+  const birdsAt = (i) => i.birds ? `${i.birds} birds at ${i.source} px` : `birds at ${i.source} px`;
   const $ = (id) => document.getElementById(id);
   let builds;
   try { builds = await (await fetch("builds.json", { cache: "no-store" })).json(); }
@@ -188,7 +199,7 @@
     $("regions-block").hidden = !choose;
     $("regions-hint").hidden = !(choose && "all" in images);
     if (choose) {
-      segment($("regions"), "region", keys.map(k => [k, images[k].label, mb(images[k].size) + " of plates" + (images[k].source ? ` · birds at ${images[k].source} px` : "")]), image, (k) => { image = k; localStorage.setItem("image", k); show(); });
+      segment($("regions"), "region", keys.map(k => [k, images[k].label, mb(images[k].size) + " of plates" + (images[k].source ? ` · ${birdsAt(images[k])}` : "")]), image, (k) => { image = k; localStorage.setItem("image", k); show(); });
     }
     const img = image ? images[image] : null;
     $("btn-full").setAttribute("manifest", img ? img.full : spec.app.manifest);
@@ -197,6 +208,12 @@
     if (img) $("btn-plates").setAttribute("manifest", img.plates);
     document.querySelector('[data-size="full"]').textContent = img ? mb(spec.app.size + img.size) + (choose ? "" : ` · ${img.label}`) : mb(spec.app.size);
     document.querySelector('[data-size="app"]').textContent = mb(spec.app.size);
+    // Only in a build made with webflash.py --debug.
+    $("card-debug").hidden = !spec.debug;
+    if (spec.debug) {
+      $("btn-debug").setAttribute("manifest", spec.debug.manifest);
+      document.querySelector('[data-size="debug"]').textContent = mb(spec.debug.size);
+    }
     if (img) document.querySelector('[data-size="plates"]').textContent = mb(img.size) + (choose ? "" : ` · ${img.label}`);
     // The card's packs, on a board with a slot: plain downloads, named as
     // the firmware looks for them.
@@ -206,7 +223,7 @@
       $("sd-files").innerHTML = Object.keys(sd).map(k => {
         const f = sd[k];
         const name = f.path.split("/").pop();
-        return `<li><span><b>${f.label}</b> &mdash; <code>${name}</code></span><span class="size">${mb(f.size)}${f.source ? ` · birds at ${f.source} px` : ""}</span><a href="${f.path}" download="${name}">Download</a></li>`;
+        return `<li><span><b>${f.label}</b> &mdash; <code>${name}</code></span><span class="size">${mb(f.size)}${f.source ? ` · ${birdsAt(f)}` : ""}</span><a href="${f.path}" download="${name}">Download</a></li>`;
       }).join("");
     }
     localStorage.setItem("board", board);

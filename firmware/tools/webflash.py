@@ -3,6 +3,7 @@
     python3 firmware/tools/webflash.py --bake       # build every board, bake what is missing, serve on :8000
     python3 firmware/tools/webflash.py --no-serve   # just assemble webflash/dist/
     python3 firmware/tools/webflash.py --boards ee02 --regions au   # one board, one plate image
+    python3 firmware/tools/webflash.py --debug      # also offer the debug app, with /api/stress
 
 The same page is published at https://c4kew4lk.github.io/bird_poster/ by
 .github/workflows/flasher.yml on every push to main, built the same way from
@@ -60,7 +61,7 @@ import shutil
 import struct
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -182,6 +183,23 @@ def pack_source(path: Path) -> int:
     return struct.unpack("<H", head[10:12])[0] if len(head) == 12 else 0
 
 
+def pack_species(path: Path) -> set[str]:
+    """The species a pack can draw, by name, aliases left out: another
+    spelling of a bird already in the pack is not another bird. (FGPL v7: a
+    16-byte header and the paper tone, then per record a u16 name length, the
+    name, w u16, h u16, flip u8, alias u8 and 64 more bytes.)"""
+    data = path.read_bytes()
+    count = struct.unpack("<I", data[12:16])[0]
+    at, names = 19, set()
+    for _ in range(count):
+        (n,) = struct.unpack("<H", data[at : at + 2])
+        name = data[at + 2 : at + 2 + n].decode("utf-8")
+        if not data[at + 2 + n + 5]:
+            names.add(name)
+        at += 2 + n + 70
+    return names
+
+
 def pack_for(board: str, style: str, bake: bool) -> Path:
     """The baked pack for a style at this board's budget - or, for `board`
     "card", at full size - baking it when asked and it is missing."""
@@ -263,7 +281,7 @@ def filesystem_image(board: str, packs: dict[str, Path], out: Path, fonts: Path)
     shutil.rmtree(stage, ignore_errors=True)
 
 
-def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool) -> None:
+def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool, debug: bool = False) -> None:
     # dist is entirely this function's output; nothing else may live in it,
     # or it gets served with the page.
     shutil.rmtree(dist, ignore_errors=True)
@@ -276,9 +294,18 @@ def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool) -> N
         text=True,
         check=False,
     ).stdout.strip()
-    # A tag when the build is one, else the date and the commit: what the page
-    # shows above the buttons, and what the frame's status page repeats.
-    version = os.environ.get("BUILD_VERSION") or f"{date.today().isoformat()} {sha}"
+    dirty = subprocess.run(
+        ["git", "diff", "--quiet", "HEAD", "--", "."], cwd=FIRMWARE, check=False
+    ).returncode != 0
+    # One build time for every board, handed to platformio.ini's version
+    # flag, so the page and each frame's status page name the same build.
+    stamp = os.environ.setdefault("BUILD_STAMP", datetime.now().strftime("%y%m%d%H%M"))
+    # A tag when the build is one, else the date and the version the firmware
+    # carries: what the page shows above the buttons, and what the frame's
+    # status page repeats.
+    version = os.environ.get("BUILD_VERSION") or (
+        f"{date.today().isoformat()} {sha}{'-dirty' if dirty else ''}.{stamp}"
+    )
 
     def manifest(name: str, chosen: list[dict]) -> dict:
         return {
@@ -315,6 +342,20 @@ def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool) -> N
             "images": {},
         }
         manifests = {entry["app"]["manifest"]: manifest(f"{spec['label']}, app only", app)}
+        if debug:
+            # Beside the ordinary app, not instead of it: the same firmware
+            # with the memory stress test in (/api/stress) and "-debug" on its
+            # version. The plates are the same either way.
+            env = spec["env"] + "-debug"
+            pio(env)
+            out_debug = dist / f"{board}-debug"
+            out_debug.mkdir(exist_ok=True)
+            debug_app = app_parts(FIRMWARE / ".pio" / "build" / env, out_debug)
+            name = f"manifest-{board}-app-debug.json"
+            m = manifest(f"{spec['label']}, debug app", debug_app)
+            m["version"] = f"{version}-debug"
+            manifests[name] = m
+            entry["debug"] = {"manifest": name, "size": size_of(debug_app)}
         if regions:
             packs = {r: pack_for(board, REGIONS[r][1], bake) for r in regions}
             # One image per region, or one image with them all - or, on a
@@ -352,6 +393,7 @@ def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool) -> N
                     "plates": f"manifest-{board}-plates-{key}.json",
                     "size": size_of(part),
                     "source": min(pack_source(p) for p in group.values()),
+                    "birds": len(set().union(*(pack_species(p) for p in group.values()))),
                 }
         if regions and board == boards[0]:
             # The full-size plates, one file a species, once for every board.
@@ -378,6 +420,7 @@ def assemble(dist: Path, boards: list[str], regions: list[str], bake: bool) -> N
                     "path": f"card/{name}",
                     "size": (card / name).stat().st_size,
                     "source": pack_source(card / name),
+                    "birds": len(pack_species(card / name)),
                 }
         for name, m in manifests.items():
             (dist / name).write_text(json.dumps(m, indent=2) + "\n")
@@ -437,6 +480,11 @@ def main() -> None:
     ap.add_argument(
         "--bake", action="store_true", help="bake any pack that is missing (minutes each)"
     )
+    ap.add_argument(
+        "--debug",
+        action="store_true",
+        help="also offer the debug app, beside the ordinary one: the same firmware plus the memory stress test (/api/stress)",
+    )
     args = ap.parse_args()
 
     boards = [b for b in args.boards.split(",") if b]
@@ -450,7 +498,7 @@ def main() -> None:
     if not boards:
         raise SystemExit("no boards to build")
     dist = FIRMWARE / "webflash" / "dist"
-    assemble(dist, boards, regions, args.bake)
+    assemble(dist, boards, regions, args.bake, args.debug)
     if not args.no_serve:
         serve(dist, args.port)
 
