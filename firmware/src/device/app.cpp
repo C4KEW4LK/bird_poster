@@ -1116,7 +1116,7 @@ std::vector<std::string> App::statusLines() {
                                                             : state.lastBirds));
   lines.push_back("Rendered: " + localTime(state.lastRender) + ", layout " +
                   std::to_string(state.layout));
-  char quiet[16];
+  char quiet[32];
   snprintf(quiet, sizeof quiet, "%02d:%02d-%02d:%02d", settings.quietFrom / 60, settings.quietFrom % 60,
            settings.quietTo / 60, settings.quietTo % 60);
   lines.push_back("Refresh: every " + std::to_string(settings.intervalMin) + " min, " +

@@ -355,6 +355,7 @@ int argTime(const char *name, int fallback) {
 }
 
 String hhmm(int minutes) {
+  minutes = (minutes % 1440 + 1440) % 1440;  // a day, whatever was stored
   char buf[8];
   snprintf(buf, sizeof buf, "%02d:%02d", minutes / 60, minutes % 60);
   return buf;

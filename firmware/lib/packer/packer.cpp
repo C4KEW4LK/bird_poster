@@ -98,25 +98,6 @@ int nextBit(const uint64_t *r, int from, int end, bool set) {
   return end;
 }
 
-// Columns [from, to) of a row: 0 when none is set, 1 when all are, 2 mixed.
-int spanState(const uint64_t *r, int from, int to) {
-  const size_t first = size_t(from) >> 6, last = size_t(to - 1) >> 6;
-  bool any = false, all = true;
-  for (size_t i = first; i <= last; ++i) {
-    uint64_t want = ~0ULL;
-    if (i == first) want &= ~0ULL << (from & 63);
-    if (i == last) {
-      const unsigned hi = unsigned((to - 1) & 63);
-      if (hi < 63) want &= (1ULL << (hi + 1)) - 1;
-    }
-    const uint64_t got = r[i] & want;
-    any = any || got;
-    all = all && got == want;
-    if (any && !all) return 2;
-  }
-  return all ? 1 : 0;
-}
-
 // Any opaque pixel in columns [from, to) of one row. Both ends are masked off
 // inside their own word, so a range costs a handful of word tests rather than
 // a bit test per column.
