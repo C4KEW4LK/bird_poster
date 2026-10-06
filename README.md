@@ -37,7 +37,7 @@ settings page runs the request and shows exactly what came back, or why not.
 
 Two boards carry the same 13.3" Spectra 6 panel:
 
-- a [Seeed XIAO ESP32-S3 Plus](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/)
+- a [Seeed XIAO ESP32-S3 Plus](https://wiki.seeedstudio.com/getting_started_with_ee02/)
   in Seeed's **EE02** e-paper driver board — 16 MB flash, one region's plates;
 - Seeed's [**reTerminal E1004**](https://wiki.seeedstudio.com/getting_started_with_reterminal_e1004/)
   — the same glass in a case with a battery, 32 MB flash and a microSD slot.
