@@ -143,9 +143,7 @@ Three install options:
 
 The page is rebuilt by [`.github/workflows/flasher.yml`](.github/workflows/flasher.yml)
 on every push to `main`, from the same script that serves it locally, and
-carries the full-size web plates with it; a tag push attaches the same images
-to the [GitHub release](https://github.com/C4KEW4LK/bird_poster/releases) for
-flashing with `esptool`.
+carries the full-size web plates with it.
 
 ## Build
 
