@@ -300,7 +300,7 @@ say(lat,place&&lat.value.trim()===''?'Enter the latitude, or use the place looku
 say(lng,place&&lng.value.trim()===''?'Enter the longitude, or use the place lookup.':'');
 if(place&&lat.value!==''&&lng.value!==''&&+lat.value==0&&+lng.value==0)say(lat,'0, 0 is the Gulf of Guinea - use the place lookup or type the frame\'s location.');
 else if(v=='ala'&&lat.validity.valid&&lng.validity.valid&&lat.value!==''&&lng.value!==''&&(+lat.value<-56||+lat.value>-8||+lng.value<104||+lng.value>170))say(lat,'The Atlas of Living Australia only covers Australia and its territories.');
-var key=g('ebirdkey'),k=key.value.trim();say(key,v!='ebird'?'':!k&&key.dataset.saved!='1'?'eBird needs an API key - free from ebird.org/api/keygen.':!k?'':!/^[A-Za-z0-9]+$/.test(k)?'The key is only letters and digits - check it was copied whole.':'');
+var key=g('ebirdkey'),k=key.value.trim();say(key,v!='ebird'?'':!k&&key.dataset.saved!='1'?'eBird needs an API key - free from ebird.org/api/keygen.':!k?'':!/^[A-Za-z0-9-]+$/.test(k)?'The key is only letters, digits and dashes - check it was copied whole.':'');
 var url=/^https?:\/\/\S+$/i;
 say(g('detector'),v=='birdnet'&&!url.test(g('detector').value.trim())?'Start the address with http:// or https://':'');
 say(g('listurl'),v=='list'&&!url.test(g('listurl').value.trim())?'Start the URL with http:// or https://':'');
@@ -360,6 +360,9 @@ h1{font:italic 1.8rem Georgia,serif;margin:.2rem 0 .6rem}
 .good{color:#2a5c2a}.bad{color:#b02020}
 code{word-break:break-all;font-size:.85rem}
 small{color:#666}
+form{margin:1rem 0}
+button{font:inherit;padding:.55rem 1rem;border-radius:6px;border:1px solid #2a5c2a;background:#2a5c2a;color:#fff;font-weight:600;cursor:pointer}
+button:hover{background:#234d23}
 </style></head><body>
 <h1>Source test</h1>
 )HTML";
@@ -515,12 +518,14 @@ bool isHttpUrl(const std::string &url) {
          url.find(' ') == std::string::npos;
 }
 
-// eBird's keys are a dozen letters and digits. Anything else is a paste gone
-// wrong, and it goes into a request header, where a line break would not do.
+// eBird's keys are letters and digits: a dozen in the old ones, a UUID with
+// its dashes in the new (which eBird refuses with the dashes taken out).
+// Anything else is a paste gone wrong, and it goes into a request header,
+// where a line break would not do.
 bool validEbirdKey(const std::string &k) {
   if (k.empty() || k.size() > 64) return false;
   for (char c : k)
-    if (!isalnum(uint8_t(c))) return false;
+    if (!isalnum(uint8_t(c)) && c != '-') return false;
   return true;
 }
 
@@ -577,7 +582,7 @@ SourceConfig sourceFromForm(App &app, std::string &problem) {
     else if (!lngOk) problem = "Longitude must be a number from -180 to 180.";
     else if (cfg.lat == 0 && cfg.lng == 0) problem = "Latitude and longitude are both 0 - that is the Gulf of Guinea. Use the place lookup or type the frame's location.";
     else if (cfg.source == Source::eBird && cfg.ebirdKey.empty()) problem = "eBird needs an API key - free from ebird.org/api/keygen.";
-    else if (cfg.source == Source::eBird && !validEbirdKey(cfg.ebirdKey)) problem = "The eBird API key should be only letters and digits - check it was copied whole.";
+    else if (cfg.source == Source::eBird && !validEbirdKey(cfg.ebirdKey)) problem = "The eBird API key should be only letters, digits and dashes - check it was copied whole.";
     // Australia and its territories, generously: Christmas Island in the west,
     // Norfolk Island in the east, Macquarie Island in the south. ALA has
     // nothing outside it, and an empty page is a poor way to learn that.
@@ -667,7 +672,10 @@ String render(App &app, const std::string &error = "") {
   page.replace("%ERROR%", error.empty() ? ""
                         : (error.rfind("Saved, except", 0) == 0 ? "<div class=\"err\">" : "<div class=\"busy\">") +
                               esc(error) + "</div>");
-  page.replace("%STAMP%", "\"" + stamp(app) + "\"");
+  // Inside the page's one script: a newline or backslash in the last result
+  // (a service's own error text, a network's name) would end the string and
+  // stop the whole script, every source's fields showing at once with it.
+  page.replace("%STAMP%", "\"" + jsonEsc(stamp(app).c_str()) + "\"");
   page.replace("%BUSYSHOW%", app.phase.empty() ? "hidden" : "");
   {
     const bool online = WiFi.status() == WL_CONNECTED;
@@ -1096,6 +1104,7 @@ void WebUi::begin(bool captive) {
     const Mode mode = modeFromForm(cfg.source, app.settings.mode);
 
     String page = FPSTR(kTestPage);
+    bool saveable = false;
     if (!problem.empty()) {
       page += "<div class=\"status\"><div><b>Result</b><span class=\"bad\">" + esc(problem) + "</span></div></div>";
     } else if (WiFi.status() != WL_CONNECTED) {
@@ -1133,9 +1142,23 @@ void WebUi::begin(bool captive) {
           page += "<div><b></b><span class=\"bad\"><small>None of them has artwork in the pack, so the page would be empty.</small></span></div>";
       }
       page += "</div>";
+      if (r.ok) {
+        // The settings form as it was posted here, in order, so saving it is
+        // the same as pressing Save on the settings page (checkboxes rely on
+        // the order: the first of a name wins).
+        page += "<form method=\"post\" action=\"/save\">";
+        for (int i = 0; i < server.args(); i++) {
+          if (server.argName(i) == "plain") continue;  // the WebServer's copy of the whole body
+          page += "<input type=\"hidden\" name=\"" + esc(server.argName(i).c_str()) + "\" value=\"" +
+                  esc(server.arg(i).c_str()) + "\">";
+        }
+        page += "<button type=\"submit\">Save settings</button></form>";
+        saveable = true;
+      }
     }
-    page += "<p><a href=\"javascript:history.back()\">Back to settings</a> &middot; <a href=\"/\">Settings</a></p>"
-            "<p><small>Nothing was saved. The Save button on the settings page does that.</small></p></body></html>";
+    page += "<p><a href=\"javascript:history.back()\">Back to settings</a> &middot; <a href=\"/\">Settings</a></p>";
+    page += saveable ? "<p><small>Nothing is saved until you press Save settings.</small></p></body></html>"
+                     : "<p><small>Nothing was saved. The Save button on the settings page does that.</small></p></body></html>";
     server.send(200, "text/html", page);
   });
   server.on("/action", HTTP_POST, [this]() {
