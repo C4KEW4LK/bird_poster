@@ -54,6 +54,17 @@ float labelScale(LabelSize size) {
   return 0.032f;
 }
 
+float textScale(TextSize size) {
+  switch (size) {
+    case TextSize::Small: return labelScale(LabelSize::Small);
+    case TextSize::Large: return labelScale(LabelSize::Large);
+    case TextSize::XLarge: return labelScale(LabelSize::XLarge);
+    case TextSize::Huge: return 0.075f;
+    case TextSize::Medium: break;
+  }
+  return labelScale(LabelSize::Medium);
+}
+
 namespace {
 
 int subPx(int px, float scale) { return std::max(1, int(std::lround(px * scale))); }
@@ -158,6 +169,109 @@ std::string formatDate(const std::tm &tm, DateStyle style, DateOrder order) {
   return buf;
 }
 
+namespace {
+
+// Each "{{name}}" in `text`, lower-cased with its spaces dropped: `each` is
+// told where it starts, one past where it ends, and the name.
+template <typename Each>
+size_t eachName(const std::string &text, Each each) {
+  size_t pos = 0;
+  while (pos < text.size()) {
+    const size_t open = text.find("{{", pos);
+    const size_t close = open == std::string::npos ? open : text.find("}}", open + 2);
+    if (close == std::string::npos) break;
+    std::string name;
+    for (char c : text.substr(open + 2, close - open - 2))
+      if (c != ' ') name += char(c >= 'A' && c <= 'Z' ? c + 32 : c);
+    if (!each(pos, open, close + 2, name)) return std::string::npos;
+    pos = close + 2;
+  }
+  return pos;
+}
+
+}  // namespace
+
+bool textUses(const std::string &text, const std::string &name, bool prefix) {
+  bool found = false;
+  eachName(text, [&](size_t, size_t, size_t, const std::string &n) {
+    found = found || n == name || (prefix && n.compare(0, name.size(), name) == 0);
+    return !found;
+  });
+  return found;
+}
+
+std::string formatTime(const std::tm &tm, bool clock12h) {
+  char buf[16];
+  if (clock12h) {
+    const int h = tm.tm_hour % 12 == 0 ? 12 : tm.tm_hour % 12;
+    std::snprintf(buf, sizeof buf, "%d:%02d %s", h, tm.tm_min, tm.tm_hour < 12 ? "am" : "pm");
+  } else {
+    std::snprintf(buf, sizeof buf, "%02d:%02d", tm.tm_hour, tm.tm_min);
+  }
+  return buf;
+}
+
+std::string formatHour(const std::tm &tm, bool clock12h) {
+  if (!clock12h) return std::to_string(tm.tm_hour);
+  return std::to_string(tm.tm_hour % 12 == 0 ? 12 : tm.tm_hour % 12) + (tm.tm_hour < 12 ? " am" : " pm");
+}
+
+std::string expandText(const std::string &text, const std::tm *tm, const TextPrefs &prefs,
+                       const TextLookup &lookup) {
+  const DateOrder order = prefs.dateOrder;
+  static const char *const kDays[] = {"Sunday",   "Monday", "Tuesday", "Wednesday",
+                                      "Thursday", "Friday", "Saturday"};
+  static const char *const kMonths[] = {"January", "February", "March",     "April",
+                                        "May",     "June",     "July",      "August",
+                                        "September", "October", "November", "December"};
+  // What a name stands for, or false for a name that is not one.
+  const auto value = [order, &prefs](const std::string &name, const std::tm &t, std::string &out) {
+    const std::tm *tm = &t;
+    const int mon = std::clamp(tm->tm_mon, 0, 11), wday = std::clamp(tm->tm_wday, 0, 6);
+    char buf[32];
+    if (name == "date.long") out = formatDate(*tm, DateStyle::WordsLong, order);
+    else if (name == "date.short") out = formatDate(*tm, DateStyle::NumericShort, order);
+    else if (name == "date.numeric") out = formatDate(*tm, DateStyle::NumericLong, order);
+    else if (name == "date.medium") out = formatDate(*tm, DateStyle::WordsShort, order);
+    else if (name == "date.full") out = formatDate(*tm, DateStyle::WordsFull, order);
+    else if (name == "time") out = formatTime(*tm, prefs.clock12h);
+    else if (name == "time.24h") out = formatTime(*tm, false);
+    else if (name == "time.12h") out = formatTime(*tm, true);
+    else if (name == "hour.24h") out = formatHour(*tm, false);
+    else if (name == "hour.12h") out = formatHour(*tm, true);
+    else if (name == "weekday") out = kDays[wday];
+    else if (name == "weekday.short") out = std::string(kDays[wday], 3);
+    else if (name == "day") out = std::to_string(tm->tm_mday);
+    else if (name == "month") out = kMonths[mon];
+    else if (name == "month.short") out = std::string(kMonths[mon], 3);
+    else if (name == "month.number") {
+      std::snprintf(buf, sizeof buf, "%02d", mon + 1);
+      out = buf;
+    } else if (name == "year") out = std::to_string(tm->tm_year + 1900);
+    else return false;
+    return true;
+  };
+  static const std::tm kAny{};  // stands in for the clock to tell a name from not one
+  std::string out;
+  const size_t end = eachName(text, [&](size_t pos, size_t open, size_t close,
+                                        const std::string &name) {
+    out.append(text, pos, open - pos);
+    std::string filled;
+    if (value(name, tm ? *tm : kAny, filled)) {
+      if (!tm) return false;
+    } else {
+      const TextValue v = lookup ? lookup(name, filled) : TextValue::Unknown;
+      if (v == TextValue::Missing) return false;
+      if (v == TextValue::Unknown) filled = text.substr(open, close - open);
+    }
+    out += filled;
+    return true;
+  });
+  if (end == std::string::npos) return "";
+  if (end < text.size()) out.append(text, end, std::string::npos);
+  return out;
+}
+
 LabelBox nameBox(const Font &firstFont, const Font &secondFont, const std::string &first,
                  const std::string &second, int px, float subScale) {
   int a1 = 0, d1 = 0, a2 = 0, d2 = 0;
@@ -216,7 +330,7 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
   // The two lines a bird's label carries under this style, either possibly
   // empty. A bird with no common name shows its scientific one instead of
   // nothing.
-  const auto lines = [&](size_t i, const std::string &scientific) {
+  const auto styled = [&](size_t i, const std::string &scientific) {
     const std::string common = cased(commonName(i), settings.commonCase);
     switch (settings.names) {
       case NameStyle::Both: return std::make_pair(common, scientific);
@@ -225,6 +339,15 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
       case NameStyle::None: break;
     }
     return std::make_pair(std::string(), std::string());
+  };
+  // With its suffix, if it has one, after whichever line comes first.
+  const auto lines = [&](size_t i, const std::string &scientific) {
+    auto pair = styled(i, scientific);
+    if (i < settings.nameSuffixes.size() && !settings.nameSuffixes[i].empty()) {
+      std::string &line = pair.first.empty() ? pair.second : pair.first;
+      if (!line.empty()) line += " " + settings.nameSuffixes[i];
+    }
+    return pair;
   };
 
   // What the packer wants of each bird, all of it out of the pack's index and
@@ -278,23 +401,71 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
   const int namePx = std::max(
       kMinLabelPx, int(std::lround(std::min(width, height) * labelScale(settings.labelSize))));
 
-  // The date takes a band along its edge, inset from the glass's own edge,
-  // and the birds are packed into the rest so none sits under it.
-  const bool dated = !settings.date.empty() && font.ok();
-  const bool noted = !settings.note.empty() && font.ok();
-  const bool dateTop = settings.dateEdge == DateEdge::Top;
-  int dateAscent = 0, dateDescent = 0, dateW = 0, band = 0;
-  const int dateInset = std::max(4, namePx / 2);
-  const int notePx = std::max(kMinLabelPx, namePx * 3 / 4);
-  int noteAscent = 0, noteDescent = 0, noteW = 0;
-  if (dated) dateW = font.measure(settings.date, namePx, &dateAscent, &dateDescent);
-  if (noted) noteW = font.measure(settings.note, notePx, &noteAscent, &noteDescent);
-  if (dated || noted) {
-    const int line = std::max(dateAscent + dateDescent, noteAscent + noteDescent);
-    band = dateInset + line + namePx / 3;
+  // The owner's lines each take a band along their
+  // edge, inset from the glass's own edge, and the birds are packed into what
+  // is left so none sits under them. Each end of each edge is a slot; what
+  // lands in one slot is written along it in turn, a space apart.
+  struct Run {
+    std::string text;
+    int px;
+    const Font *face;
+    int w = 0, ascent = 0, descent = 0;
+  };
+  struct Slot {
+    std::vector<Run> runs;
+    int w = 0;
+  };
+  Slot slots[2][3];  // [TextEdge][TextAlign]
+  const int inset = std::max(4, namePx / 2);
+  const auto put = [&](const std::string &text, TextEdge edge, TextAlign align, int px,
+                       const Font *face = nullptr) {
+    if (text.empty() || !font.ok()) return;
+    std::string set = text;
+    if (face && face->ok() && face != &font) {
+      set = cased(text, NameCase::Upper);
+      if (!face->covers(set)) set = text, face = nullptr;
+    } else {
+      face = nullptr;
+    }
+    slots[int(edge)][int(align)].runs.push_back(Run{set, px, face ? face : &font});
+  };
+  const auto linePx = [&](TextSize size) {
+    return std::max(kMinLabelPx, int(std::lround(std::min(width, height) *
+                                                 textScale(size))));
+  };
+  put(settings.topText, TextEdge::Top, settings.topAlign, linePx(settings.topSize), settings.topFont);
+  put(settings.bottomText, TextEdge::Bottom, settings.bottomAlign, linePx(settings.bottomSize),
+      settings.bottomFont);
+  const int textW = boxW - 2 * inset;
+  int band[2] = {0, 0}, edgeAscent[2] = {0, 0}, edgeDescent[2] = {0, 0};
+  for (int e = 0; e < 2; ++e) {
+    for (Slot &slot : slots[e]) {
+      if (slot.runs.empty()) continue;
+      // Measured at its size, and shrunk together to fit across the page if
+      // it does not: an owner's line can be as long as they like.
+      const auto measure = [&] {
+        slot.w = 0;
+        for (Run &r : slot.runs) {
+          r.w = r.face->measure(r.text, r.px, &r.ascent, &r.descent);
+          slot.w += r.w + (slot.w ? namePx / 2 : 0);
+        }
+      };
+      measure();
+      if (slot.w > textW && slot.w > 0) {
+        const float scale = float(textW) / float(slot.w);
+        for (Run &r : slot.runs) r.px = std::max(kMinLabelPx, int(r.px * scale));
+        measure();
+      }
+      for (const Run &r : slot.runs) {
+        edgeAscent[e] = std::max(edgeAscent[e], r.ascent);
+        edgeDescent[e] = std::max(edgeDescent[e], r.descent);
+      }
+    }
+    if (edgeAscent[e] + edgeDescent[e] > 0)
+      band[e] = inset + edgeAscent[e] + edgeDescent[e] + namePx / 3;
   }
-  const int packH = boxH - band;
-  const int originX = mLeft, originY = mTop + (dateTop ? band : 0);
+  const int packH = boxH - band[0] - band[1];
+  const int originX = mLeft, originY = mTop + band[0];
 
   std::vector<Placement> placed;
   int usedPx = 0;
@@ -437,22 +608,23 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
     }
   }
 
-  const int left = mLeft + dateInset, right = width - mRight - dateInset;
-  // Both lines share a baseline: the date's, or the note's own when alone.
-  const int ascent = dated ? dateAscent : noteAscent, descent = dated ? dateDescent : noteDescent;
-  const int baseline =
-      dateTop ? mTop + dateInset + ascent : height - mBottom - dateInset - descent;
-  if (dated) {
-    progress("writing the date");
-    const int x = settings.dateAlign == DateAlign::Left     ? left
-                  : settings.dateAlign == DateAlign::Centre ? (width - dateW) / 2
-                                                            : right - dateW;
-    font.draw(out, settings.date, x, baseline, namePx, kBlack);
-  }
-  if (noted) {
-    // The end the date is not at; the left when the date is centred or absent.
-    const bool noteRight = dated && settings.dateAlign == DateAlign::Left;
-    font.draw(out, settings.note, noteRight ? right - noteW : left, baseline, notePx, kBlack);
+  const int left = mLeft + inset, right = width - mRight - inset;
+  for (int e = 0; e < 2; ++e) {
+    // Everything on an edge shares one baseline.
+    const int baseline = e == int(TextEdge::Top) ? mTop + inset + edgeAscent[e]
+                                                 : height - mBottom - inset - edgeDescent[e];
+    for (int a = 0; a < 3; ++a) {
+      const Slot &slot = slots[e][a];
+      if (slot.runs.empty()) continue;
+      progress("writing the page's text");
+      int x = a == int(TextAlign::Left)     ? left
+              : a == int(TextAlign::Centre) ? (left + right - slot.w) / 2
+                                            : right - slot.w;
+      for (const Run &r : slot.runs) {
+        r.face->draw(out, r.text, x, baseline, r.px, kBlack);
+        x += r.w + namePx / 2;
+      }
+    }
   }
 
   if (report) {
@@ -472,6 +644,8 @@ bool renderBirdPage(const Plates &plates, const std::vector<int> &plateIndices,
     report->pack = packCounters;
     report->placements = placed;
     report->fellBack = fellBack;
+    report->birdsTop = originY;
+    report->birdsBottom = originY + packH;
     report->lumaKept = lumaKept;
     report->dither = ditherCounters;
     report->fast = fastStats;

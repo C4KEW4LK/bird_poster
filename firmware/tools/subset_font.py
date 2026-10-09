@@ -11,8 +11,9 @@ produce, and cut the file to about a tenth. The room goes to the plates.
 
 `--caps` is for the common-name face, which the frame only ever sets in
 capitals: the capital letters of the same blocks - Rüppell's, Marañon, the
-macrons of the New Zealand names - and the punctuation a bird's name carries,
-nothing lower-case. A name the subset cannot set falls back to the label face
+macrons of the New Zealand names - the punctuation a bird's name carries, and
+what the page's own lines put round a time, a battery level or a temperature
+(: % & ! ? + # @ ; and the degree sign), nothing lower-case. A name the subset cannot set falls back to the label face
 on the frame, so a stray character costs a change of face, not a box.
 
 Either way only the kerning survives of the OpenType features: the frame's
@@ -31,9 +32,10 @@ RANGES = "U+0020-007E,U+00A0-00FF,U+0100-017F,U+2010-2027,U+2030-203A,U+2122,U+0
 
 
 def caps_unicodes() -> list[int]:
-    """Capitals, digits and a name's punctuation: space ' ( ) , - . / and the
-    curly apostrophe and dashes a web source may send."""
-    keep = [ord(c) for c in " '(),-./0123456789"] + list(range(ord("A"), ord("Z") + 1))
+    """Capitals, digits, a name's punctuation - space ' ( ) , - . / and the
+    curly apostrophe and dashes a web source may send - and the page text's."""
+    keep = [ord(c) for c in " '(),-./0123456789:%&!?+#@;\u00b0"]
+    keep += list(range(ord("A"), ord("Z") + 1))
     keep += [c for c in range(0xC0, 0x180) if chr(c).isupper()]
     keep += [0x178, 0x2010, 0x2011, 0x2013, 0x2014, 0x2018, 0x2019]
     return sorted(set(keep))

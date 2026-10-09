@@ -76,6 +76,9 @@ struct Sighting {
   // species, when a detection in the reply was that day's (its
   // `isNewSpecies`); empty otherwise, and always for other sources.
   std::string newOn;
+  // BirdNET-Go only: its surest detection of the species in the window, in
+  // percent; -1 for the other sources, which have no such thing.
+  int confidence = -1;
 };
 
 struct SourceConfig {
@@ -209,5 +212,24 @@ std::vector<Sighting> preferNew(const std::vector<Sighting>& page,
                                 const std::vector<Sighting>& ranked,
                                 const std::function<bool(const std::string&)>& isNew,
                                 std::size_t limit);
+
+// The weather for the page text's {{weather...}} names, from Open-Meteo: free,
+// no key, one small request for the frame's latitude and longitude. Today is
+// days[0], tomorrow days[1]; temperatures are in the unit asked for.
+struct Weather {
+  bool ok = false;
+  float now = 0;     // temperature now
+  int nowCode = -1;  // WMO weather code now; see weatherText
+  struct Day {
+    float high = 0, low = 0;
+    int code = -1;  // the day's weather, as the forecast sums it up
+    int rain = -1;  // highest chance of rain in the day, percent; -1 for not given
+  } days[2];
+};
+std::string weatherUrl(double lat, double lng, bool fahrenheit);
+bool parseWeather(const std::string& body, Weather& out, std::string* why = nullptr);
+// A WMO weather code in a few words: "Partly cloudy", "Light rain". Empty for
+// one it does not know.
+const char* weatherText(int code);
 
 }  // namespace birdposter

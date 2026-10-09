@@ -86,6 +86,10 @@ int pageMain(int argc, char **argv) {
   int count = 10;
   bool setup = false, status = false;
   DateOrder dateOrder = DateOrder::DayFirst;
+  std::map<std::string, std::string> textValues;
+  bool clock12h = false;
+  std::string nameSuffix;
+  bool topInNameFont = false, bottomInNameFont = false;
   std::string spriteRgb, spriteMask;
   std::string canvasOut;
   std::string webSprite;
@@ -133,8 +137,6 @@ int pageMain(int argc, char **argv) {
                            : !std::strcmp(v, "hero")    ? PackStyle::Hero
                                                         : PackStyle::Classic;
     }
-    // --date STYLE (0..4, see DateStyle) dates the page today, month first
-    // after --date-us; --date-pos EDGE ALIGN puts it: t or b, then l, c or r.
     if (!std::strcmp(argv[i], "--no-keep-hairlines")) keepHairlines = false;
     // --sprite RGB.ppm MASK.pgm: draw the first bird from these instead of
     // its pack sprite - a decoded image from a codec experiment - on the
@@ -147,19 +149,52 @@ int pageMain(int argc, char **argv) {
       spriteMask = argv[++i];
     }
     if (!std::strcmp(argv[i], "--canvas") && i + 1 < argc) canvasOut = argv[++i];  // pre-dither PPM
-    if (!std::strcmp(argv[i], "--note") && i + 1 < argc) settings.note = argv[++i];
+    // --date-us: {{date.short}} and {{date.numeric}} month first, for the
+    // lines after it.
     if (!std::strcmp(argv[i], "--date-us")) dateOrder = DateOrder::MonthFirst;
-    if (!std::strcmp(argv[i], "--date") && i + 1 < argc) {
+    // --clock-12h: {{time}} as 2:05 pm, for the lines after it.
+    if (!std::strcmp(argv[i], "--clock-12h")) clock12h = true;
+    // --top TEXT and --bottom TEXT: the owner's lines, "{{date.long}}" and
+    // the like filled in from now; --text-align TOP BOTTOM puts them, each
+    // l, c or r.
+    // --text-value NAME VALUE answers one of the frame's own names ({{new}},
+    // {{birds}}...) for them, before them on the line; --text-font TOP BOTTOM
+    // sets each in the label face or the common-name one: label or name.
+    if (!std::strcmp(argv[i], "--text-value") && i + 2 < argc) {
+      textValues[argv[i + 1]] = argv[i + 2];
+      i += 2;
+    }
+    // --name-suffix TEXT: after every bird's name, as BirdNET-Go's confidence
+    // is - "(87%)".
+    if (!std::strcmp(argv[i], "--name-suffix") && i + 1 < argc) nameSuffix = argv[++i];
+    // --text-size TOP BOTTOM: each line's size, 1 small to 5 huge (TextSize).
+    if (!std::strcmp(argv[i], "--text-size") && i + 2 < argc) {
+      settings.topSize = TextSize(std::clamp(std::atoi(argv[++i]), 1, 5));
+      settings.bottomSize = TextSize(std::clamp(std::atoi(argv[++i]), 1, 5));
+    }
+    if (!std::strcmp(argv[i], "--text-font") && i + 2 < argc) {
+      topInNameFont = !std::strcmp(argv[++i], "name");
+      bottomInNameFont = !std::strcmp(argv[++i], "name");
+    }
+    if ((!std::strcmp(argv[i], "--top") || !std::strcmp(argv[i], "--bottom")) && i + 1 < argc) {
+      const bool top = argv[i][2] == 't';
       const std::time_t now = std::time(nullptr);
       std::tm tm{};
       localtime_r(&now, &tm);
-      settings.date =
-          formatDate(tm, DateStyle(std::clamp(std::atoi(argv[++i]), 0, 4)), dateOrder);
+      (top ? settings.topText : settings.bottomText) =
+          expandText(argv[++i], &tm, TextPrefs{dateOrder, clock12h}, [&](const std::string &name, std::string &out) {
+            const auto it = textValues.find(name);
+            if (it == textValues.end()) return TextValue::Unknown;
+            out = it->second;
+            return TextValue::Filled;
+          });
     }
-    if (!std::strcmp(argv[i], "--date-pos") && i + 2 < argc) {
-      settings.dateEdge = argv[++i][0] == 't' ? DateEdge::Top : DateEdge::Bottom;
-      const char a = argv[++i][0];
-      settings.dateAlign = a == 'l' ? DateAlign::Left : a == 'c' ? DateAlign::Centre : DateAlign::Right;
+    if (!std::strcmp(argv[i], "--text-align") && i + 2 < argc) {
+      const auto align = [](char a) {
+        return a == 'l' ? TextAlign::Left : a == 'r' ? TextAlign::Right : TextAlign::Centre;
+      };
+      settings.topAlign = align(argv[++i][0]);
+      settings.bottomAlign = align(argv[++i][0]);
     }
     if (!std::strcmp(argv[i], "--vivid") && i + 1 < argc) settings.vivid = std::atoi(argv[++i]);
     if (!std::strcmp(argv[i], "--sharpen") && i + 1 < argc) settings.sharpen = std::atoi(argv[++i]);
@@ -192,6 +227,8 @@ int pageMain(int argc, char **argv) {
       (!readFile(nameFontPath.c_str(), nameBytes) || !nameFont.load(std::move(nameBytes))))
     std::fprintf(stderr, "no name font at %s - common names in the label font\n", nameFontPath.c_str());
   nameFont.setKeepHairlines(keepHairlines);
+  if (topInNameFont) settings.topFont = &nameFont;
+  if (bottomInNameFont) settings.bottomFont = &nameFont;
   if (!canvasOut.empty()) {
     settings.beforeDither = [canvasOut](const Canvas &c) {
       FILE *f = std::fopen(canvasOut.c_str(), "wb");
@@ -308,6 +345,7 @@ int pageMain(int argc, char **argv) {
       }
     }
     BirdPageReport report;
+    if (!nameSuffix.empty()) settings.nameSuffixes.assign(indices.size(), nameSuffix);
     if (!renderBirdPage(plates, indices, settings, font, frame, &report)) {
       std::fprintf(stderr, "no layout fits\n");
       return 2;

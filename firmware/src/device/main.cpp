@@ -298,6 +298,9 @@ void drawNewPage(bool skipIfSame = false) {
     app.progress("");
     return;
   }
+  // While the radio is still up: the weather, when a line of the page asks.
+  app.fetchWeather();
+  if (!app.weatherError.empty()) Serial.printf("weather: %s\n", app.weatherError.c_str());
   const uint32_t sig = app.pageSignature();
   if (skipIfSame && app.state.glass == "birds" && sig == app.state.pageSig) {
     app.state.lastResult = "unchanged - kept the page on the glass";
@@ -542,6 +545,7 @@ void setup() {
     std::vector<int> page;
     app.state.fetchOk = app.fetchBirds(page);
     if (!app.state.fetchOk) app.state.lastResult = app.fetchError;
+    app.fetchWeather();  // so the status page can say whether it answers
     app.beforeRefresh = radioOff;
     app.showStatus();
     goToSleep();

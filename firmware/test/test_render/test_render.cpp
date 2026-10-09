@@ -514,6 +514,99 @@ void test_a_page_margin_leaves_its_border_untouched() {
   TEST_ASSERT_INT_WITHIN(2, bare[1] + (s.marginTop - s.marginBottom) / 2, inset[1]);
 }
 
+// The owner's lines: names filled in from the clock, the rest left alone,
+// and nothing at all from a clock that is not set.
+void test_page_text_fills_in_the_clock() {
+  std::tm tm{};
+  tm.tm_year = 2026 - 1900, tm.tm_mon = 8, tm.tm_mday = 26, tm.tm_wday = 6;
+  tm.tm_hour = 14, tm.tm_min = 5;
+  TEST_ASSERT_EQUAL_STRING("Seen 26 September 2026 at 14:05",
+                           expandText("Seen {{date.long}} at {{time}}", &tm).c_str());
+  TEST_ASSERT_EQUAL_STRING("Saturday 26 September 2026", expandText("{{ Date.Full }}", &tm).c_str());
+  TEST_ASSERT_EQUAL_STRING("09/26/26 2:05 pm",
+                           expandText("{{date.short}} {{time}}", &tm, TextPrefs{DateOrder::MonthFirst, true}).c_str());
+  TEST_ASSERT_EQUAL_STRING("Sat 26 Sep 09 2026",
+                           expandText("{{weekday.short}} {{day}} {{month.short}} {{month.number}} {{year}}", &tm).c_str());
+  TEST_ASSERT_EQUAL_STRING("{{nope}} {{ unclosed", expandText("{{nope}} {{ unclosed", &tm).c_str());
+  // One name a value: there is no bare {{date}} beside {{date.long}}.
+  TEST_ASSERT_EQUAL_STRING("{{date}}", expandText("{{date}}", &tm).c_str());
+  // {{time}} follows the preference; the other two are fixed whatever it says.
+  TEST_ASSERT_EQUAL_STRING("2:05 pm 14:05", expandText("{{time.12h}} {{time.24h}}", &tm).c_str());
+  TEST_ASSERT_EQUAL_STRING("2:05 pm 14:05",
+                           expandText("{{time}} {{time.24h}}", &tm, TextPrefs{DateOrder::DayFirst, true}).c_str());
+  TEST_ASSERT_EQUAL_STRING("14 2 pm {{hour}}",
+                           expandText("{{hour.24h}} {{hour.12h}} {{hour}}", &tm, TextPrefs{DateOrder::DayFirst, true}).c_str());
+  tm.tm_hour = 0;
+  TEST_ASSERT_EQUAL_STRING("12:05 am", formatTime(tm, true).c_str());
+  TEST_ASSERT_EQUAL_STRING("0", formatHour(tm, false).c_str());
+  TEST_ASSERT_EQUAL_STRING("12 am", formatHour(tm, true).c_str());
+  tm.tm_hour = 12;
+  TEST_ASSERT_EQUAL_STRING("12:05 pm", formatTime(tm, true).c_str());
+  TEST_ASSERT_EQUAL_STRING("12:05", formatTime(tm, false).c_str());
+  tm.tm_hour = 14;
+  TEST_ASSERT_EQUAL_STRING("", expandText("Seen {{date.long}}", nullptr).c_str());
+  TEST_ASSERT_EQUAL_STRING("No clock {{nope}}", expandText("No clock {{nope}}", nullptr).c_str());
+}
+
+// Names beyond the clock's come from the caller: filled in, left as written
+// when nobody knows them, and the whole line dropped for one there is none of.
+void test_page_text_asks_the_caller_for_other_names() {
+  const TextLookup lookup = [](const std::string &name, std::string &out) {
+    if (name == "new") return out = "Galah and Crimson Rosella", TextValue::Filled;
+    if (name == "battery") return TextValue::Missing;
+    return TextValue::Unknown;
+  };
+  TEST_ASSERT_EQUAL_STRING("New today: Galah and Crimson Rosella!",
+                           expandText("New today: {{ NEW }}!", nullptr, TextPrefs{}, lookup).c_str());
+  TEST_ASSERT_EQUAL_STRING("", expandText("Battery {{battery}}", nullptr, TextPrefs{}, lookup).c_str());
+  TEST_ASSERT_EQUAL_STRING("{{what}}", expandText("{{what}}", nullptr, TextPrefs{}, lookup).c_str());
+  TEST_ASSERT_TRUE(textUses("Refresh {{ Refresh }}", "refresh"));
+  TEST_ASSERT_FALSE(textUses("Refresh {{refreshes}} {{date}}", "refresh"));
+}
+
+// A line along an edge takes a band the birds are packed clear of: the text
+// is drawn in its band and every bird in the room between.
+void test_page_text_keeps_the_birds_out_of_its_band() {
+  const std::vector<uint8_t> pack = v7FixturePack();
+  Plates p;
+  std::string err;
+  TEST_ASSERT_TRUE_MESSAGE(openPack(pack, p, &err), err.c_str());
+  Font face;
+  TEST_ASSERT_TRUE_MESSAGE(loadFont(face), "run from firmware/: needs ../assets/fonts");
+
+  BirdPageSettings s;
+  s.names = NameStyle::None;
+  s.topText = "Seen near home";
+  s.bottomText = "26 September 2026";
+  BirdPageReport report;
+  Frame out;
+  TEST_ASSERT_TRUE(renderBirdPage(p, {0}, s, face, out, &report));
+  TEST_ASSERT_TRUE(report.birdsTop > 0 && report.birdsBottom < out.h);
+  const auto inked = [&](int y0, int y1) {
+    for (int y = y0; y < y1; ++y)
+      for (int x = 0; x < out.w; ++x)
+        if (out.row(y)[x] != kWhite) return true;
+    return false;
+  };
+  TEST_ASSERT_TRUE_MESSAGE(inked(0, report.birdsTop), "no top line above the birds");
+  TEST_ASSERT_TRUE_MESSAGE(inked(report.birdsBottom, out.h), "no bottom line below the birds");
+  for (const Placement &pl : report.placements) {
+    // dim is the longest side; the bird's height is its share of that.
+    const PlateEntry &e = p.entry(size_t(pl.index));
+    const int h = pl.dim * e.h / std::max(e.w, e.h);
+    TEST_ASSERT_TRUE(pl.y >= 0);
+    TEST_ASSERT_TRUE(report.birdsTop + pl.y + h <= report.birdsBottom);
+  }
+
+  // Without them the birds have the page.
+  BirdPageSettings bare;
+  bare.names = NameStyle::None;
+  BirdPageReport bareReport;
+  TEST_ASSERT_TRUE(renderBirdPage(p, {0}, bare, face, out, &bareReport));
+  TEST_ASSERT_TRUE(bareReport.birdsTop < report.birdsTop);
+  TEST_ASSERT_TRUE(bareReport.birdsBottom > report.birdsBottom);
+}
+
 void test_a_pack_that_is_not_a_pack_is_refused() {
   std::vector<uint8_t> junk(2000, 0x42);
   Plates p;
@@ -550,6 +643,9 @@ int main() {
   RUN_TEST(test_the_plane_coder_round_trips_and_refuses_a_cut_stream);
   RUN_TEST(test_a_v7_pack_round_trips_through_the_reader);
   RUN_TEST(test_a_page_margin_leaves_its_border_untouched);
+  RUN_TEST(test_page_text_fills_in_the_clock);
+  RUN_TEST(test_page_text_asks_the_caller_for_other_names);
+  RUN_TEST(test_page_text_keeps_the_birds_out_of_its_band);
   RUN_TEST(test_a_pack_that_is_not_a_pack_is_refused);
   return UNITY_END();
 }

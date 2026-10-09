@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <random>
 
@@ -135,6 +136,11 @@ bool parseBirdNet(const std::string& body, std::vector<Sighting>& out, std::stri
     if (row["isNewSpecies"] | false)
       for (Sighting& s : parsed)
         if (s.scientific == scientific) s.newOn = row["date"] | "";
+    if (!row["confidence"].isNull()) {
+      const int pct = int(std::lround((row["confidence"] | 0.0) * 100.0));
+      for (Sighting& s : parsed)
+        if (s.scientific == scientific) s.confidence = std::max(s.confidence, pct);
+    }
   }
   out.swap(parsed);
   return true;
@@ -512,6 +518,70 @@ std::vector<Sighting> preferNew(const std::vector<Sighting>& page,
     if (!has(bird.scientific)) out.push_back(bird);
   }
   return out;
+}
+
+std::string weatherUrl(double lat, double lng, bool fahrenheit) {
+  char buf[320];
+  // timezone=auto: "today" is the frame's day where it is, not UTC's.
+  std::snprintf(buf, sizeof buf,
+                "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f"
+                "&current=temperature_2m,weather_code"
+                "&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max"
+                "&timezone=auto&forecast_days=2%s",
+                lat, lng, fahrenheit ? "&temperature_unit=fahrenheit" : "");
+  return buf;
+}
+
+bool parseWeather(const std::string& body, Weather& out, std::string* why) {
+  JsonDocument doc;
+  if (failed(deserializeJson(doc, body), why)) return false;
+  JsonObjectConst current = doc["current"], daily = doc["daily"];
+  if (current.isNull() || daily.isNull() || current["temperature_2m"].isNull()) {
+    // Open-Meteo says what it did not like in "reason".
+    if (why) *why = doc["reason"] | "reply was not the shape expected";
+    return false;
+  }
+  Weather w;
+  w.now = current["temperature_2m"] | 0.0f;
+  w.nowCode = current["weather_code"] | -1;
+  for (size_t d = 0; d < 2; ++d) {
+    if (daily["temperature_2m_max"][d].isNull()) continue;
+    w.days[d].high = daily["temperature_2m_max"][d] | 0.0f;
+    w.days[d].low = daily["temperature_2m_min"][d] | 0.0f;
+    w.days[d].code = daily["weather_code"][d] | -1;
+    w.days[d].rain = daily["precipitation_probability_max"][d] | -1;
+  }
+  w.ok = true;
+  out = w;
+  return true;
+}
+
+const char* weatherText(int code) {
+  switch (code) {
+    case 0: return "Clear";
+    case 1: return "Mostly clear";
+    case 2: return "Partly cloudy";
+    case 3: return "Overcast";
+    case 45: case 48: return "Fog";
+    case 51: return "Light drizzle";
+    case 53: case 55: return "Drizzle";
+    case 56: case 57: return "Freezing drizzle";
+    case 61: return "Light rain";
+    case 63: return "Rain";
+    case 65: return "Heavy rain";
+    case 66: case 67: return "Freezing rain";
+    case 71: return "Light snow";
+    case 73: return "Snow";
+    case 75: return "Heavy snow";
+    case 77: return "Snow grains";
+    case 80: return "Light showers";
+    case 81: return "Showers";
+    case 82: return "Heavy showers";
+    case 85: case 86: return "Snow showers";
+    case 95: return "Thunderstorms";
+    case 96: case 99: return "Thunderstorms with hail";
+  }
+  return "";
 }
 
 }  // namespace birdposter

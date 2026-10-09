@@ -81,6 +81,13 @@ button:disabled{opacity:.6;cursor:wait}
 @font-face{font-family:BPName;src:url(/font/name.ttf)}@font-face{font-family:BPLabel;src:url(/font/label.ttf)}
 .nameprev{position:relative;margin-top:.8rem;border:1px solid var(--line);border-radius:8px;padding:1.6rem .8rem 1.1rem;text-align:center;color:#111;line-height:1;overflow:hidden;white-space:nowrap}
 .npcap{position:absolute;top:.35rem;left:.6rem;font:600 .68rem system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.linebox{border:1px solid var(--line);border-radius:8px;background:#fbf9f4;padding:.2rem .8rem .8rem;margin-top:.7rem}.linehead{font-weight:600;font-size:.9rem;margin-top:.5rem}
+.tpcap{margin-top:.8rem;font:600 .68rem system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.textprev{position:relative;margin-top:.25rem;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;color:#111;line-height:1;background:#fff}
+.tpband{display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;white-space:nowrap;gap:.3em}.tpband>span:nth-child(2){text-align:center}.tpband>span:nth-child(3){text-align:right}
+.tpgap{height:1rem}
+.examples{list-style:none;padding:0;margin:.3rem 0 0}.examples li{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem .5rem;padding:.35rem 0;border-top:1px solid var(--line)}.tokens .examples code{flex:1 1 100%;font-size:.82rem;user-select:all;white-space:normal;overflow-wrap:anywhere}.exout{flex:1;font-family:BPLabel,Georgia,serif;font-style:italic;color:var(--ink)}.exout:before{content:"\2192  ";font-style:normal;color:var(--muted)}.examples em{flex:1 1 100%;font-size:.78rem;color:var(--muted)}.examples button{padding:.15rem .55rem;font-size:.8rem;margin-left:.3rem}.tokens h4{margin:.8rem 0 0;font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.tokens{margin:.7rem 0 0;font-size:.85rem;color:#444}.tokens summary{cursor:pointer;color:var(--green)}.tokens table{border-collapse:collapse;margin:.4rem 0;width:100%}.tokens td code{white-space:normal}.tokens td,.tokens th{padding:.2rem .4rem .2rem 0;vertical-align:top;border-top:1px solid var(--line);text-align:left}.tokens th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-top:0}.tokens code{font-size:.8rem;white-space:nowrap}
 #np1{font-family:BPName,Georgia,serif}#np2{font-family:BPLabel,Georgia,serif;font-style:italic}
 .credits{margin:1.2rem 0 .4rem;font-size:.85rem;color:var(--muted)}.credits summary{cursor:pointer}.credits p{margin:.4rem 0}
 footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
@@ -95,7 +102,6 @@ footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
 <div><b>Next</b><span>%NEXT%</span></div>
 <div><b>Plates</b><span>%PLATES%</span></div>
 <div><b>Firmware</b><span>%VERSION%</span></div>
-%REFRESHES%
 </div>
 %PREVIEW%
 </div>
@@ -131,10 +137,13 @@ footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
 <div class="list"><div class="lh"><label>List URL</label><details class="info"><summary title="More about this">i</summary><div>Anything that answers with JSON: a bare list of scientific names, <code>["Turdus merula", &hellip;]</code>, or a list of objects with <code>scientific</code>, and optionally <code>common</code> and <code>count</code>. BirdNET-Go's own field names work too. The order given is the ranking when there are no counts.</div></details></div><input name="listurl" value="%LISTURL%" maxlength="256" placeholder="http://homeassistant.local:8123/local/birds.json"></div>
 <div class="ebird"><div class="lh"><label>eBird API key</label><details class="info"><summary title="More about this">i</summary><div>Free and instant from <a href="https://ebird.org/api/keygen" target="_blank">ebird.org/api/keygen</a> with an eBird account. The frame only reads with it. Once saved it is never shown again, here or anywhere; leave the field blank to keep it, or type a new one to replace it. eBird looks back 30 days at most and 50 km at most.</div></details></div><input name="ebirdkey" id="ebirdkey" value="" maxlength="64" placeholder="%EBIRDHINT%" data-saved="%EBIRDSAVED%" autocomplete="off">
 <label>Names in</label><select name="ebirdloc"><option value="en_AU" %EBL_AU%>Australian English - Grey Teal, Australian Wood Duck</option><option value="en" %EBL_EN%>Clements English - Gray Teal, Maned Duck</option><option value="en_NZ" %EBL_NZ%>New Zealand English</option><option value="en_UK" %EBL_UK%>British English</option><option value="en_IN" %EBL_IN%>Indian English</option><option value="en_ZA" %EBL_ZA%>South African English</option></select></div>
-<div class="place">
+<div class="where">
 <div class="js online" %OFFLINE%><label>Lookup location</label><div class="row"><input id="place" placeholder="Sydney" autocomplete="off"><button type="button" onclick="findPlace()" style="flex:0;white-space:nowrap">Look up</button></div><div class="places" id="places"></div></div>
 <div class="row"><div><label>Latitude</label><input name="lat" id="lat" type="number" step="any" min="-90" max="90" value="%LAT%"></div><div><label>Longitude</label><input name="lng" id="lng" type="number" step="any" min="-180" max="180" value="%LNG%"></div></div>
-<div class="row"><div><label>Radius (km)</label><input name="radius" type="number" min="1" max="500" value="%RADIUS%"></div>
+<small class="wxnote">Only for the weather on the page: this source is not asked about a place.</small>
+</div>
+<div class="place">
+<div class="row"><div><label>Radius (<span id="radunit">%DISTNAME%</span>)</label><input name="radius" id="radius" type="number" min="1" max="%RADIUSMAX%" value="%RADIUS%"></div>
 <div class="inat"><div class="lh"><label>iNaturalist API</label><details class="info inat"><summary title="More about this">i</summary><div>v2 sends only what the frame reads (about an eighth of the bytes) but iNaturalist may still change it; v1 is frozen and sends everything, so a fetch takes longer. If v2 stops working, switch.</div></details></div><select name="inatv"><option value="2" %INATV2%>v2 - lean, may change</option><option value="1" %INATV1%>v1 - stable, slower</option></select></div></div>
 </div>
 <div class="window"><div class="lh"><label>Look back</label><details class="info"><summary title="More about this">i</summary><div>Which sightings count: the top birds seen in this window. BirdNET-Go is asked for its last 200 detections (1000 with "every bird" on) and the window is applied to those.</div></details></div><div class="row"><select name="lookbackunit" id="lookbackunit" onchange="lbChanged()"><option value="0" %LB0%>minutes</option><option value="1" %LB1%>hours</option><option value="2" %LB2%>days</option><option value="3" %LB3%>Since last update</option></select><input name="lookback" id="lookback" type="number" min="1" max="10000" value="%LOOKBACK%"></div></div>
@@ -157,15 +166,31 @@ footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
 <div class="row"><div><label>Size</label><select name="label"><option value="0" %LBL0%>Small</option><option value="1" %LBL1%>Medium</option><option value="2" %LBL2%>Large</option><option value="3" %LBL3%>Extra large</option></select></div>
 <div><label>Scientific name size</label><select name="scipct"><option value="100" %SCI100%>100% (same)</option><option value="90" %SCI90%>90%</option><option value="80" %SCI80%>80%</option><option value="70" %SCI70%>70%</option><option value="60" %SCI60%>60%</option><option value="50" %SCI50%>50% (half)</option></select></div></div>
 
+<div class="birdnet"><div class="check"><label><input type="checkbox" name="showconf" id="showconf" value="1" %CONFON%>Show BirdNET-Go's confidence after each name</label><details class="info"><summary title="More about this">i</summary><div>Written after the first line of each name, e.g. SUPERB FAIRYWREN (87%): the surest of that bird's detections in the look-back window. In the common names' capitals face it needs the font from this firmware's filesystem image for the %; with an older one the name is set in the label face instead.</div></details></div><input type="hidden" name="showconf" value="0"></div>
 <div class="js" hidden><div class="nameprev" id="nameprev"><span class="npcap">Preview</span><div id="np1"></div><div id="np2"></div></div></div>
-<h3>Date</h3>
-<div class="check"><label><input type="checkbox" name="date" id="date" value="1" %DATEON% onchange="dateChanged()">Show today's date</label><details class="info"><summary title="More about this">i</summary><div>The date the page was drawn, in the name font at the name size. The order applies to the numeric styles; 09/26/2026 is month first. The birds are packed around it, never under it. Left off until the frame's clock has been set from the network.</div></details></div><input type="hidden" name="date" value="0">
-<div id="dateopts">
-<div class="row"><div><label>Style</label><select name="datestyle"><option value="0" %DST0%>26/09/26</option><option value="1" %DST1%>26/09/2026</option><option value="2" %DST2%>26 Sep 2026</option><option value="3" %DST3%>26 September 2026</option><option value="4" %DST4%>Saturday 26 September 2026</option></select></div>
-<div><label>Short date order</label><select name="dateorder"><option value="0" %DOR0%>Day first - UK, AU</option><option value="1" %DOR1%>Month first - US</option></select></div></div>
-<div class="row"><div><label>Position</label><select name="dateedge"><option value="0" %DED0%>Top</option><option value="1" %DED1%>Bottom</option></select></div>
-<div><label>Alignment</label><select name="datealign"><option value="0" %DAL0%>Left</option><option value="1" %DAL1%>Centre</option><option value="2" %DAL2%>Right</option></select></div></div>
 </div>
+
+<div class="card">
+<h2>Page text</h2>
+<div class="lh"><label>Your own lines along the top and bottom</label><details class="info"><summary title="More about this">i</summary><div>At the name size, shrunk to fit if long. The birds are packed clear of any edge with text on it. For the date, put <code>{{date.long}}</code> or another of the templates below in a line.</div></details></div>
+<div class="linebox"><div class="linehead">Top line</div><label>Text</label><input name="toptext" value="%TOPTEXT%" maxlength="120" placeholder="e.g. Seen near home, {{date.long}}" autocomplete="off">
+<div class="row"><div><div class="lh"><label>Size</label><details class="info"><summary title="More about this">i</summary><div>Small to Extra large match the name sizes above; Huge is larger, for a heading. A line too long for the page at its size is shrunk to fit. The preview below is drawn to scale: its width stands for the whole width of the glass.</div></details></div><select name="topsize"><option value="1" %TSZ1%>Small</option><option value="2" %TSZ2%>Medium</option><option value="3" %TSZ3%>Large</option><option value="4" %TSZ4%>Extra large</option><option value="5" %TSZ5%>Huge</option></select></div>
+<div><label>Alignment</label><select name="topalign"><option value="0" %TAL0%>Left</option><option value="1" %TAL1%>Centre</option><option value="2" %TAL2%>Right</option></select></div>
+</div>
+<div class="row"><div><div class="lh"><label>Font</label><details class="info"><summary title="More about this">i</summary><div>The label face is the italic the scientific names are set in. The name face is the common names' capitals: a line in it is set in capitals, and one with a character it lacks goes in the label face instead. A new-bird line is set in the face of the line it stands in for.</div></details></div><select name="topface"><option value="0" %TFC0%>Label (italic)</option><option value="1" %TFC1%>Name (capitals)</option></select></div><div></div></div>
+</div>
+<div class="linebox"><div class="linehead">Bottom line</div><label>Text</label><input name="bottomtext" value="%BOTTEXT%" maxlength="120" placeholder="e.g. Updated {{time}}, next at {{next}}" autocomplete="off">
+<div class="row"><div><label>Size</label><select name="bottomsize"><option value="1" %BSZ1%>Small</option><option value="2" %BSZ2%>Medium</option><option value="3" %BSZ3%>Large</option><option value="4" %BSZ4%>Extra large</option><option value="5" %BSZ5%>Huge</option></select></div>
+<div><label>Alignment</label><select name="bottomalign"><option value="0" %BAL0%>Left</option><option value="1" %BAL1%>Centre</option><option value="2" %BAL2%>Right</option></select></div>
+</div>
+<div class="row"><div><label>Font</label><select name="bottomface"><option value="0" %BFC0%>Label (italic)</option><option value="1" %BFC1%>Name (capitals)</option></select></div><div></div></div>
+</div>
+<div class="birdnet"><div class="check"><label><input type="checkbox" name="newtext" id="newtext" value="1" %NEWTEXTON% onchange="newTextChanged()">Different lines when a bird is new</label><details class="info"><summary title="More about this">i</summary><div>When the page has a bird BirdNET-Go calls a new species today, these lines are used instead - all day, as BirdNET-Go keeps its badge. <code>{{new}}</code> names the new birds. Leave one empty to keep the usual line on that edge.</div></details></div><input type="hidden" name="newtext" value="0">
+<div id="newtextopts"><div class="row"><div><label>Top line, new bird</label><input name="newtoptext" value="%NEWTOP%" maxlength="120" placeholder="e.g. New today: {{new}}!" autocomplete="off"></div>
+<div><label>Bottom line, new bird</label><input name="newbottomtext" value="%NEWBOT%" maxlength="120" placeholder="(the usual bottom line)" autocomplete="off"></div></div></div></div>
+<details class="tokens"><summary>Templates</summary><div>Anything in double braces is filled in when the page is drawn. A line that asks for something the frame does not have - the clock not yet set, a battery on a board that cannot read one - is left off the page rather than printed with a gap.<table><tr><th>Tag</th><th>Description</th><th>Example</th></tr><tr><td><code>{{date.<wbr>long}}</code></td><td>Today&#39;s date, the month in full</td><td>26 September 2026</td></tr><tr><td><code>{{date.<wbr>medium}}</code></td><td>Today&#39;s date, the month shortened</td><td>26 Sep 2026</td></tr><tr><td><code>{{date.<wbr>short}}</code></td><td>Today&#39;s date in figures, two-digit year, in the date order under Preferences</td><td>26/09/26</td></tr><tr><td><code>{{date.<wbr>numeric}}</code></td><td>Today&#39;s date in figures, full year, in the date order under Preferences</td><td>26/09/2026</td></tr><tr><td><code>{{date.<wbr>full}}</code></td><td>Today&#39;s date with the day of the week</td><td>Saturday 26 September 2026</td></tr><tr><td><code>{{time}}</code></td><td>The time the page was drawn, on the clock under Preferences</td><td>14:05 or 2:05 pm</td></tr><tr><td><code>{{time.<wbr>24h}}</code></td><td>The time the page was drawn, always 24-hour</td><td>14:05</td></tr><tr><td><code>{{time.<wbr>12h}}</code></td><td>The time the page was drawn, always 12-hour</td><td>2:05 pm</td></tr><tr><td><code>{{hour.<wbr>24h}}</code></td><td>The hour the page was drawn, always 24-hour</td><td>14</td></tr><tr><td><code>{{hour.<wbr>12h}}</code></td><td>The hour the page was drawn, always 12-hour</td><td>2 pm</td></tr><tr><td><code>{{weekday}}</code></td><td>Today&#39;s day of the week</td><td>Saturday</td></tr><tr><td><code>{{weekday.<wbr>short}}</code></td><td>Today&#39;s day of the week, shortened</td><td>Sat</td></tr><tr><td><code>{{day}}</code></td><td>Today&#39;s day of the month</td><td>26</td></tr><tr><td><code>{{month}}</code></td><td>This month&#39;s name</td><td>September</td></tr><tr><td><code>{{month.<wbr>short}}</code></td><td>This month&#39;s name, shortened</td><td>Sep</td></tr><tr><td><code>{{month.<wbr>number}}</code></td><td>This month as a number</td><td>09</td></tr><tr><td><code>{{year}}</code></td><td>This year</td><td>2026</td></tr><tr><td><code>{{next}}</code></td><td>When the next page is due, after any quiet hours, on the clock under Preferences</td><td>15:05 or 3:05 pm</td></tr><tr><td><code>{{next.<wbr>24h}}</code></td><td>When the next page is due, after any quiet hours, always 24-hour</td><td>15:05</td></tr><tr><td><code>{{next.<wbr>12h}}</code></td><td>When the next page is due, after any quiet hours, always 12-hour</td><td>3:05 pm</td></tr><tr><td><code>{{birds}}</code></td><td>How many birds are on the page</td><td>10</td></tr><tr><td><code>{{top}}</code></td><td>The common name of the source&#39;s first-ranked bird on the page, before any shuffle</td><td>Superb Fairywren</td></tr><tr><td><code>{{top.<wbr>scientific}}</code></td><td>The scientific (Latin) name of the source&#39;s first-ranked bird on the page, before any shuffle</td><td>Malurus cyaneus</td></tr><tr><td><code>{{new}}</code></td><td>The birds on the page BirdNET-Go calls new species today</td><td>Galah and Crimson Rosella</td></tr><tr><td><code>{{new.<wbr>count}}</code></td><td>How many birds on the page BirdNET-Go calls new species today</td><td>2</td></tr><tr><td><code>{{weather.<wbr>now}}</code></td><td>The temperature when the page was drawn</td><td>14&deg;</td></tr><tr><td><code>{{weather.<wbr>summary}}</code></td><td>The weather when the page was drawn</td><td>Partly cloudy</td></tr><tr><td><code>{{weather.<wbr>today}}</code></td><td>Today&#39;s forecast</td><td>Light rain</td></tr><tr><td><code>{{weather.<wbr>high}}</code></td><td>Today&#39;s forecast high</td><td>18&deg;</td></tr><tr><td><code>{{weather.<wbr>low}}</code></td><td>Today&#39;s forecast low</td><td>6&deg;</td></tr><tr><td><code>{{weather.<wbr>rain}}</code></td><td>Today&#39;s forecast chance of rain</td><td>60%</td></tr><tr><td><code>{{weather.<wbr>tomorrow}}</code></td><td>Tomorrow&#39;s forecast</td><td>Overcast</td></tr><tr><td><code>{{weather.<wbr>tomorrow.<wbr>high}}</code></td><td>Tomorrow&#39;s forecast high</td><td>21&deg;</td></tr><tr><td><code>{{weather.<wbr>tomorrow.<wbr>low}}</code></td><td>Tomorrow&#39;s forecast low</td><td>9&deg;</td></tr><tr><td><code>{{weather.<wbr>tomorrow.<wbr>rain}}</code></td><td>Tomorrow&#39;s forecast chance of rain</td><td>10%</td></tr><tr><td><code>{{source}}</code></td><td>Where the birds came from</td><td>iNaturalist</td></tr><tr><td><code>{{window}}</code></td><td>The time the birds were seen in, or &quot;since the last update&quot;</td><td>last 7 days</td></tr><tr><td><code>{{place}}</code></td><td>The latitude and longitude searched, place-based sources only</td><td>-35.2809, 149.1300</td></tr><tr><td><code>{{radius}}</code></td><td>The distance searched, in the unit under Preferences, place-based sources only</td><td>25 km</td></tr><tr><td><code>{{refresh}}</code></td><td>How many times the glass has been refreshed, since the count was last cleared under Preferences</td><td>123</td></tr><tr><td><code>{{battery}}</code></td><td>The battery&#39;s voltage, reTerminal E1004 only</td><td>3.92 V</td></tr><tr><td><code>{{battery.<wbr>percent}}</code></td><td>The battery&#39;s charge, a rough guide from its voltage, reTerminal E1004 only</td><td>78%</td></tr></table>The weather is from <a href="https://open-meteo.com" target="_blank">Open-Meteo</a> (free, no key) for the latitude and longitude above, in the unit under Preferences, fetched with the birds only when a line asks for it. A line with the time, the weather, the next update, the refresh count or the battery in it changes every time, so the page is redrawn at every refresh rather than kept when nothing else has changed.<h4>Examples</h4><ul class="examples"><li><code>Seen near home, {{date.long}}</code><span class="exout">Seen near home, 26 September 2026</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>{{weekday}} {{date.long}}, drawn at {{time}}</code><span class="exout">Saturday 26 September 2026, drawn at 2:05 pm</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>{{birds}} species, {{window}}</code><span class="exout">10 species, last 7 days</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>Bird of the day: {{top}}</code><span class="exout">Bird of the day: Superb Fairywren</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li class="birdnet"><code>New today: {{new}}!</code><span class="exout">New today: Galah and Crimson Rosella!</span> <em>(BirdNET-Go, for the new-bird lines)</em><span><button type="button" data-to="newtoptext">New-bird top</button><button type="button" data-to="newbottomtext">New-bird bottom</button></span></li><li><code>{{weather.now}}, {{weather.summary}}, high of {{weather.high}}</code><span class="exout">14°, Partly cloudy, high of 18°</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>Today: {{weather.today}}, {{weather.high}}/{{weather.low}}, {{weather.rain}} chance of rain</code><span class="exout">Today: Light rain, 18°/6°, 60% chance of rain</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>Tomorrow: {{weather.tomorrow}}, {{weather.tomorrow.high}}/{{weather.tomorrow.low}}</code><span class="exout">Tomorrow: Overcast, 21°/9°</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>Next update {{next}}</code><span class="exout">Next update 3:05 pm</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>Within {{radius}} of {{place}} - {{source}}</code><span class="exout">Within 25 km of -35.2809, 149.1300 - iNaturalist</span><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li><li><code>Battery {{battery.percent}}, refresh {{refresh}}</code><span class="exout">Battery 78%, refresh 123</span> <em>(the battery on the reTerminal E1004 only)</em><span><button type="button" data-to="toptext">Top</button><button type="button" data-to="bottomtext">Bottom</button></span></li></ul></div></details>
+<div class="js" hidden><div class="tpcap">Preview</div><div class="textprev" id="textprev"><div class="tpband" id="tptop"><span></span><span></span><span></span></div><div class="tpgap"></div><div class="tpband" id="tpbot"><span></span><span></span><span></span></div></div>
+<div class="birdnet"><div class="check"><label><input type="checkbox" id="tpnew" onchange="textPreview()">Preview as a page with a new bird</label></div></div><small id="tpnote"></small></div>
 </div>
 
 <div class="card">
@@ -183,7 +208,6 @@ footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
 <h3>Extras</h3>
 <div class="check"><label><input type="checkbox" name="webplates" id="webplates" value="1" %WEBON% onchange="webChanged()">Pull full-size plates from the web</label><details class="info"><summary title="More about this">i</summary><div>For a bird drawn much larger than its plate in flash - a page of one or two birds - the frame fetches the same plate at full size from here (<code>&lt;address&gt;/Genus_species.bin</code>), and uses the one in flash if the site does not answer. A normal page never needs it. Put <code>{region}</code> in the address for a site with a folder a region. %WEBLAST%</div></details></div><input type="hidden" name="webplates" value="0">
 <input name="weburl" id="weburl" value="%WEBURL%" maxlength="256" placeholder="https://c4kew4lk.github.io/bird_poster/plates/{region}" autocomplete="off" style="margin-top:.4rem">
-<div class="check"><label><input type="checkbox" name="countref" value="1" %COUNTON%>Count refreshes (battery test)</label><details class="info"><summary title="More about this">i</summary><div>Counts every refresh of the glass and writes the running total small on the page, at the other end of the date's strip, and on the status page. Run a charged battery flat and the last number on the glass is how many refreshes it lasted; the count survives the battery going flat. Reset it from the status box at the top.</div></details></div><input type="hidden" name="countref" value="0">
 </div>
 
 <div class="card">
@@ -193,25 +217,34 @@ footer{font-size:.85rem;color:var(--muted);margin:.6rem 0 1.5rem}
 <div><label>Until</label><input name="quietto" id="quietto" type="time" value="%QTO%" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder="06:00"></div></div>
 <small id="quietnote"></small>
 <div class="js" hidden><label>Timezone</label><div class="row"><select id="tzsel" onchange="tzPick()">
-<option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Sydney, Canberra, Melbourne, Hobart</option>
-<option value="AEST-10">Brisbane</option>
-<option value="ACST-9:30ACDT,M10.1.0,M4.1.0/3">Adelaide</option>
-<option value="ACST-9:30">Darwin</option>
-<option value="AWST-8">Perth</option>
-<option value="NZST-12NZDT,M9.5.0,M4.1.0/3">New Zealand</option>
-<option value="JST-9">Japan</option>
-<option value="IST-5:30">India</option>
-<option value="GMT0BST,M3.5.0/1,M10.5.0">United Kingdom, Ireland</option>
-<option value="CET-1CEST,M3.5.0,M10.5.0/3">Central Europe</option>
-<option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Eastern Europe</option>
-<option value="EST5EDT,M3.2.0,M11.1.0">US Eastern</option>
-<option value="CST6CDT,M3.2.0,M11.1.0">US Central</option>
-<option value="MST7MDT,M3.2.0,M11.1.0">US Mountain</option>
-<option value="PST8PDT,M3.2.0,M11.1.0">US Pacific</option>
+<option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Sydney, Canberra, Melbourne, Hobart (AEST/AEDT)</option>
+<option value="AEST-10">Brisbane (AEST)</option>
+<option value="ACST-9:30ACDT,M10.1.0,M4.1.0/3">Adelaide (ACST/ACDT)</option>
+<option value="ACST-9:30">Darwin (ACST)</option>
+<option value="AWST-8">Perth (AWST)</option>
+<option value="NZST-12NZDT,M9.5.0,M4.1.0/3">New Zealand (NZST/NZDT)</option>
+<option value="JST-9">Japan (JST)</option>
+<option value="IST-5:30">India (IST)</option>
+<option value="GMT0BST,M3.5.0/1,M10.5.0">United Kingdom (GMT/BST), Ireland (GMT/IST)</option>
+<option value="CET-1CEST,M3.5.0,M10.5.0/3">Central Europe (CET/CEST)</option>
+<option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Eastern Europe (EET/EEST)</option>
+<option value="EST5EDT,M3.2.0,M11.1.0">US Eastern (EST/EDT)</option>
+<option value="CST6CDT,M3.2.0,M11.1.0">US Central (CST/CDT)</option>
+<option value="MST7MDT,M3.2.0,M11.1.0">US Mountain (MST/MDT)</option>
+<option value="PST8PDT,M3.2.0,M11.1.0">US Pacific (PST/PDT)</option>
 <option value="UTC0">UTC</option>
 <option value="">Other - enter it manually</option>
 </select><button type="button" id="tzmanual" onclick="tzToggle()" style="flex:0;white-space:nowrap">Manual entry</button></div></div>
 <div id="tzbox"><div class="lh"><label>Timezone (POSIX)</label><details class="info"><summary title="More about this">i</summary><div>e.g. AEST-10AEDT,M10.1.0,M4.1.0/3 for Sydney, NZST-12NZDT,M9.5.0,M4.1.0/3, CET-1CEST,M3.5.0,M10.5.0/3, EST5EDT,M3.2.0,M11.1.0</div></details></div><input name="tz" id="tz" value="%TZ%" maxlength="64" placeholder="AEST-10AEDT,M10.1.0,M4.1.0/3"></div>
+</div>
+<div class="card">
+<h2>Preferences</h2>
+<div class="row"><div><div class="lh"><label>Dates</label><details class="info"><summary title="More about this">i</summary><div>Which comes first in a short date - <code>{{date.short}}</code> and <code>{{date.numeric}}</code> in the page text. Dates in words are always day first: 26 September 2026.</div></details></div><select name="dateorder"><option value="0" %DOR0%>Day first - 26/09/2026</option><option value="1" %DOR1%>Month first - 09/26/2026</option></select></div>
+<div><div class="lh"><label>Distances</label><details class="info"><summary title="More about this">i</summary><div>For the radius the place-based sources search, <code>{{radius}}</code> on the page and the status page. The frame keeps the radius in kilometres, so switching back and forth does not drift it.</div></details></div><select name="distunit" id="distunit" onchange="distChanged()"><option value="0" %DU0%>Kilometres</option><option value="1" %DU1%>Miles</option></select></div></div>
+<div class="row"><div><div class="lh"><label>Temperatures</label><details class="info"><summary title="More about this">i</summary><div>For <code>{{weather...}}</code> on the page and the status page.</div></details></div><select name="tempunit"><option value="0" %TU0%>Celsius</option><option value="1" %TU1%>Fahrenheit</option></select></div>
+<div><div class="lh"><label>Times</label><details class="info"><summary title="More about this">i</summary><div>For <code>{{time}}</code> and <code>{{next}}</code> on the page, and the times on the status page and here. Their <code>.24h</code> and <code>.12h</code> forms, and the hour tags, keep their own clock whatever this says.</div></details></div><select name="clock"><option value="0" %CK0%>24-hour - 14:05</option><option value="1" %CK1%>12-hour - 2:05 pm</option></select></div></div>
+<div class="lh"><label>Refresh count</label><details class="info"><summary title="More about this">i</summary><div>Every refresh of the glass is counted, and <code>{{refresh}}</code> puts the count on the page. Run a charged battery flat and the last number on the glass is how many refreshes it lasted; the count survives the battery going flat. Clear it before a test.</div></details></div>
+<div class="row" style="align-items:center"><span>%REFRESHCOUNT%</span><button type="submit" formaction="/action" formmethod="post" name="do" value="resetcount" formnovalidate onclick="return confirm('Clear the refresh count to 0?')">Clear</button></div>
 </div>
 <div class="savebar"><button class="primary" type="submit">Save settings</button></div>
 </form>
@@ -245,12 +278,29 @@ function marginChanged(){var four=document.getElementById('marginmode').value=='
 document.getElementById('marginone').hidden=four;document.getElementById('marginfour').hidden=!four}
 marginChanged();
 // Options that only matter with their box ticked fold away without it.
-function dateChanged(){document.getElementById('dateopts').hidden=!document.getElementById('date').checked}
-dateChanged();
+function newTextChanged(){document.getElementById('newtextopts').hidden=!document.getElementById('newtext').checked}
+newTextChanged();
+// The radius box is in the unit picked under Preferences: switching converts what
+// is in it, so the search area stays the same.
+// The exact distance is kept aside, so going to miles and back gives the
+// same kilometres rather than one rounded twice.
+var distUnit=document.getElementById('distunit').value,radKm=null;
+document.getElementById('radius').addEventListener('input',function(){radKm=null});
+function distChanged(){var u=document.getElementById('distunit').value;if(u==distUnit)return;
+var r=document.getElementById('radius'),km=1.609344,v=+r.value;
+if(r.value!==''&&v>0){if(radKm===null)radKm=distUnit=='1'?v*km:v;r.value=Math.max(1,Math.round(u=='1'?radKm/km:radKm))}
+r.max=u=='1'?310:500;document.getElementById('radunit').textContent=u=='1'?'miles':'km';distUnit=u}
 function webChanged(){document.getElementById('weburl').hidden=!document.getElementById('webplates').checked}
 webChanged();
+// The latitude and longitude are wanted by the place-based sources, and by
+// the weather whatever the source.
+function whereChanged(){var f=document.getElementById('settings').elements,v=document.getElementById('source').value;
+var place=v=='inat'||v=='ebird'||v=='ala',wx=['toptext','bottomtext','newtoptext','newbottomtext'].some(function(n){return f[n]&&/\{\{\s*weather\./i.test(f[n].value)});
+document.querySelectorAll('.where').forEach(function(e){e.hidden=!(place||wx)});
+document.querySelectorAll('.wxnote').forEach(function(e){e.hidden=place})}
 function srcChanged(){var v=document.getElementById('source').value;
 var show=function(c,on){document.querySelectorAll('.'+c).forEach(function(e){e.hidden=!on})};
+whereChanged();
 show('birdnet',v=='birdnet');show('list',v=='list');show('ebird',v=='ebird');
 show('place',v=='inat'||v=='ebird'||v=='ala');show('inat',v=='inat');show('window',v!='list');
 var m=document.getElementById('mode'),r=document.getElementById('rarest'),no=!(v=='inat'||v=='ebird');
@@ -323,6 +373,7 @@ var common='Crimson Rosella',sci='Platycercus elegans';
 common=cs=='1'?common.toUpperCase():cs=='2'?common.toLowerCase():common;
 var a=document.getElementById('np1'),b=document.getElementById('np2'),box=document.getElementById('nameprev');
 var first=how=='0'||how=='2'?common:how=='1'?sci:'',second=how=='0'?sci:'';
+if(first&&f.elements.showconf[0].checked&&g('source')=='birdnet')first+=' (87%)';
 a.textContent=first||'No names on the page';b.textContent=second;b.hidden=!second;
 a.style.fontSize=(first?px:13)+'px';a.style.color=first?'':'var(--muted)';
 var label=how=='1'||(first&&first!==first.toUpperCase());
@@ -331,6 +382,60 @@ b.style.fontSize=Math.max(1,Math.round(px*(+g('scipct')/100)))+'px';b.style.marg
 var cream=+g('cream');box.style.background='rgb('+[255-3*cream,255-5*cream,255-9*cream]+')'}
 namePreview();
 document.getElementById('settings').addEventListener('change',namePreview);
+// The page's text bands, as renderBirdPage lays them out: the owner's lines
+// and the note at the ends of their edges, at the name size as a
+// share of the page; the values are the frame's own, as of loading this page.
+var TV=%TEXTVALS%;
+function textPreview(){var f=document.getElementById('settings'),el=f.elements,g=function(n){var e=el[n];return e?(e.length&&!e.tagName?e[0]:e).value:''};
+var on=function(n){var e=el[n];e=e&&e.length&&!e.tagName?e[0]:e;return !!(e&&e.checked)};
+var box=document.getElementById('textprev'),rot=+g('rotation'),portrait=(rot&1)==0,pw=portrait?1200:1600;
+var w=box.clientWidth||300,k=w/pw;
+var mg=g('marginmode')=='1'?[+g('margintop'),+g('marginright'),+g('marginbottom'),+g('marginleft')]:[+g('margin'),+g('margin'),+g('margin'),+g('margin')];
+// Sizes as renderBirdPage sets them: a share of the page's short side
+// (1200 px), never under kMinLabelPx. The frame's sizes are em sizes, as CSS
+// font-size is, so a size times k is the size on the glass shrunk to the
+// preview's width.
+var sc={0:.024,1:.032,2:.042,3:.055},nameSc=sc[g('label')]||.032,size=function(n){return Math.max(11,Math.round(1200*n))};
+var px=size(nameSc),inset=Math.max(4,px/2),linePx=function(v){v=+v;return size(v==5?.075:sc[v-1]||.032)};
+// Only the sides' margins show: the strip is the two edges, not the page.
+box.style.padding='0 '+mg[1]*k+'px 0 '+mg[3]*k+'px';
+var src=g('source'),fresh=src=='birdnet'&&document.getElementById('tpnew').checked,vals={};
+for(var n in TV)vals[n]=TV[n];
+if(fresh){vals['new']=vals['new']||'Superb Fairywren';vals['new.count']=vals['new.count']||'1'}
+// The times as the Times select says now, not as it was saved.
+var clk=function(t){var m=/^(\d{1,2}):(\d\d)(?: ([ap])m)?$/.exec(t||'');if(!m)return t;var h=+m[1]%(m[3]?12:24)+(m[3]=='p'?12:0);
+return g('clock')=='1'?((h%12||12)+':'+m[2]+(h<12?' am':' pm')):((h<10?'0':'')+h+':'+m[2])};
+['time','next'].forEach(function(n){if(vals[n])vals[n]=clk(vals[n])});
+var missing=[];
+var fill=function(t){var gone=false,o=t.replace(/\{\{([^}]*)\}\}/g,function(m,n){n=n.replace(/ /g,'').toLowerCase();if(!(n in vals))return m;if(vals[n]===null){gone=true;missing.push(n);return ''}return vals[n]});return gone?'':o};
+var swap=fresh&&on('newtext');
+var top=swap&&g('newtoptext').trim()?g('newtoptext'):g('toptext'),bot=swap&&g('newbottomtext').trim()?g('newbottomtext'):g('bottomtext');
+var bands=[[[],[],[]],[[],[],[]]],face=[g('topface')=='1',g('bottomface')=='1'];
+var put=function(t,e,a,size,name){name=name&&face[e];if(t)bands[e][a].push({t:name?t.toUpperCase():t,px:size,name:name})};
+var b=fill(bot.trim());
+put(fill(top.trim()),0,+g('topalign'),linePx(g('topsize')),true);put(b,1,+g('bottomalign'),linePx(g('bottomsize')),true);
+['tptop','tpbot'].forEach(function(id,e){var row=document.getElementById(id),any=false;
+row.style.padding=(e?'0 ':inset*k+'px ')+inset*k+'px '+(e?inset*k+'px ':px/3*k+'px ')+inset*k+'px';
+if(e)row.style.paddingTop=px/3*k+'px';
+for(var a=0;a<3;a++){var span=row.children[a];span.innerHTML='';bands[e][a].forEach(function(r,i){any=true;var x=document.createElement('span');x.textContent=r.t;
+x.style.fontSize=r.px*k+'px';x.style.fontFamily=r.name?'BPName,Georgia,serif':'BPLabel,Georgia,serif';x.style.fontStyle=r.name?'':'italic';if(i)x.style.marginLeft=px/2*k+'px';span.appendChild(x)})}
+row.hidden=!any;row.style.fontSize='';
+// Shrink to fit, as the frame does.
+if(any&&row.scrollWidth>row.clientWidth)row.style.transform='scale('+row.clientWidth/row.scrollWidth+')',row.style.transformOrigin='left';else row.style.transform=''});
+var cream=+g('cream');box.style.background='rgb('+[255-3*cream,255-5*cream,255-9*cream]+')';
+var why={weather:'the weather comes with the next page (and needs a location)',next:'the next update needs the clock',battery:'this board cannot read its battery','battery.percent':'this board cannot read its battery',place:'this source has no place',radius:'this source has no place','new':'no bird is new today','new.count':'no bird is new today',birds:'no page fetched yet',top:'no page fetched yet','top.scientific':'no page fetched yet'};
+var none=document.getElementById('tptop').hidden&&document.getElementById('tpbot').hidden;box.hidden=none;
+document.getElementById('tpnote').textContent=none?'No text on the page.':missing.length?'A line is left off: '+(why[missing[0]]||(missing[0].indexOf('weather.')==0?why.weather:'the clock is not set yet'))+'.':''}
+textPreview();
+document.getElementById('settings').addEventListener('change',textPreview);
+document.getElementById('settings').addEventListener('input',textPreview);
+document.getElementById('settings').addEventListener('input',whereChanged);
+// An example's Top or Bottom puts it in that line, as if typed there.
+document.querySelectorAll('.examples button').forEach(function(b){b.onclick=function(){
+var f=document.getElementById('settings').elements[b.dataset.to];f.value=b.closest('li').querySelector('code').textContent;
+if(b.dataset.to.indexOf('new')==0){var n=document.getElementById('newtext');n.checked=true;newTextChanged()}
+f.dispatchEvent(new Event('input',{bubbles:true}));f.focus()}});
+window.addEventListener('resize',textPreview);
 document.getElementById('settings').addEventListener('input',check);
 document.getElementById('settings').addEventListener('change',check);
 check();
@@ -398,6 +503,8 @@ std::string arg(const char *name) { return std::string(server.arg(name).c_str())
 // Longest URL, key or timezone kept: NVS takes far more, but nothing real
 // comes near it.
 constexpr size_t kMaxText = 256;
+// The page's own lines: more than fits across the glass at the smallest size.
+constexpr size_t kMaxPageText = 120;
 
 // A field typed or pasted: surrounding spaces and any control characters
 // (a pasted newline, say) dropped. Not for the SSID or passwords, which may
@@ -567,7 +674,15 @@ SourceConfig sourceFromForm(App &app, std::string &problem) {
   if (server.hasArg("ebirdloc") && validEbirdLocale(arg("ebirdloc"))) cfg.ebirdLocale = arg("ebirdloc");
   if (server.hasArg("listurl")) cfg.listUrl = argTrim("listurl");
   cfg.minConfidence = argInt("bnconf", 0, 100, cfg.minConfidence);
-  cfg.radiusKm = argInt("radius", 1, 500, cfg.radiusKm);
+  // In the unit the form was showing - which is the one it posts, even when
+  // it has just been changed - and kept in kilometres.
+  if (argInt("distunit", 0, 1, int(app.settings.miles)) == 1) {
+    // Unchanged from what the page showed keeps the kilometres it came from.
+    const int mi = argInt("radius", 1, 310, -1);
+    if (mi > 0 && mi != kmToMiles(cfg.radiusKm)) cfg.radiusKm = std::clamp(milesToKm(mi), 1, 500);
+  } else {
+    cfg.radiusKm = argInt("radius", 1, 500, cfg.radiusKm);
+  }
   cfg.inatVersion = argInt("inatv", 1, 2, app.settings.inatVersion);
   cfg.since = app.windowStart(argInt("lookback", 1, 10000, app.settings.lookback),
                               Settings::Lookback(argInt("lookbackunit", 0, 3, int(app.settings.lookbackUnit))));
@@ -603,6 +718,48 @@ Mode modeFromForm(Source source, Mode fallback) {
   // hides the option; a submit that carries it anyway lands on most-seen
   // rather than on a page that fails every hour.
   return supports(source, mode) ? mode : Mode::MostDetected;
+}
+
+// Every page-text name as the frame would fill it in now, for the settings
+// page's preview: {"date.long":"26 September 2026", "battery":null, ...},
+// null for one the frame has none of. '%' and '<' escaped, so neither the
+// %TOKEN% passes nor the HTML parser can read anything into a value.
+String textValues(App &app) {
+  static const char *const kNames[] = {
+      "date.long", "date.short", "date.numeric", "date.medium", "date.full", "time",
+      "time.24h", "time.12h", "hour.24h", "hour.12h", "weekday", "weekday.short", "day", "month", "month.short", "month.number", "year",
+      "next", "next.24h", "next.12h", "birds", "top", "top.scientific", "new", "new.count", "source", "window",
+      "place", "radius", "refresh", "battery", "battery.percent", "weather.now", "weather.summary",
+      "weather.today", "weather.high", "weather.low", "weather.rain", "weather.tomorrow",
+      "weather.tomorrow.high", "weather.tomorrow.low", "weather.tomorrow.rain"};
+  const std::time_t now = std::time(nullptr);
+  std::tm tm{};
+  if (now > 100000) localtime_r(&now, &tm);
+  String json = "{";
+  for (const char *name : kNames) {
+    std::string out;
+    const TextValue v = app.textValue(name, out);
+    bool have = v == TextValue::Filled;
+    if (v == TextValue::Unknown) {  // one of the clock's
+      out = expandText(std::string("{{") + name + "}}", now > 100000 ? &tm : nullptr,
+                       app.settings.textPrefs());
+      have = !out.empty();
+    }
+    if (json.length() > 1) json += ',';
+    json += "\"" + String(name) + "\":";
+    if (!have) {
+      json += "null";
+      continue;
+    }
+    json += '"';
+    for (char c : jsonEsc(out)) {
+      if (c == '%') json += "\\u0025";
+      else if (c == '<') json += "\\u003c";
+      else json += c;
+    }
+    json += '"';
+  }
+  return json + "}";
 }
 
 String render(App &app, const std::string &error = "") {
@@ -729,7 +886,12 @@ String render(App &app, const std::string &error = "") {
   page.replace("%DETECTOR%", esc(s.detectorUrl));
   page.replace("%LAT%", fmt(s.lat));
   page.replace("%LNG%", fmt(s.lng));
-  page.replace("%RADIUS%", String(s.radiusKm));
+  page.replace("%RADIUS%", String(s.miles ? kmToMiles(s.radiusKm) : s.radiusKm));
+  page.replace("%RADIUSMAX%", s.miles ? "310" : "500");
+  page.replace("%DISTNAME%", s.miles ? "miles" : "km");
+  for (int v = 0; v < 2; ++v) page.replace("%DU" + String(v) + "%", sel(int(s.miles) == v));
+  for (int v = 0; v < 2; ++v) page.replace("%TU" + String(v) + "%", sel(int(s.fahrenheit) == v));
+  for (int v = 0; v < 2; ++v) page.replace("%CK" + String(v) + "%", sel(int(s.clock12h) == v));
   page.replace("%LOOKBACK%", String(s.lookback));
   page.replace("%INATV2%", sel(s.inatVersion == 2));
   page.replace("%INATV1%", sel(s.inatVersion == 1));
@@ -752,9 +914,20 @@ String render(App &app, const std::string &error = "") {
   for (int v = 50; v <= 100; v += 10)
     page.replace("%SCI" + String(v) + "%", sel(s.sciPercent == v));
   for (int k = 0; k < 4; ++k) page.replace("%PKS" + String(k) + "%", sel(int(s.packStyle) == k));
-  page.replace("%DATEON%", s.showDate ? "checked" : "");
+  page.replace("%TOPTEXT%", esc(s.topText));
+  page.replace("%CONFON%", s.showConfidence ? "checked" : "");
+  page.replace("%TEXTVALS%", textValues(app));
+  page.replace("%NEWTOP%", esc(s.newTopText));
+  page.replace("%NEWBOT%", esc(s.newBottomText));
+  page.replace("%NEWTEXTON%", s.newText ? "checked" : "");
+  for (int v = 0; v < 2; ++v) page.replace("%TFC" + String(v) + "%", sel(int(s.topInNameFont) == v));
+  for (int v = 0; v < 2; ++v) page.replace("%BFC" + String(v) + "%", sel(int(s.bottomInNameFont) == v));
+  for (int v = 1; v < 6; ++v) page.replace("%TSZ" + String(v) + "%", sel(int(s.topSize) == v));
+  for (int v = 1; v < 6; ++v) page.replace("%BSZ" + String(v) + "%", sel(int(s.bottomSize) == v));
+  page.replace("%BOTTEXT%", esc(s.bottomText));
+  for (int v = 0; v < 3; ++v) page.replace("%TAL" + String(v) + "%", sel(int(s.topAlign) == v));
+  for (int v = 0; v < 3; ++v) page.replace("%BAL" + String(v) + "%", sel(int(s.bottomAlign) == v));
   page.replace("%EVERYON%", s.everyBird ? "checked" : "");
-  page.replace("%COUNTON%", s.countRefreshes ? "checked" : "");
   page.replace("%SHUFON%", s.shuffleBirds ? "checked" : "");
   page.replace("%NEWON%", s.preferNew ? "checked" : "");
   page.replace("%BNCONF%", String(s.minConfidence));
@@ -762,22 +935,10 @@ String render(App &app, const std::string &error = "") {
   page.replace("%WEBURL%", esc(s.webPlatesUrl));
   page.replace("%WEBLAST%", app.lastWebPlates.empty() ? String("")
                                                       : "Last page: " + esc(app.lastWebPlates) + ".");
-  if (s.countRefreshes) {
-    const std::string since = st.refreshesSince ? " since " + app.localTime(st.refreshesSince) : "";
-    page.replace("%REFRESHES%",
-                 String("<div><b>Refreshes</b><span>") + String((unsigned long)st.refreshes) +
-                     esc(since) +
-                     " <form method=\"post\" action=\"/action\" style=\"display:inline\" "
-                     "onsubmit=\"return confirm('Reset the refresh count to 0?')\"><button "
-                     "name=\"do\" value=\"resetcount\" "
-                     "style=\"padding:.1rem .5rem;font-size:.85rem\">Reset</button></form></span></div>");
-  } else {
-    page.replace("%REFRESHES%", "");
-  }
-  for (int v = 0; v < 5; ++v) page.replace("%DST" + String(v) + "%", sel(int(s.dateStyle) == v));
+  page.replace("%REFRESHCOUNT%",
+               String((unsigned long)st.refreshes) + (st.refreshes == 1 ? " refresh" : " refreshes") +
+                   (st.refreshesSince ? esc(" since " + app.localTime(st.refreshesSince)) : String("")));
   for (int v = 0; v < 2; ++v) page.replace("%DOR" + String(v) + "%", sel(int(s.dateOrder) == v));
-  for (int v = 0; v < 2; ++v) page.replace("%DED" + String(v) + "%", sel(int(s.dateEdge) == v));
-  for (int v = 0; v < 3; ++v) page.replace("%DAL" + String(v) + "%", sel(int(s.dateAlign) == v));
   for (int v = 0; v < 5; ++v) page.replace("%VIV" + String(v) + "%", sel(s.vivid == v));
   for (int v = 0; v < 5; ++v) page.replace("%SHP" + String(v) + "%", sel(s.sharpen == v));
   for (int v = 0; v < 5; ++v) page.replace("%EDG" + String(v) + "%", sel(s.edges == v));
@@ -1027,6 +1188,7 @@ void WebUi::begin(bool captive) {
     }
     s.birds = argInt("birds", 1, 40, s.birds);
     s.everyBird = argInt("everybird", 0, 1, int(s.everyBird)) == 1;
+    s.showConfidence = argInt("showconf", 0, 1, int(s.showConfidence)) == 1;
     s.rotation = argInt("rotation", 0, 3, s.rotation);
     s.names = NameStyle(argInt("names", 0, 3, int(s.names)));
     s.commonCase = NameCase(argInt("namecase", 0, 2, int(s.commonCase)));
@@ -1035,24 +1197,30 @@ void WebUi::begin(bool captive) {
     s.packStyle = PackStyle(argInt("packstyle", 0, 3, int(s.packStyle)));
     // The checkbox comes before a hidden "0" of the same name, and the server
     // reads the first: "1" when ticked, the hidden "0" when not.
-    s.showDate = argInt("date", 0, 1, int(s.showDate)) == 1;
     s.shuffleBirds = argInt("shuffle", 0, 1, int(s.shuffleBirds)) == 1;
     s.preferNew = argInt("newfirst", 0, 1, int(s.preferNew)) == 1;
     s.minConfidence = argInt("bnconf", 0, 100, s.minConfidence);
-    const bool counting = argInt("countref", 0, 1, int(s.countRefreshes)) == 1;
-    // Turning the counter on starts a fresh count: a test begins from 0.
-    if (counting && !s.countRefreshes) app.resetRefreshCount();
-    s.countRefreshes = counting;
     s.webPlates = argInt("webplates", 0, 1, int(s.webPlates)) == 1;
     if (server.hasArg("weburl")) {
       const std::string url = argTrim("weburl");
       if (isHttpUrl(url)) s.webPlatesUrl = url;
       else if (!url.empty()) notes += " The web plates address must start with http:// or https://, with no spaces.";
     }
-    s.dateStyle = DateStyle(argInt("datestyle", 0, 4, int(s.dateStyle)));
     s.dateOrder = DateOrder(argInt("dateorder", 0, 1, int(s.dateOrder)));
-    s.dateEdge = DateEdge(argInt("dateedge", 0, 1, int(s.dateEdge)));
-    s.dateAlign = DateAlign(argInt("datealign", 0, 2, int(s.dateAlign)));
+    if (server.hasArg("toptext")) s.topText = argTrim("toptext").substr(0, kMaxPageText);
+    if (server.hasArg("bottomtext")) s.bottomText = argTrim("bottomtext").substr(0, kMaxPageText);
+    s.topAlign = TextAlign(argInt("topalign", 0, 2, int(s.topAlign)));
+    if (server.hasArg("newtoptext")) s.newTopText = argTrim("newtoptext").substr(0, kMaxPageText);
+    if (server.hasArg("newbottomtext")) s.newBottomText = argTrim("newbottomtext").substr(0, kMaxPageText);
+    s.newText = argInt("newtext", 0, 1, int(s.newText)) == 1;
+    s.miles = argInt("distunit", 0, 1, int(s.miles)) == 1;
+    s.fahrenheit = argInt("tempunit", 0, 1, int(s.fahrenheit)) == 1;
+    s.clock12h = argInt("clock", 0, 1, int(s.clock12h)) == 1;
+    s.topInNameFont = argInt("topface", 0, 1, int(s.topInNameFont)) == 1;
+    s.bottomInNameFont = argInt("bottomface", 0, 1, int(s.bottomInNameFont)) == 1;
+    s.topSize = TextSize(argInt("topsize", 1, 5, int(s.topSize)));
+    s.bottomSize = TextSize(argInt("bottomsize", 1, 5, int(s.bottomSize)));
+    s.bottomAlign = TextAlign(argInt("bottomalign", 0, 2, int(s.bottomAlign)));
     s.vivid = argInt("vivid", 0, 4, s.vivid);
     s.sharpen = argInt("sharpen", 0, 4, s.sharpen);
     s.edges = argInt("edges", 0, 4, s.edges);
@@ -1190,7 +1358,7 @@ void WebUi::begin(bool captive) {
       pending_ = Request::Sleep;
     } else if (what == "resetcount") {
       app.resetRefreshCount();
-      warning_ = "Refresh count reset to 0.";
+      warning_ = "Refresh count cleared to 0.";
       redirectHome();
     } else if (what == "reboot") {
       server.send(200, "text/html", "<meta charset=utf-8><p style='font:16px system-ui;padding:1rem'>Rebooting.</p>");

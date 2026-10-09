@@ -17,6 +17,7 @@
 #endif
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <new>
 #include <random>
@@ -312,7 +313,8 @@ void App::noteNewToday(const std::vector<Sighting> &seen) {
   }
   for (const Sighting &s : seen) {
     if (s.newOn != today) continue;
-    if (std::any_of(newToday.begin(), newToday.end(),
+    if (settings.source == Source::BirdNet &&
+        std::any_of(newToday.begin(), newToday.end(),
                     [&s](const Sighting &k) { return k.scientific == s.scientific; }))
       continue;
     newToday.push_back(s);
@@ -555,6 +557,8 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
       page = preferNew(page, pool, isNew, want);
     }
   }
+  pageTopScientific = page.empty() ? "" : page.front().scientific;
+  pageTopCommon = page.empty() ? "" : page.front().common;
   if (settings.shuffleBirds) {
     // Seeded by the layout, which every page moves on: a new order each page,
     // and the same one again for the same layout.
@@ -564,10 +568,17 @@ bool App::fetchBirds(std::vector<int> &plateIndices) {
   plateIndices.clear();
   pageBirds.clear();
   pageCommon.clear();
+  pageConfidence.clear();
+  pageNew.clear();
   for (const Sighting &s : page) {
     plateIndices.push_back(plates.find(s.scientific));
     pageBirds.push_back(s.scientific);
     pageCommon.push_back(s.common);
+    pageConfidence.push_back(s.confidence);
+    if (settings.source == Source::BirdNet &&
+        std::any_of(newToday.begin(), newToday.end(),
+                    [&s](const Sighting &k) { return k.scientific == s.scientific; }))
+      pageNew.push_back(s.common.empty() ? s.scientific : s.common);
   }
   if (plateIndices.empty()) {
     fetchError = every && seen.empty()
@@ -612,9 +623,9 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
   ps.marginBottom = settings.marginBottomPx();
   ps.marginLeft = settings.marginLeftPx();
   ps.commonNames = pageCommon;
+  ps.nameSuffixes = nameSuffixes();
   ps.commonCase = settings.commonCase;
   ps.commonFont = &nameFont;
-  ps.note = refreshNote();
   // The full-size supplement: for a bird drawn well above its flash plate's
   // size (the renderer only asks then), the same plate at full size from the
   // web - and the flash plate on any failure. After the first failure the
@@ -706,15 +717,14 @@ bool App::showBirds(const std::vector<int> &plateIndices) {
       hook();
     }
   };
-  // Only once the clock has been set: a page dated 1970 is worse than none.
-  const std::time_t now = std::time(nullptr);
-  if (settings.showDate && now > 100000) {
-    std::tm tm{};
-    localtime_r(&now, &tm);
-    ps.date = formatDate(tm, settings.dateStyle, settings.dateOrder);
-    ps.dateEdge = settings.dateEdge;
-    ps.dateAlign = settings.dateAlign;
-  }
+  ps.topText = pageText(topLine());
+  ps.bottomText = pageText(bottomLine());
+  ps.topAlign = settings.topAlign;
+  ps.bottomAlign = settings.bottomAlign;
+  if (settings.topInNameFont) ps.topFont = &nameFont;
+  if (settings.bottomInNameFont) ps.bottomFont = &nameFont;
+  ps.topSize = settings.topSize;
+  ps.bottomSize = settings.bottomSize;
   ps.progress = [this](const char *what) { progress(what); };
   // The page on the glass is not wanted to draw the next one, and it is
   // 1.9 MB: kept through the render, a second page in one wake has the old
@@ -867,6 +877,7 @@ void App::stressTest(int pages) {
     return;
   }
   const std::vector<std::string> allBirds = pageBirds, allCommon = pageCommon;
+  const std::vector<int> allConfidence = pageConfidence;
   // Every combination of these, the bird count moving fastest so heavy and
   // light pages alternate: few birds draw large and pull full-size web
   // plates; forty fill the packer and the kept planes; scatter and grid run
@@ -885,6 +896,7 @@ void App::stressTest(int pages) {
     const size_t n = std::min(all.size(), size_t(settings.birds));
     pageBirds.assign(allBirds.begin(), allBirds.begin() + long(n));
     pageCommon.assign(allCommon.begin(), allCommon.begin() + long(n));
+    pageConfidence.assign(allConfidence.begin(), allConfidence.begin() + long(n));
     progress("stress test, page " + std::to_string(i + 1) + " of " + std::to_string(pages));
     showBirds(std::vector<int>(all.begin(), all.begin() + long(n)));
     Serial.printf("stress: page %d of %d done, %u KB PSRAM free, largest %u KB, heap %u KB\n", i + 1,
@@ -978,13 +990,11 @@ bool App::present() {
   }
   // Every refresh the panel was asked for drew on the battery, the timed-out
   // ones too, so they all count.
-  if (settings.countRefreshes) {
-    ++state.refreshes;
-    if (!state.refreshesSince && lastPresented > 100000) state.refreshesSince = uint32_t(lastPresented);
-  }
+  ++state.refreshes;
+  if (!state.refreshesSince && lastPresented > 100000) state.refreshesSince = uint32_t(lastPresented);
   if (ok) state.glass = lastKind;
   timing::outcome(ok ? lastKind.c_str() : "panel_fail");
-  if (ok || settings.countRefreshes) saveState(state);
+  saveState(state);
   return ok;
 }
 
@@ -1012,7 +1022,7 @@ std::string App::webPlateUrl(const std::string &name) const {
   return url + ".bin";
 }
 
-uint32_t App::pageSignature() const {
+uint32_t App::pageSignature() {
   uint32_t h = 2166136261u;  // FNV-1a
   const auto add = [&h](const std::string &s) {
     for (char c : s) h = (h ^ uint8_t(c)) * 16777619u;
@@ -1023,30 +1033,176 @@ uint32_t App::pageSignature() const {
     add(pageBirds[i]);
     add(i < pageCommon.size() ? pageCommon[i] : "");
   }
-  // The date as it would be printed: a new day is a new page, a new hour is not.
-  const std::time_t now = std::time(nullptr);
-  if (settings.showDate && now > 100000) {
-    std::tm tm{};
-    localtime_r(&now, &tm);
-    add(formatDate(tm, settings.dateStyle, settings.dateOrder));
-  }
-  add(refreshNote());  // counting refreshes changes the page every time, as it should
+  for (const std::string &suffix : nameSuffixes()) add(suffix);
+  // The owner's lines as they would be printed: one with the date in it is a
+  // new page each day, one with the time in it every minute, as it should be.
+  add(pageText(topLine()));
+  add(pageText(bottomLine()));
   add(kFirmwareVersion);
   add(settings.pack);
   add(settings.webPlates ? settings.webPlatesUrl : "");
   for (long v : {long(state.layout), long(settings.rotation), long(settings.names),
                  long(settings.commonCase), long(settings.labelSize), long(settings.sciPercent),
-                 long(settings.packStyle), long(settings.showDate), long(settings.dateStyle),
-                 long(settings.dateOrder), long(settings.dateEdge), long(settings.dateAlign),
+                 long(settings.packStyle), long(settings.dateOrder), long(settings.clock12h),
                  long(settings.vivid), long(settings.sharpen), long(settings.edges),
-                 long(settings.cream)})
+                 long(settings.cream), long(settings.topAlign), long(settings.bottomAlign),
+                 long(settings.topInNameFont), long(settings.bottomInNameFont),
+                 long(settings.topSize), long(settings.bottomSize)})
     num(v);
   return h ? h : 1;  // 0 means "no page"
 }
 
-std::string App::refreshNote() const {
-  if (!settings.countRefreshes) return "";
-  return "Refresh " + std::to_string(state.refreshes + 1);
+std::vector<std::string> App::nameSuffixes() const {
+  std::vector<std::string> out;
+  if (!settings.showConfidence || settings.source != Source::BirdNet) return out;
+  for (int pct : pageConfidence) out.push_back(pct < 0 ? "" : "(" + std::to_string(pct) + "%)");
+  return out;
+}
+
+std::string App::pageText(const std::string &text) {
+  if (text.empty()) return "";
+  const std::time_t now = std::time(nullptr);
+  std::tm tm{};
+  if (now > 100000) localtime_r(&now, &tm);
+  return expandText(text, now > 100000 ? &tm : nullptr, settings.textPrefs(),
+                    [this](const std::string &name, std::string &out) { return textValue(name, out); });
+}
+
+bool App::newBirdLines() const { return settings.newText && !pageNew.empty(); }
+
+const std::string &App::topLine() const {
+  return newBirdLines() && !settings.newTopText.empty() ? settings.newTopText : settings.topText;
+}
+
+const std::string &App::bottomLine() const {
+  return newBirdLines() && !settings.newBottomText.empty() ? settings.newBottomText
+                                                           : settings.bottomText;
+}
+
+bool App::weatherUsed() const {
+  for (const std::string *line :
+       {&settings.topText, &settings.bottomText, &settings.newTopText, &settings.newBottomText})
+    if (textUses(*line, "weather.", true)) return true;
+  return false;
+}
+
+void App::fetchWeather() {
+  weather = Weather{};
+  weatherError.clear();
+  if (!weatherUsed()) return;
+  if (settings.lat == 0 && settings.lng == 0) {
+    weatherError = "no location set for it";
+    return;
+  }
+  std::string body, error, why;
+  int http = 0;
+  if (!fetch(weatherUrl(settings.lat, settings.lng, settings.fahrenheit), body, http, error, {}, 8000)) {
+    weatherError = error;
+  } else if (!parseWeather(body, weather, &why) || http != 200) {
+    weather = Weather{};
+    weatherError = (http != 200 ? "HTTP " + std::to_string(http) + ": " : std::string()) + why;
+  }
+  progress("");
+}
+
+namespace {
+
+// A lithium cell's charge from its voltage at rest: the usual curve, which a
+// frame at rest between pages is close enough to. A guide, not a gauge.
+int batteryPercent(int mv) {
+  static const int kCurve[][2] = {{4150, 100}, {4110, 90}, {4020, 80}, {3950, 70}, {3870, 60},
+                                  {3840, 50},  {3800, 40}, {3770, 30}, {3730, 20}, {3690, 10},
+                                  {3610, 5},   {3300, 0}};
+  if (mv >= kCurve[0][0]) return 100;
+  for (size_t i = 1; i < sizeof kCurve / sizeof kCurve[0]; ++i)
+    if (mv >= kCurve[i][0]) {
+      const int v0 = kCurve[i][0], v1 = kCurve[i - 1][0], p0 = kCurve[i][1], p1 = kCurve[i - 1][1];
+      return p0 + (p1 - p0) * (mv - v0) / (v1 - v0);
+    }
+  return 0;
+}
+
+}  // namespace
+
+TextValue App::textValue(const std::string &name, std::string &out) {
+  char buf[64];
+  if (name == "birds") {
+    if (pageBirds.empty()) return TextValue::Missing;
+    out = std::to_string(pageBirds.size());
+  } else if (name == "top" || name == "top.scientific") {
+    if (pageTopScientific.empty()) return TextValue::Missing;
+    out = name == "top" && !pageTopCommon.empty() ? pageTopCommon : pageTopScientific;
+  } else if (name == "new" || name == "new.count") {
+    if (pageNew.empty()) return TextValue::Missing;
+    if (name == "new.count") {
+      out = std::to_string(pageNew.size());
+    } else {
+      // "A", "A and B", "A, B and C".
+      out.clear();
+      for (size_t i = 0; i < pageNew.size(); ++i)
+        out += (i == 0 ? "" : i + 1 == pageNew.size() ? " and " : ", ") + pageNew[i];
+    }
+  } else if (name.compare(0, 8, "weather.") == 0) {
+    const std::string what = name.substr(8);
+    const bool tomorrow = what.compare(0, 8, "tomorrow") == 0;
+    const std::string part = tomorrow ? (what.size() > 9 ? what.substr(9) : "summary") : what;
+    const Weather::Day &day = weather.days[tomorrow ? 1 : 0];
+    const auto degrees = [&](float t) {
+      snprintf(buf, sizeof buf, "%d\u00B0", int(std::lround(t)));
+      return std::string(buf);
+    };
+    if (!(tomorrow ? part == "summary" || part == "high" || part == "low" || part == "rain"
+                   : part == "now" || part == "summary" || part == "today" || part == "high" ||
+                         part == "low" || part == "rain"))
+      return TextValue::Unknown;
+    if (!weather.ok) return TextValue::Missing;
+    if (part == "now") out = degrees(weather.now);
+    else if (part == "high") out = degrees(day.high);
+    else if (part == "low") out = degrees(day.low);
+    else if (part == "rain") {
+      if (day.rain < 0) return TextValue::Missing;
+      out = std::to_string(day.rain) + "%";
+    } else {
+      out = weatherText(part == "summary" && !tomorrow ? weather.nowCode : day.code);
+      if (out.empty()) return TextValue::Missing;
+    }
+  } else if (name == "source") {
+    out = sourceName(settings.source);
+  } else if (name == "window") {
+    const int n = settings.lookback;
+    const auto span = [n](const char *unit) {
+      return n == 1 ? std::string("last ") + unit
+                    : "last " + std::to_string(n) + " " + unit + "s";
+    };
+    switch (settings.lookbackUnit) {
+      case Settings::Lookback::Minutes: out = span("minute"); break;
+      case Settings::Lookback::Hours: out = span("hour"); break;
+      case Settings::Lookback::Days: out = span("day"); break;
+      case Settings::Lookback::SinceLast: out = "since the last update"; break;
+    }
+  } else if (name == "place" || name == "radius") {
+    if (!settings.placeBased()) return TextValue::Missing;
+    if (name == "place") snprintf(buf, sizeof buf, "%.4f, %.4f", settings.lat, settings.lng);
+    out = name == "place" ? std::string(buf) : settings.radiusText();
+  } else if (name == "next" || name == "next.24h" || name == "next.12h") {
+    const std::time_t now = std::time(nullptr);
+    if (now < 100000) return TextValue::Missing;
+    const std::time_t next = now + std::time_t(sleepSeconds(now));
+    std::tm tm{};
+    localtime_r(&next, &tm);
+    out = formatTime(tm, name == "next" ? settings.clock12h : name == "next.12h");
+  } else if (name == "refresh") {
+    out = std::to_string(state.refreshes + 1);  // counting the refresh about to happen
+  } else if (name == "battery" || name == "battery.percent") {
+    const int mv = batteryMv();
+    if (mv < 0) return TextValue::Missing;
+    if (name == "battery") snprintf(buf, sizeof buf, "%d.%02d V", mv / 1000, (mv % 1000) / 10);
+    else snprintf(buf, sizeof buf, "%d%%", batteryPercent(mv));
+    out = buf;
+  } else {
+    return TextValue::Unknown;
+  }
+  return TextValue::Filled;
 }
 
 void App::resetRefreshCount() {
@@ -1060,18 +1216,16 @@ std::string App::localTime(std::time_t t) const {
   if (t < 100000) return "never";
   std::tm tm{};
   localtime_r(&t, &tm);
-  char buf[32];
-  std::strftime(buf, sizeof buf, "%Y-%m-%d %H:%M", &tm);
-  return buf;
+  char buf[16];
+  std::strftime(buf, sizeof buf, "%Y-%m-%d ", &tm);
+  return buf + formatTime(tm, settings.clock12h);
 }
 
 std::string App::clockTime(std::time_t t) const {
   if (t < 100000) return "never";
   std::tm tm{};
   localtime_r(&t, &tm);
-  char buf[16];
-  std::strftime(buf, sizeof buf, "%H:%M", &tm);
-  return buf;
+  return formatTime(tm, settings.clock12h);
 }
 
 uint64_t App::sleepSeconds(std::time_t now) const {
@@ -1140,7 +1294,8 @@ std::vector<std::string> App::statusLines() {
 
   const SourceConfig cfg = sourceConfig();
   char geo[80];
-  snprintf(geo, sizeof geo, "%d km around %.4f, %.4f", settings.radiusKm, settings.lat, settings.lng);
+  snprintf(geo, sizeof geo, "%s around %.4f, %.4f", settings.radiusText().c_str(), settings.lat,
+           settings.lng);
   std::string window;
   switch (settings.lookbackUnit) {
     case Settings::Lookback::Minutes: window = std::to_string(settings.lookback) + " min"; break;
@@ -1210,6 +1365,14 @@ std::vector<std::string> App::statusLines() {
       next = "about " + clockTime(now + std::time_t(sleepSeconds(now)));
     }
     lines.push_back("Next: " + next);
+    if (weatherUsed()) {
+      const char unit = settings.fahrenheit ? 'F' : 'C';
+      lines.push_back(weather.ok ? "Weather: " + std::to_string(int(std::lround(weather.now))) +
+                                       "\u00B0" + unit + ", " + weatherText(weather.nowCode) +
+                                       " (Open-Meteo)"
+                                 : "!Weather: " + (weatherError.empty() ? std::string("not fetched yet")
+                                                                        : weatherError));
+    }
   }
   lines.push_back("Plates: " + (platesOk ? std::to_string(plates.count()) + " species from " + packPath
                                          : "!" + platesError));
@@ -1218,8 +1381,7 @@ std::vector<std::string> App::statusLines() {
     lines.push_back("Web plates: " + settings.webPlatesUrl +
                     (packRegion.empty() ? std::string("") : " (region " + packRegion + ")") +
                     (lastWebPlates.empty() ? "" : " - " + lastWebPlates));
-  if (settings.countRefreshes)
-    lines.push_back("Refreshes: " + std::to_string(state.refreshes + 1) + " including this one, since " +
+  lines.push_back("Refreshes: " + std::to_string(state.refreshes + 1) + " including this one, since " +
                     (state.refreshesSince ? localTime(state.refreshesSince) : std::string("now")));
   if (const int mv = batteryMv(); mv >= 0) {
     char buf[48];

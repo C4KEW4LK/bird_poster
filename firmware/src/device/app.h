@@ -89,6 +89,19 @@ struct App {
   std::string fetchError;
   std::vector<std::string> pageBirds;   // scientific, the artwork key
   std::vector<std::string> pageCommon;  // parallel; may be empty strings
+  std::vector<int> pageConfidence;      // parallel; BirdNET-Go's percent, -1 for none
+  // The source's first-ranked bird on the page, before any shuffle: {{top}}.
+  std::string pageTopScientific, pageTopCommon;
+  // The page's birds BirdNET-Go counts as new species today (see newToday),
+  // by common name where there is one: {{new}}, and what switches the page
+  // to the "new bird" lines. Always empty for the other sources.
+  std::vector<std::string> pageNew;
+  // The weather for {{weather...}}, fetched with the birds when a line asks
+  // for it (see fetchWeather); not ok, with the reason, when it could not be.
+  Weather weather;
+  std::string weatherError;
+  bool weatherUsed() const;
+  void fetchWeather();
 
   // What the frame is doing right now, one short line, empty when idle. The
   // web UI shows it while a page is being made. Every stage calls
@@ -192,18 +205,29 @@ struct App {
 
   std::vector<std::string> statusLines();
   std::string localTime(std::time_t t) const;
-  // "Refresh 123", counting the refresh about to happen, for the page and the
-  // status page; empty while counting is off.
-  std::string refreshNote() const;
+  // One of the owner's lines for the page, its "{{...}}" filled in from the
+  // clock and the page now (see textValue); empty when it asks for something
+  // there is none of.
+  std::string pageText(const std::string &text);
+  // What goes after each bird's name: its confidence, when that is shown.
+  std::vector<std::string> nameSuffixes() const;
+  // What a page-text name beyond the clock's stands for: the page's birds,
+  // the source, the next update, the battery.
+  TextValue textValue(const std::string &name, std::string &out);
+  // The lines for this page: the "new bird" ones when that is switched on,
+  // the page has a bird BirdNET-Go calls new today, and the line is set.
+  bool newBirdLines() const;
+  const std::string &topLine() const;
+  const std::string &bottomLine() const;
   // A hash of everything that decides how the next bird page looks - the
   // birds and their names, the date, the layout, every drawing setting, the
   // firmware. Equal to State::pageSig when that page is already on the glass.
-  uint32_t pageSignature() const;
+  uint32_t pageSignature();
   // Where the web supplement asks for a species' full-size plate.
   std::string webPlateUrl(const std::string &name) const;
   // Start the refresh count again from nothing.
   void resetRefreshCount();
-  std::string clockTime(std::time_t t) const;  // HH:MM, or "never"
+  std::string clockTime(std::time_t t) const;  // 14:05 or 2:05 pm as set, or "never"
   bool inQuietHours() const { return inQuietHours(std::time(nullptr)); }
   // The page holds every species in the window rather than a set number.
   bool everyBird() const { return settings.everyBird && settings.source == Source::BirdNet; }

@@ -172,6 +172,8 @@ void test_birdnet_repeats_are_counted_not_duplicated() {
   TEST_ASSERT_EQUAL_INT(2, blackbird->localCount);          // two calls, one species
   TEST_ASSERT_EQUAL_STRING("Eurasian Blackbird", blackbird->common.c_str());
   TEST_ASSERT_EQUAL_INT(0, blackbird->globalCount);         // BirdNET-Go has no such figure
+  TEST_ASSERT_EQUAL_INT(91, blackbird->confidence);         // the surer of its two calls
+  TEST_ASSERT_EQUAL_INT(64, find(seen, "Strix aluco")->confidence);
 }
 
 void test_inaturalist_keeps_both_counts() {
@@ -538,10 +540,43 @@ void test_a_json_list_takes_names_or_objects_in_the_order_given() {
   TEST_ASSERT_EQUAL_STRING(config.listUrl.c_str(), requestUrl(config, kNow).c_str());
 }
 
+// Open-Meteo: the place and the unit in the request, and now, today and
+// tomorrow out of the reply.
+void test_weather_url_and_reply() {
+  const std::string url = weatherUrl(-35.28, 149.13, true);
+  TEST_ASSERT_TRUE(url.rfind("https://api.open-meteo.com/v1/forecast?", 0) == 0);
+  TEST_ASSERT_TRUE(url.find("latitude=-35.2800&longitude=149.1300") != std::string::npos);
+  TEST_ASSERT_TRUE(url.find("temperature_unit=fahrenheit") != std::string::npos);
+  TEST_ASSERT_TRUE(weatherUrl(0, 0, false).find("temperature_unit") == std::string::npos);
+
+  const std::string body =
+      R"({"latitude":-35.25,"longitude":149.125,"timezone":"Australia/Sydney",)"
+      R"("current":{"time":"2026-10-09T14:00","temperature_2m":14.6,"weather_code":2},)"
+      R"("daily":{"time":["2026-10-09","2026-10-10"],"temperature_2m_max":[18.2,21.0],)"
+      R"("temperature_2m_min":[6.4,8.9],"weather_code":[61,3],"precipitation_probability_max":[60,10]}})";
+  Weather w;
+  std::string why;
+  TEST_ASSERT_TRUE_MESSAGE(parseWeather(body, w, &why), why.c_str());
+  TEST_ASSERT_TRUE(w.ok);
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 14.6f, w.now);
+  TEST_ASSERT_EQUAL_INT(2, w.nowCode);
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 18.2f, w.days[0].high);
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 8.9f, w.days[1].low);
+  TEST_ASSERT_EQUAL_INT(61, w.days[0].code);
+  TEST_ASSERT_EQUAL_INT(10, w.days[1].rain);
+  TEST_ASSERT_EQUAL_STRING("Light rain", weatherText(61));
+  TEST_ASSERT_EQUAL_STRING("", weatherText(1234));
+
+  TEST_ASSERT_FALSE(parseWeather(R"({"error":true,"reason":"Latitude must be in range of -90 to 90"})", w, &why));
+  TEST_ASSERT_EQUAL_STRING("Latitude must be in range of -90 to 90", why.c_str());
+}
+
+
 }  // namespace
 
 int main() {
   UNITY_BEGIN();
+  RUN_TEST(test_weather_url_and_reply);
   RUN_TEST(test_birdnet_url_is_the_public_v2_path);
   RUN_TEST(test_a_refused_birdnet_names_private_mode);
   RUN_TEST(test_inaturalist_url_carries_the_window_and_the_place);

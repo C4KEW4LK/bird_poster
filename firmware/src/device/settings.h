@@ -6,6 +6,7 @@
 // factory reset of one need not touch the other.
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 
@@ -13,6 +14,10 @@
 #include "source.h"
 
 namespace birdposter {
+
+constexpr double kKmPerMile = 1.609344;
+inline int kmToMiles(int km) { return std::max(1, int(km / kKmPerMile + 0.5)); }
+inline int milesToKm(int mi) { return int(mi * kKmPerMile + 0.5); }
 
 struct Settings {
   // The network the frame joins. Empty SSID means "not set up yet", which is
@@ -46,14 +51,13 @@ struct Settings {
   int rotation = 1;     // quarter turns from the panel's portrait; 1 = landscape
   NameStyle names = NameStyle::Both;  // what goes under each bird
   NameCase commonCase = NameCase::Upper;  // how the common name is cased
+  bool showConfidence = false;  // BirdNET-Go: its confidence after each name, "(87%)"
   LabelSize labelSize = LabelSize::Medium;
   int sciPercent = 70;  // scientific name under a common one, % of its size
   PackStyle packStyle = PackStyle::Classic;  // how the birds are arranged on the page
   bool shuffleBirds = false;  // the chosen birds in a random order, not the source's ranking
   bool preferNew = false;  // BirdNET-Go: species it first heard today go on the page first
   int minConfidence = 0;   // BirdNET-Go: detections less sure than this, in percent, are ignored
-  bool showDate = false;  // today's date along one edge of the bird page
-  bool countRefreshes = false;  // count every refresh of the glass, for a battery test
   // Full-size plates from the web, for a bird drawn much larger than its
   // plate in flash; the flash plate whenever the site does not answer. The
   // files sit under the URL as <Scientific_name>.bin; a "{region}" in it is
@@ -63,10 +67,26 @@ struct Settings {
   // the web UI.
   bool webPlates = true;
   std::string webPlatesUrl = "https://c4kew4lk.github.io/bird_poster/plates/{region}";
-  DateStyle dateStyle = DateStyle::WordsLong;
-  DateOrder dateOrder = DateOrder::DayFirst;  // for the numeric styles
-  DateEdge dateEdge = DateEdge::Bottom;
-  DateAlign dateAlign = DateAlign::Right;
+  DateOrder dateOrder = DateOrder::DayFirst;  // for {{date.short}} and {{date.numeric}}
+  // Distances shown and entered in miles. The radius is kept in kilometres
+  // whichever, so the sources and a switch back are not touched by rounding.
+  bool miles = false;
+  bool fahrenheit = false;  // the weather in °F, not °C
+  bool clock12h = false;    // times as 2:05 pm rather than 14:05, on the page and off it
+  TextPrefs textPrefs() const { return TextPrefs{dateOrder, clock12h}; }
+  // The owner's own lines along the top and bottom of the bird page, with
+  // "{{date.long}}" and the like filled in from the clock (see expandText).
+  // Empty means none; the birds are packed clear of either.
+  std::string topText, bottomText;
+  TextAlign topAlign = TextAlign::Centre, bottomAlign = TextAlign::Centre;
+  // Lines used instead of those when the page has a bird BirdNET-Go calls a
+  // new species today ({{new}} names them). An empty one keeps the usual line.
+  bool newText = false;
+  std::string newTopText, newBottomText;
+  // Each line in the common names' face (capitals) rather than the label's.
+  // A new-bird line takes the face of the line it stands in for.
+  bool topInNameFont = false, bottomInNameFont = false;
+  TextSize topSize = TextSize::Medium, bottomSize = TextSize::Medium;  // each line's size
   int vivid = 2;    // colour boost before the dither, 0 least .. 4 most
   int sharpen = 2;  // unsharp mask before the dither, 0 off .. 4 most
   int edges = 2;    // ink along detected edges, 0 off .. 4 strongest
@@ -100,6 +120,11 @@ struct Settings {
   int marginBottomPx() const { return marginPerSide ? marginBottom : margin; }
   int marginLeftPx() const { return marginPerSide ? marginLeft : margin; }
 
+  // The radius as the owner reads it: "25 km", or "16 mi".
+  std::string radiusText() const {
+    return miles ? std::to_string(kmToMiles(radiusKm)) + " mi" : std::to_string(radiusKm) + " km";
+  }
+
   bool portrait() const { return (rotation & 1) == 0; }
   bool configured() const { return !wifiSsid.empty(); }
   // Whether the source can be asked for anything: the place-based sources
@@ -132,7 +157,7 @@ struct State {
   bool showingStatus = false;  // key 2 toggles this
   bool portalOn = false;       // key 1 sets this; the web UI or the idle timeout clears it
   std::string glass;           // what is on the panel: birds, status, setup, pattern
-  uint32_t refreshes = 0;      // glass refreshes counted, while counting is on
+  uint32_t refreshes = 0;      // glass refreshes counted: {{refresh}}, a battery test
   uint32_t refreshesSince = 0; // epoch seconds the count started, 0 for not yet
   uint32_t pageSig = 0;        // App::pageSignature() of the bird page on the glass, 0 for none
 };

@@ -49,17 +49,58 @@ void loadSettings(Settings &s) {
   // firmware cannot leave an older one with no layout at all.
   const uint8_t style = p.getUChar("packstyle", uint8_t(s.packStyle));
   s.packStyle = style <= uint8_t(PackStyle::Hero) ? PackStyle(style) : PackStyle::Classic;
-  s.showDate = p.getBool("date", s.showDate);
-  s.countRefreshes = p.getBool("countref", s.countRefreshes);
   s.shuffleBirds = p.getBool("shuffle", s.shuffleBirds);
   s.preferNew = p.getBool("newfirst", s.preferNew);
   s.minConfidence = p.getInt("bnconf", s.minConfidence);
   s.webPlates = p.getBool("webplates", s.webPlates);
   s.webPlatesUrl = getStr(p, "weburl", s.webPlatesUrl);
-  s.dateStyle = DateStyle(std::min<int>(4, p.getUChar("datestyle", uint8_t(s.dateStyle))));
   s.dateOrder = DateOrder(std::min<int>(1, p.getUChar("dateorder", uint8_t(s.dateOrder))));
-  s.dateEdge = p.getUChar("dateedge", uint8_t(s.dateEdge)) == 0 ? DateEdge::Top : DateEdge::Bottom;
-  s.dateAlign = DateAlign(std::min<int>(2, p.getUChar("datealign", uint8_t(s.dateAlign))));
+  s.topText = getStr(p, "toptext", s.topText);
+  s.bottomText = getStr(p, "bottext", s.bottomText);
+  s.topAlign = TextAlign(std::min<int>(2, p.getUChar("topalign", uint8_t(s.topAlign))));
+  s.bottomAlign = TextAlign(std::min<int>(2, p.getUChar("botalign", uint8_t(s.bottomAlign))));
+  // "textface" was one face for both lines, before each had its own.
+  const bool both = p.getBool("textface", false);
+  s.topInNameFont = p.getBool("topface", both || s.topInNameFont);
+  s.bottomInNameFont = p.getBool("botface", both || s.bottomInNameFont);
+  // The date was a setting of its own before the page had lines of text: a
+  // frame that showed it gets the same date as a line on the same edge, and
+  // saveSettings drops the old keys so this happens once.
+  if (p.getBool("date", false)) {
+    static const char *const kStyles[] = {"{{date.short}}", "{{date.numeric}}", "{{date.medium}}",
+                                          "{{date.long}}", "{{date.full}}"};
+    const int style = std::min<int>(4, p.getUChar("datestyle", 3));
+    const bool top = p.getUChar("dateedge", 1) == 0;
+    const TextAlign align = TextAlign(std::min<int>(2, p.getUChar("datealign", 2)));
+    std::string &line = top ? s.topText : s.bottomText;
+    if (line.empty()) {
+      line = kStyles[style];
+      (top ? s.topAlign : s.bottomAlign) = align;
+    }
+  }
+  // 0 was "the names' size": the size the names are set to, then. The name
+  // sizes run Small to Extra large as 0 to 3, the line sizes as 1 to 4.
+  const auto lineSize = [&](const char *key, TextSize fallback) {
+    const int v = p.getUChar(key, uint8_t(fallback));
+    return TextSize(v == 0 ? int(s.labelSize) + 1 : std::clamp(v, 1, 5));
+  };
+  s.topSize = lineSize("topsize", s.topSize);
+  s.bottomSize = lineSize("botsize", s.bottomSize);
+  // Counting refreshes was a setting of its own, which wrote the count small
+  // along the bottom; now the frame always counts and {{refresh}} places it.
+  // A frame that had it on keeps it, as a line, once.
+  if (p.getBool("countref", false) && s.bottomText.empty()) {
+    s.bottomText = "Refresh {{refresh}}";
+    s.bottomAlign = TextAlign::Left;
+    s.bottomSize = TextSize::Small;
+  }
+  s.showConfidence = p.getBool("showconf", s.showConfidence);
+  s.newText = p.getBool("newtext", s.newText);
+  s.miles = p.getBool("miles", s.miles);
+  s.fahrenheit = p.getBool("fahr", s.fahrenheit);
+  s.clock12h = p.getBool("clock12", s.clock12h);
+  s.newTopText = getStr(p, "newtop", s.newTopText);
+  s.newBottomText = getStr(p, "newbot", s.newBottomText);
   s.vivid = std::min<int>(4, p.getUChar("vivid", uint8_t(s.vivid)));
   s.sharpen = std::min<int>(4, p.getUChar("sharpen", uint8_t(s.sharpen)));
   s.edges = std::min<int>(4, p.getUChar("edges", uint8_t(s.edges)));
@@ -117,17 +158,30 @@ void saveSettings(const Settings &s) {
   p.putUChar("label", uint8_t(s.labelSize));
   p.putUChar("scipct", uint8_t(s.sciPercent));
   p.putUChar("packstyle", uint8_t(s.packStyle));
-  p.putBool("date", s.showDate);
-  p.putBool("countref", s.countRefreshes);
   p.putBool("shuffle", s.shuffleBirds);
   p.putBool("newfirst", s.preferNew);
   p.putInt("bnconf", s.minConfidence);
   p.putBool("webplates", s.webPlates);
   p.putString("weburl", s.webPlatesUrl.c_str());
-  p.putUChar("datestyle", uint8_t(s.dateStyle));
   p.putUChar("dateorder", uint8_t(s.dateOrder));
-  p.putUChar("dateedge", uint8_t(s.dateEdge));
-  p.putUChar("datealign", uint8_t(s.dateAlign));
+  for (const char *gone : {"date", "datestyle", "dateedge", "datealign", "countref"})  // now lines of text
+    if (p.isKey(gone)) p.remove(gone);
+  p.putString("toptext", s.topText.c_str());
+  p.putString("bottext", s.bottomText.c_str());
+  p.putUChar("topalign", uint8_t(s.topAlign));
+  p.putUChar("botalign", uint8_t(s.bottomAlign));
+  p.putBool("topface", s.topInNameFont);
+  p.putBool("botface", s.bottomInNameFont);
+  if (p.isKey("textface")) p.remove("textface");
+  p.putUChar("topsize", uint8_t(s.topSize));
+  p.putUChar("botsize", uint8_t(s.bottomSize));
+  p.putBool("showconf", s.showConfidence);
+  p.putBool("newtext", s.newText);
+  p.putBool("miles", s.miles);
+  p.putBool("fahr", s.fahrenheit);
+  p.putBool("clock12", s.clock12h);
+  p.putString("newtop", s.newTopText.c_str());
+  p.putString("newbot", s.newBottomText.c_str());
   p.putUChar("vivid", uint8_t(s.vivid));
   p.putUChar("sharpen", uint8_t(s.sharpen));
   p.putUChar("edges", uint8_t(s.edges));

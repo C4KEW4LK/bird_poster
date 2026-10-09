@@ -24,6 +24,13 @@ namespace birdposter {
 enum class LabelSize { Small, Medium, Large, XLarge };
 float labelScale(LabelSize size);
 
+// The size of one of the owner's lines of text: the name sizes, and one
+// larger for a heading. 0 is not used: it was "the names' size" once, and a
+// setting saved then is read as that size (see loadSettings).
+enum class TextSize : uint8_t { Small = 1, Medium, Large, XLarge, Huge };
+// As a fraction of the page's short side, like labelScale.
+float textScale(TextSize size);
+
 // A name under a bird is the common name with the scientific one beneath it,
 // smaller. The pack does not know common names - they come from the source,
 // in whatever language it answers in - so they arrive with the request and
@@ -40,9 +47,8 @@ enum class NameStyle : uint8_t { Both = 0, Scientific = 1, Common = 2, None = 3 
 enum class NameCase : uint8_t { AsGiven = 0, Upper = 1, Lower = 2 };
 std::string cased(const std::string &name, NameCase how);
 
-// The date on the bird page: how it is written, and which edge and end of the
-// page it sits on. The numeric styles follow DateOrder; the ones in words are
-// always day first.
+// How a date is written, for the page text's {{date...}} names. The numeric
+// styles follow DateOrder; the ones in words are always day first.
 enum class DateStyle : uint8_t {
   NumericShort = 0,  // 26/09/26, or 09/26/26 month first
   NumericLong = 1,   // 26/09/2026, or 09/26/2026 month first
@@ -51,10 +57,50 @@ enum class DateStyle : uint8_t {
   WordsFull = 4,     // Saturday 26 September 2026
 };
 enum class DateOrder : uint8_t { DayFirst = 0, MonthFirst = 1 };  // UK/AU, US
-enum class DateEdge : uint8_t { Top = 0, Bottom = 1 };
-enum class DateAlign : uint8_t { Left = 0, Centre = 1, Right = 2 };
+// Which edge of the page a line of text sits on, and which end of it.
+enum class TextEdge : uint8_t { Top = 0, Bottom = 1 };
+enum class TextAlign : uint8_t { Left = 0, Centre = 1, Right = 2 };
 std::string formatDate(const std::tm &tm, DateStyle style,
                        DateOrder order = DateOrder::DayFirst);
+// A time of day: 14:05, or 2:05 pm on a 12-hour clock.
+std::string formatTime(const std::tm &tm, bool clock12h = false);
+// The hour alone: 14, or 2 pm.
+std::string formatHour(const std::tm &tm, bool clock12h = false);
+
+// How the owner likes dates and times written, for the page text.
+struct TextPrefs {
+  DateOrder dateOrder = DateOrder::DayFirst;  // for the numeric dates
+  bool clock12h = false;                      // 2:05 pm rather than 14:05
+};
+
+// The owner's own line of text, with "{{name}}" filled in from the clock:
+//
+//   date.long         26 September 2026     date.short    26/09/26
+//   date.medium       26 Sep 2026           date.numeric  26/09/2026
+//   date.full         Saturday 26 September 2026
+//   time              14:05, or 2:05 pm on a 12-hour clock
+//   time.24h          14:05 whatever the clock  time.12h  2:05 pm whatever the clock
+//   hour.24h          14                        hour.12h  2 pm
+//   weekday           Saturday              weekday.short Sat
+//   day  26   month  September   month.short  Sep   month.number  09   year  2026
+//
+// and from `lookup` for any other name - what the frame knows of the page and
+// itself, which the renderer does not. The numeric dates and the time follow
+// `prefs`.
+// Names are not case sensitive and may have spaces inside the braces; one
+// nobody knows is left as written. `tm` null means the clock is not set.
+//
+// A line that asks for something there is none of - the clock not set, or a
+// name `lookup` answers Missing - comes back empty, rather than with a hole:
+// a page dated 1970, or "Battery: " and nothing, is worse than no line.
+enum class TextValue : uint8_t { Unknown, Filled, Missing };
+using TextLookup = std::function<TextValue(const std::string &name, std::string &out)>;
+std::string expandText(const std::string &text, const std::tm *tm,
+                       const TextPrefs &prefs = {}, const TextLookup &lookup = nullptr);
+
+// Whether `text` asks for "{{name}}", as expandText would read it; or, with
+// `prefix`, for any name that starts with `name` ("weather.").
+bool textUses(const std::string &text, const std::string &name, bool prefix = false);
 
 struct BirdPageSettings {
   bool portrait = false;
@@ -89,17 +135,22 @@ struct BirdPageSettings {
   int marginTop = 0, marginRight = 0, marginBottom = 0, marginLeft = 0;
   bool grow = true;  // let birds grow into the gaps after the pack (off: the packed layout alone)
   PackStyle packStyle = PackStyle::Classic;  // how the page is arranged; see packer.h
-  // Written along one edge of the page in the label font, at the name size,
-  // with the birds packed into what is left. Empty means no date.
-  std::string date;
-  DateEdge dateEdge = DateEdge::Bottom;
-  DateAlign dateAlign = DateAlign::Right;
-  // A short line in the same strip as the date, smaller, at the other end of
-  // it - the refresh counter. Without a date it takes the strip on its own,
-  // on the date's edge. Empty means none.
-  std::string note;
+  // The owner's own lines, already expanded (see expandText), one along each
+  // edge at their own sizes, with the birds packed into what is left.
+  // Empty means none.
+  std::string topText, bottomText;
+  TextAlign topAlign = TextAlign::Centre, bottomAlign = TextAlign::Centre;
+  // The face each of the owner's lines is set in. Null means the label font;
+  // the common name's face is capitals only, so a line set in it is put in
+  // capitals, and one it still lacks a character for goes in the label font.
+  const Font *topFont = nullptr, *bottomFont = nullptr;
+  // How large each line is set.
+  TextSize topSize = TextSize::Medium, bottomSize = TextSize::Medium;
   // Parallel to the plate indices; shorter, or an empty string, means none.
   std::vector<std::string> commonNames;
+  // Also parallel: written after the first line of a bird's name, a space
+  // apart - BirdNET-Go's confidence, "(87%)". Shorter, or empty, means none.
+  std::vector<std::string> nameSuffixes;
   // The face the common name is set in. Null, or not loaded, means the label
   // font - the scientific name is always in that.
   const Font *commonFont = nullptr;
@@ -174,6 +225,10 @@ struct BirdPageReport {
   FastStats fast;        // fast-memory requests in the render, granted or not
   std::vector<Placement> placements;  // where each bird went, in page pixels
   bool fellBack = false; // the pack style could not fit the set, and it was laid out as classic
+  // The rows the birds were packed into, [birdsTop, birdsBottom): the page
+  // inside its margins less the bands the date and the text took. Placements
+  // are from birdsTop down.
+  int birdsTop = 0, birdsBottom = 0;
 };
 
 // Draw `plateIndices` (into `plates`, page order - the caller has already

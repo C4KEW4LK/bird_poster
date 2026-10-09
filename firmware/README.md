@@ -76,8 +76,13 @@ The page's settings have flags of the same names: `--pack classic|grid|scatter|h
 tone, 0-4), `--jitter N` (dither randomisation), `--resample
 bilinear|mitchell|catmullrom` (how an enlarged plate is filled in),
 `--sci-percent N` (scientific name size), `--margin PX` (or `--margins TOP
-RIGHT BOTTOM LEFT`), `--date STYLE` with `--date-us` and
-`--date-pos t|b l|c|r`, and `--note TEXT` (the refresh counter's line). For
+RIGHT BOTTOM LEFT`), and
+`--top TEXT` / `--bottom TEXT` with `--text-align l|c|r l|c|r` and
+`--text-font label|name label|name` and `--text-size N N` (1 small to 5 huge) (the owner's lines, each in its own face and size, `{{...}}` filled in from the
+host's clock; `--text-value NAME VALUE`, before them, answers one of the
+frame's own names such as `new` or `birds`; `--date-us` puts the numeric
+dates month first; `--clock-12h` writes `{{time}}` as 2:05 pm), and `--name-suffix
+TEXT` after every bird's name, as the confidence is. For
 looking into the pipeline: `--canvas FILE.ppm` writes the page as the dither
 receives it, and `--web-sprite FILE.bin` draws the first bird from a
 full-size web plate through the frame's own decoder.
@@ -327,8 +332,125 @@ web* above).
 
 Beyond the birds and their names, all set from the web UI:
 
-- **Date** - today's date along the top or bottom edge, left, centre or right,
-  numeric (day or month first) or in words; the birds are packed around it.
+Under **Page text**:
+
+- **Top line / Bottom line** - your own text along either edge, left, centre
+  or right, at its own size - Small to Extra large as the names have, or Huge
+  for a heading (shrunk to fit if it is long) - each in its own
+  choice of the label face or the common names' capitals. A line in the capitals face is
+  put in capitals; one with a character that face lacks falls back to the
+  label face. There is no separate date setting: put `{{date.long}}`, or
+  another of the templates, in a line. (A frame that had the old **Show
+  today's date** on gets the same date as a line on the same edge, once, when
+  it is updated.) Anything in double braces is filled in when the page is
+  drawn:
+
+  | tag | description | example |
+  | --- | --- | --- |
+  | `{{date.long}}` | Today's date, the month in full | 26 September 2026 |
+  | `{{date.medium}}` | Today's date, the month shortened | 26 Sep 2026 |
+  | `{{date.short}}` | Today's date in figures, two-digit year, in the date order under Preferences | 26/09/26 |
+  | `{{date.numeric}}` | Today's date in figures, full year, in the date order under Preferences | 26/09/2026 |
+  | `{{date.full}}` | Today's date with the day of the week | Saturday 26 September 2026 |
+  | `{{time}}` | The time the page was drawn, on the clock under Preferences | 14:05 or 2:05 pm |
+  | `{{time.24h}}` | The time the page was drawn, always 24-hour | 14:05 |
+  | `{{time.12h}}` | The time the page was drawn, always 12-hour | 2:05 pm |
+  | `{{hour.24h}}` | The hour the page was drawn, always 24-hour | 14 |
+  | `{{hour.12h}}` | The hour the page was drawn, always 12-hour | 2 pm |
+  | `{{weekday}}` | Today's day of the week | Saturday |
+  | `{{weekday.short}}` | Today's day of the week, shortened | Sat |
+  | `{{day}}` | Today's day of the month | 26 |
+  | `{{month}}` | This month's name | September |
+  | `{{month.short}}` | This month's name, shortened | Sep |
+  | `{{month.number}}` | This month as a number | 09 |
+  | `{{year}}` | This year | 2026 |
+  | `{{next}}` | When the next page is due, after any quiet hours, on the clock under Preferences | 15:05 or 3:05 pm |
+  | `{{next.24h}}` | When the next page is due, after any quiet hours, always 24-hour | 15:05 |
+  | `{{next.12h}}` | When the next page is due, after any quiet hours, always 12-hour | 3:05 pm |
+  | `{{birds}}` | How many birds are on the page | 10 |
+  | `{{top}}` | The common name of the source's first-ranked bird on the page, before any shuffle | Superb Fairywren |
+  | `{{top.scientific}}` | The scientific (Latin) name of the source's first-ranked bird on the page, before any shuffle | Malurus cyaneus |
+  | `{{new}}` | The birds on the page BirdNET-Go calls new species today | Galah and Crimson Rosella |
+  | `{{new.count}}` | How many birds on the page BirdNET-Go calls new species today | 2 |
+  | `{{weather.now}}` | The temperature when the page was drawn | 14° |
+  | `{{weather.summary}}` | The weather when the page was drawn | Partly cloudy |
+  | `{{weather.today}}` | Today's forecast | Light rain |
+  | `{{weather.high}}` | Today's forecast high | 18° |
+  | `{{weather.low}}` | Today's forecast low | 6° |
+  | `{{weather.rain}}` | Today's forecast chance of rain | 60% |
+  | `{{weather.tomorrow}}` | Tomorrow's forecast | Overcast |
+  | `{{weather.tomorrow.high}}` | Tomorrow's forecast high | 21° |
+  | `{{weather.tomorrow.low}}` | Tomorrow's forecast low | 9° |
+  | `{{weather.tomorrow.rain}}` | Tomorrow's forecast chance of rain | 10% |
+  | `{{source}}` | Where the birds came from | iNaturalist |
+  | `{{window}}` | The time the birds were seen in, or "since the last update" | last 7 days |
+  | `{{place}}` | The latitude and longitude searched, place-based sources only | -35.2809, 149.1300 |
+  | `{{radius}}` | The distance searched, in the unit under Preferences, place-based sources only | 25 km |
+  | `{{refresh}}` | How many times the glass has been refreshed, since the count was last cleared under Preferences | 123 |
+  | `{{battery}}` | The battery's voltage, reTerminal E1004 only | 3.92 V |
+  | `{{battery.percent}}` | The battery's charge, a rough guide from its voltage, reTerminal E1004 only | 78% |
+
+  The weather comes from [Open-Meteo](https://open-meteo.com) - free, no key -
+  for the frame's latitude and longitude, fetched with the birds and only when
+  a line asks for it. The location fields are on the source card; with
+  BirdNET-Go or a JSON list they appear there once a line uses the weather.
+  The numeric dates follow the date order under **Preferences**. Names are not case
+  sensitive; one that is not in the table is printed as written. A line that
+  asks for something the frame does not have - the clock not yet set, no new
+  bird, a battery on the EE02, which has no battery sense - is left off the
+  page rather than printed with a gap - and so is a weather line when
+  Open-Meteo does not answer. A line with the time, the weather, the next
+  update, the refresh count or the battery in it is different every time, so
+  the page is redrawn at every refresh instead of being kept when nothing else
+  changed. Placing `{{refresh}}` in a line stops the counter also being written
+  small. The birds are packed clear of each edge that has text on it. The
+  settings page previews both lines live, with the frame's own
+  values as of loading it.
+  Some whole lines to start from (the settings page lists these under
+  **Templates**, each with buttons that put it in the top or bottom line):
+
+  ```text
+  Seen near home, {{date.long}}                     → Seen near home, 26 September 2026
+  {{weekday}} {{date.long}}, drawn at {{time}}      → Saturday 26 September 2026, drawn at 2:05 pm
+  {{birds}} species, {{window}}                     → 10 species, last 7 days
+  Bird of the day: {{top}}                          → Bird of the day: Superb Fairywren
+  {{weather.now}}, {{weather.summary}}, high of {{weather.high}}
+                                                    → 14°, Partly cloudy, high of 18°
+  Today: {{weather.today}}, {{weather.high}}/{{weather.low}}, {{weather.rain}} chance of rain
+                                                    → Today: Light rain, 18°/6°, 60% chance of rain
+  Tomorrow: {{weather.tomorrow}}, {{weather.tomorrow.high}}/{{weather.tomorrow.low}}
+                                                    → Tomorrow: Overcast, 21°/9°
+  Next update {{next}}                              → Next update 3:05 pm
+  Within {{radius}} of {{place}} - {{source}}       → Within 25 km of -35.2809, 149.1300 - iNaturalist
+  Battery {{battery.percent}}, refresh {{refresh}}  → Battery 78%, refresh 123 (battery: reTerminal E1004)
+  New today: {{new}}!                               → New today: Galah and Crimson Rosella! (a new-bird line)
+  ```
+- **Different lines when a bird is new** (BirdNET-Go) - lines used instead of
+  the usual ones while the page has a bird BirdNET-Go marks as a new species
+  today; it keeps that all day, as BirdNET-Go keeps its badge. An empty one
+  keeps the usual line on that edge.
+
+Under **Preferences** (each set on its own, so km with °F is fine):
+
+- **Dates** - day first (26/09/2026) or month first (09/26/2026), for
+  `{{date.short}}` and `{{date.numeric}}`. Dates in words are always day first.
+- **Distances** - kilometres or miles, for the source's search radius,
+  `{{radius}}` and the status page. The radius is kept in kilometres whichever
+  is picked, so switching back and forth does not drift it.
+- **Temperatures** - Celsius or Fahrenheit, for the weather.
+- **Times** - 24-hour (14:05) or 12-hour (2:05 pm), for `{{time}}` and
+  `{{next}}` and for the times on the status page and the settings page.
+  `{{time.24h}}`, `{{time.12h}}`, `{{hour.24h}}`, `{{hour.12h}}`, `{{next.24h}}`
+  and `{{next.12h}}` keep their own clock whatever this says.
+- **Refresh count** - the frame counts every refresh of the glass, and
+  `{{refresh}}` puts the count on the page: a battery test, since the count
+  survives the battery going flat - run a charged battery flat and the last
+  number on the glass is how many refreshes it lasted. **Clear** sets it back
+  to 0. (A frame that had the old **Count refreshes** box ticked gets
+  `Refresh {{refresh}}` as its bottom line, small, once, when it is updated.)
+
+Under **Picture** and **Layout**:
+
 - **Paper** - white, or four strengths of cream, multiplied over the page
   before the dither so the plates' own paper takes the same tone.
 - **Margin** - a border the page draws nothing in, so a mount or a bezel over
@@ -338,13 +460,14 @@ Beyond the birds and their names, all set from the web UI:
   packed into what is left, so a margin draws them smaller rather than leaving
   a gap. 0, the default, is the glass itself: the birds bleed off it.
 - **Scientific name size** - 100% down to 50% of the common name.
+- **Show BirdNET-Go's confidence** (BirdNET-Go) - the surest of each bird's
+  detections in the look-back window, after the first line of its name:
+  SUPERB FAIRYWREN (87%). In the capitals face the % needs this firmware's
+  filesystem image; with an older one the name falls back to the label face.
 - **Shuffle the birds' order** - the chosen birds handed to the layout in a
   new random order every page, rather than the most seen (or rarest) first.
   The first bird takes the middle of the page, so this moves which bird gets
   it - with Hero, which bird is the hero.
-- **Count refreshes** - a battery test: every refresh of the glass is counted,
-  the running total is drawn small in the date's strip and on the status
-  page, and it survives the battery going flat; reset from the status box.
 - **Full-size plates from the web** - above.
 
 ## Where this is up to
